@@ -1,0 +1,522 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Messaging — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Communications active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="UmbaneCommunicationsDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">forum</span>
+              <span data-design-text-token="label-md">Communications</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- WhatsApp Messaging Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-md max-w-7xl w-full mx-auto">
+
+        <!-- Page Heading & Profile Toggle -->
+        <section class="flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <div class="flex items-center gap-gutter-sm">
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">WhatsApp Messaging</h1>
+              <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success whitespace-nowrap" data-design-text-token="label-sm">Business Verified</span>
+            </div>
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Customer support and field dispatch messaging via +27 10 500 4410.</p>
+          </div>
+
+          <button id="toggle-profile-btn" type="button" aria-expanded="true" class="inline-flex items-center justify-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-gutter-md py-2 text-primary shadow-sm transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person</span>
+            <span class="font-label text-label-md" data-design-text-token="label-md">Customer Info</span>
+          </button>
+        </section>
+
+        <!-- 3-Panel WhatsApp Workspace -->
+        <section aria-label="WhatsApp Chat Workspace" class="rounded-lg border border-outline-variant bg-surface shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+
+          <!-- Left Panel: Search Contacts & Customer Conversation List -->
+          <div class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-outline-variant flex flex-col">
+            <div class="p-gutter-sm border-b border-outline-variant/70 bg-surface-container-low">
+              <label for="wa-search" class="sr-only">Search contacts</label>
+              <div class="relative flex items-center">
+                <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                  <span class="material-symbols-outlined text-title-md">search</span>
+                </span>
+                <input id="wa-search" type="search" placeholder="Search contacts..." class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-3 py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-success focus:outline-none focus:ring-2 focus:ring-success/20">
+              </div>
+            </div>
+
+            <ul class="divide-y divide-outline-variant/60">
+              <!-- Active Conversation -->
+              <li class="bg-surface-container p-gutter-md flex items-start gap-gutter-sm cursor-pointer">
+                <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success text-on-success font-label text-label-md">TM</span>
+                <div class="min-w-0 flex-1 flex flex-col gap-0.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Thabo Mokoena</span>
+                    <span class="font-mono text-mono-sm text-success tabular-nums shrink-0" data-design-text-token="mono-sm">10:42</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="font-body text-body-md text-on-surface-variant truncate" data-design-text-token="body-md">Confirmed technician access for DB-04.</p>
+                  </div>
+                </div>
+              </li>
+
+              <!-- Unread Conversation 1 -->
+              <li class="p-gutter-md flex items-start gap-gutter-sm hover:bg-surface-container-low cursor-pointer">
+                <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container text-primary font-label text-label-md">LM</span>
+                <div class="min-w-0 flex-1 flex flex-col gap-0.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Lerato Molefe</span>
+                    <span class="font-mono text-mono-sm text-success tabular-nums shrink-0" data-design-text-token="mono-sm">10:15</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="font-body text-body-md text-on-surface truncate" data-design-text-token="body-md">Prepaid meter showing Error 04 after...</p>
+                    <span class="inline-flex h-5 min-w-5 px-1.5 items-center justify-center rounded-full bg-success font-label text-label-sm text-on-success tabular-nums" data-design-text-token="label-sm">2</span>
+                  </div>
+                </div>
+              </li>
+
+              <!-- Unread Conversation 2 -->
+              <li class="p-gutter-md flex items-start gap-gutter-sm hover:bg-surface-container-low cursor-pointer">
+                <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-md">JV</span>
+                <div class="min-w-0 flex-1 flex flex-col gap-0.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Johan van der Merwe</span>
+                    <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums shrink-0" data-design-text-token="mono-sm">09:30</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="font-body text-body-md text-on-surface truncate" data-design-text-token="body-md">Can you resend the R 1,500 token?</p>
+                    <span class="inline-flex h-5 min-w-5 px-1.5 items-center justify-center rounded-full bg-success font-label text-label-sm text-on-success tabular-nums" data-design-text-token="label-sm">1</span>
+                  </div>
+                </div>
+              </li>
+
+              <!-- Read Conversation -->
+              <li class="p-gutter-md flex items-start gap-gutter-sm hover:bg-surface-container-low cursor-pointer">
+                <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container font-label text-label-md">NP</span>
+                <div class="min-w-0 flex-1 flex flex-col gap-0.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Naledi Phiri</span>
+                    <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums shrink-0" data-design-text-token="mono-sm">Yesterday</span>
+                  </div>
+                  <p class="font-body text-body-md text-on-surface-variant truncate" data-design-text-token="body-md">Thanks, received the tariff PDF.</p>
+                </div>
+              </li>
+
+              <!-- Read Conversation -->
+              <li class="p-gutter-md flex items-start gap-gutter-sm hover:bg-surface-container-low cursor-pointer">
+                <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-on-surface font-label text-label-md">SZ</span>
+                <div class="min-w-0 flex-1 flex flex-col gap-0.5">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Sipho Zulu</span>
+                    <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums shrink-0" data-design-text-token="mono-sm">21 Nov</span>
+                  </div>
+                  <p class="font-body text-body-md text-on-surface-variant truncate" data-design-text-token="body-md">Gate code for Durban Block C is 4481#.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Center/Right Panel: Active Chat Window -->
+          <div id="chat-panel" class="lg:col-span-5 border-b lg:border-b-0 lg:border-r border-outline-variant flex flex-col justify-between bg-surface-container-low">
+            <!-- Chat Header -->
+            <header class="bg-surface px-gutter-md py-gutter-sm border-b border-outline-variant flex items-center justify-between gap-gutter-sm">
+              <div class="flex items-center gap-gutter-sm min-w-0">
+                <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success text-on-success font-label text-label-md">TM</span>
+                <div class="min-w-0">
+                  <h2 class="font-title text-title-md text-on-surface truncate" data-design-text-token="title-md">Thabo Mokoena</h2>
+                  <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">+27 82 419 7732</p>
+                </div>
+              </div>
+              <span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success whitespace-nowrap" data-design-text-token="label-sm">
+                <span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+                Active
+              </span>
+            </header>
+
+            <!-- Message History -->
+            <div class="p-gutter-md flex flex-col gap-gutter-md flex-1">
+              <div class="flex justify-center">
+                <span class="rounded-full bg-surface px-3 py-0.5 font-label text-label-sm text-on-surface-variant border border-outline-variant/70 tabular-nums" data-design-text-token="label-sm">Today, 23 Nov 2026</span>
+              </div>
+
+              <!-- Incoming Message -->
+              <div class="flex flex-col items-start gap-1 max-w-sm">
+                <div class="rounded-lg rounded-tl-sm bg-surface border border-outline-variant p-gutter-sm shadow-sm">
+                  <p class="font-body text-body-md text-on-surface text-pretty" data-design-text-token="body-md">Morning team, our basement DB-04 CT meter tripped again on Phase 2. Can a technician inspect today?</p>
+                </div>
+                <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">10:18</span>
+              </div>
+
+              <!-- Outgoing Message (WhatsApp Green Accent) -->
+              <div class="flex flex-col items-end gap-1 self-end max-w-sm">
+                <div class="rounded-lg rounded-tr-sm bg-success p-gutter-sm shadow-sm text-on-success">
+                  <p class="font-body text-body-md text-pretty" data-design-text-token="body-md">Hi Thabo, we have logged urgent ticket TKT-2026-418 and assigned Pieter Botha for 10:00 AM today.</p>
+                </div>
+                <span class="inline-flex items-center gap-1 font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">
+                  10:25
+                  <span class="material-symbols-outlined text-label-md text-success" aria-hidden="true">done_all</span>
+                </span>
+              </div>
+
+              <!-- Incoming Message -->
+              <div class="flex flex-col items-start gap-1 max-w-sm">
+                <div class="rounded-lg rounded-tl-sm bg-surface border border-outline-variant p-gutter-sm shadow-sm">
+                  <p class="font-body text-body-md text-on-surface text-pretty" data-design-text-token="body-md">Confirmed technician access for DB-04. Security has his ID on the gate list.</p>
+                </div>
+                <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">10:42</span>
+              </div>
+            </div>
+
+            <!-- Message Input Bar -->
+            <div class="bg-surface p-gutter-sm border-t border-outline-variant flex items-center gap-gutter-xs">
+              <button type="button" aria-label="Attach file" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">attach_file</span>
+              </button>
+
+              <label for="wa-message-input" class="sr-only">Type a WhatsApp message</label>
+              <input id="wa-message-input" type="text" placeholder="Type a WhatsApp message..." class="flex-1 min-w-0 rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-success focus:bg-surface focus:outline-none focus:ring-2 focus:ring-success/20">
+
+              <button type="button" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-success px-gutter-md py-2 text-on-success shadow-sm transition-opacity duration-state-change hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success shrink-0">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">send</span>
+                <span class="font-label text-label-lg" data-design-text-token="label-lg">Send</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Collapsible Customer Profile Side Panel -->
+          <aside id="customer-profile-panel" aria-label="Customer Profile Information" class="lg:col-span-3 bg-surface p-gutter-md flex flex-col gap-gutter-md">
+            <div class="flex flex-col items-center text-center gap-gutter-xs pb-gutter-md border-b border-outline-variant/70">
+              <span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-container font-headline text-title-lg text-primary">TM</span>
+              <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Thabo Mokoena</h3>
+              <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">+27 82 419 7732</p>
+              <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Commercial Account</span>
+            </div>
+
+            <dl class="flex flex-col gap-gutter-sm">
+              <div class="flex flex-col gap-0.5">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Company</dt>
+                <dd class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</dd>
+              </div>
+              <div class="flex flex-col gap-0.5">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Linked Property</dt>
+                <dd class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Office Tower</dd>
+              </div>
+              <div class="flex flex-col gap-0.5">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Linked Meter</dt>
+                <dd class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">MTR-88412-ZA</dd>
+              </div>
+              <div class="flex flex-col gap-0.5">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Active Ticket</dt>
+                <dd class="font-mono text-mono-sm text-error" data-design-text-token="mono-sm">TKT-2026-418 (Urgent)</dd>
+              </div>
+            </dl>
+
+            <a href="../customers/UmbaneCustomerProfile.html" class="mt-auto w-full inline-flex items-center justify-center gap-1.5 rounded-DEFAULT border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-primary hover:bg-primary-container" data-design-text-token="label-md">
+              View Full Profile
+            </a>
+          </aside>
+
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const toggleProfileBtn = document.getElementById('toggle-profile-btn');
+      const profilePanel = document.getElementById('customer-profile-panel');
+      const chatPanel = document.getElementById('chat-panel');
+
+      if (toggleProfileBtn && profilePanel && chatPanel) {
+        toggleProfileBtn.addEventListener('click', function () {
+          const isHidden = profilePanel.classList.toggle('hidden');
+          toggleProfileBtn.setAttribute('aria-expanded', String(!isHidden));
+          chatPanel.classList.toggle('lg:col-span-5', !isHidden);
+          chatPanel.classList.toggle('lg:col-span-8', isHidden);
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

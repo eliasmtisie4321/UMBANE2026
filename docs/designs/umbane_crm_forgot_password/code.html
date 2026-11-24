@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+  <div class="min-h-[1024px] flex flex-col justify-between bg-background" data-stitch-vh="min-h-[1024px]===min-h-screen">
+    <!-- Top Brand Header (matches Screen 1) -->
+    <header class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin pt-gutter-lg lg:pt-gutter-xl">
+      <a href="../login/UmbaneLogin.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+          </svg>
+        </span>
+        <span class="flex items-baseline gap-gutter-xs">
+          <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+          <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+        </span>
+      </a>
+    </header>
+
+    <!-- Centered Recovery Card -->
+    <main class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin py-gutter-xl lg:py-section flex-1 flex items-center justify-center">
+      <div class="w-full max-w-md flex flex-col gap-gutter-md">
+        <!-- COMPONENT: card-elevated -->
+        <article data-component-id="card-elevated" data-component-type="card" data-component-variant="elevated" class="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-gutter-lg sm:p-gutter-xl shadow-lg">
+          <!-- State 1: Request Reset Form -->
+          <div id="recovery-form-state" class="flex flex-col gap-gutter-lg">
+            <header class="flex flex-col gap-gutter-sm">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="inline-flex h-11 w-11 items-center justify-center rounded-md bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-headline-md" aria-hidden="true">lock_reset</span>
+                </span>
+                <span class="h-1 w-8 rounded-full bg-tertiary" aria-hidden="true"></span>
+              </div>
+
+              <h1 data-component-id="typography-headline" data-component-type="typography" data-component-variant="headline" data-design-text-token="headline-md" class="font-headline text-headline-md text-primary text-balance pt-gutter-xs">Forgot your password?</h1>
+
+              <p data-component-id="typography-body" data-component-type="typography" data-component-variant="body" data-design-text-token="body-md" class="font-body text-body-md text-on-surface-variant text-pretty">Enter the email address registered with your Umbane CRM account and we will send you a secure link to reset your password.</p>
+            </header>
+
+            <form id="recovery-form" class="flex flex-col gap-gutter-md" novalidate>
+              <!-- Email Address Input -->
+              <!-- COMPONENT: input-field-icon -->
+              <label data-component-id="input-field-icon" data-component-type="input-field" data-component-variant="with-icon" class="flex flex-col gap-gutter-xs w-full">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Email address</span>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3.5 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">mail</span>
+                  </span>
+                  <input id="recovery-email" type="email" name="email" autocomplete="email" inputmode="email" placeholder="name@umbane.co.za" required class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-gutter-md py-3 font-body text-body-md text-on-surface placeholder:text-outline transition-colors duration-state-change ease-state-change focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+              </label>
+
+              <!-- Validation Error Message -->
+              <p id="recovery-error" class="hidden rounded-DEFAULT bg-error-container px-gutter-md py-gutter-sm font-body text-body-md text-on-error-container" role="alert" data-design-text-token="body-md"></p>
+
+              <!-- Electric Blue Primary Action Button -->
+              <div class="pt-gutter-xs">
+                <!-- COMPONENT: button-secondary -->
+                <button data-component-id="button-secondary" data-component-type="button" data-component-variant="secondary" type="submit" class="w-full inline-flex items-center justify-center gap-gutter-sm rounded-md bg-secondary px-gutter-lg py-3.5 text-on-secondary shadow-sm transition-colors duration-state-change ease-state-change hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 active:bg-primary">
+                  <span class="font-label text-label-lg" data-design-text-token="label-lg">Send Reset Link</span>
+                </button>
+              </div>
+            </form>
+
+            <footer class="pt-gutter-md border-t border-outline-variant/60 flex items-center justify-between gap-gutter-sm">
+              <a href="../login/UmbaneLogin.html" class="inline-flex items-center gap-gutter-xs font-label text-label-md text-secondary transition-colors duration-state-change ease-state-change hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-sm">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+                <span data-design-text-token="label-md">Back to Login</span>
+              </a>
+
+              <button id="preview-success-btn" type="button" class="font-label text-label-sm text-on-surface-variant underline decoration-outline-variant underline-offset-4 transition-colors duration-state-change ease-state-change hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-sm" data-design-text-token="label-sm">Preview confirmation</button>
+            </footer>
+          </div>
+
+          <!-- State 2: Email Confirmation Success State -->
+          <div id="recovery-success-state" class="hidden flex flex-col gap-gutter-lg" role="status" aria-live="polite">
+            <header class="flex flex-col gap-gutter-sm">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="inline-flex h-11 w-11 items-center justify-center rounded-md bg-success text-on-success shadow-sm">
+                  <span class="material-symbols-outlined text-headline-md" aria-hidden="true">mark_email_read</span>
+                </span>
+                <span class="inline-flex items-center gap-gutter-xs rounded-full bg-tertiary-container px-3 py-1 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">
+                  <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+                  Link sent
+                </span>
+              </div>
+
+              <h2 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary text-balance pt-gutter-xs" data-design-text-token="headline-lg">Check your email</h2>
+
+              <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+                We sent a password reset link to <strong id="confirmed-email" class="font-semibold text-on-surface">name@umbane.co.za</strong>. Follow the link in your inbox to choose a new password.
+              </p>
+            </header>
+
+            <div class="rounded-lg border border-outline-variant bg-surface-container-low p-gutter-md flex items-start gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-lg text-secondary shrink-0" aria-hidden="true">info</span>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">
+                Did not receive the email? Check your spam folder or try another registered address.
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-gutter-sm">
+              <a href="../login/UmbaneLogin.html" class="w-full inline-flex items-center justify-center gap-gutter-sm rounded-md bg-secondary px-gutter-lg py-3.5 text-on-secondary shadow-sm transition-colors duration-state-change ease-state-change hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+                <span class="font-label text-label-lg" data-design-text-token="label-lg">Back to Login</span>
+              </a>
+
+              <button id="reset-another-btn" type="button" class="w-full inline-flex items-center justify-center rounded-md border border-outline-variant bg-surface px-gutter-lg py-3 font-label text-label-md text-on-surface transition-colors duration-state-change ease-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary" data-design-text-token="label-md">Try a different email address</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- Minimal Footer (matches Screen 1) -->
+    <footer class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin pb-gutter-lg flex flex-wrap items-center justify-between gap-gutter-md text-on-surface-variant">
+      <span class="font-label text-label-sm" data-design-text-token="label-sm">© 2026 Umbane Energy Operations. All rights reserved.</span>
+      <span class="font-mono text-mono-sm" data-design-text-token="mono-sm">v2.4 · Grid Cloud</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var formState = document.getElementById('recovery-form-state');
+      var successState = document.getElementById('recovery-success-state');
+      var form = document.getElementById('recovery-form');
+      var emailInput = document.getElementById('recovery-email');
+      var errorBox = document.getElementById('recovery-error');
+      var confirmedEmail = document.getElementById('confirmed-email');
+      var previewBtn = document.getElementById('preview-success-btn');
+      var resetAnotherBtn = document.getElementById('reset-another-btn');
+
+      function showSuccess(email) {
+        if (confirmedEmail) {
+          confirmedEmail.textContent = email || 'name@umbane.co.za';
+        }
+        if (errorBox) errorBox.classList.add('hidden');
+        if (formState) formState.classList.add('hidden');
+        if (successState) successState.classList.remove('hidden');
+      }
+
+      function showForm() {
+        if (successState) successState.classList.add('hidden');
+        if (formState) formState.classList.remove('hidden');
+      }
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var emailVal = emailInput ? emailInput.value.trim() : '';
+          if (!emailVal || emailVal.indexOf('@') === -1) {
+            if (errorBox) {
+              errorBox.textContent = 'Please enter a valid registered email address.';
+              errorBox.classList.remove('hidden');
+            }
+            return;
+          }
+          showSuccess(emailVal);
+        });
+      }
+
+      if (previewBtn) {
+        previewBtn.addEventListener('click', function () {
+          var emailVal = emailInput && emailInput.value.trim() ? emailInput.value.trim() : 'thabo@umbane.co.za';
+          showSuccess(emailVal);
+        });
+      }
+
+      if (resetAnotherBtn) {
+        resetAnotherBtn.addEventListener('click', showForm);
+      }
+    })();
+  </script>
+
+
+</body></html>

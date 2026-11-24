@@ -1,0 +1,478 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Product — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Inventory active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="UmbaneInventoryDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">inventory_2</span>
+              <span data-design-text-token="label-md">Inventory</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Add New Product Form Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-5xl w-full mx-auto">
+
+        <!-- Breadcrumb & Page Heading -->
+        <section class="flex flex-col gap-gutter-sm">
+          <a href="UmbaneProductsList.html" class="inline-flex items-center gap-gutter-xs self-start font-label text-label-md text-secondary hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Products List</span>
+          </a>
+          <div class="flex flex-wrap items-end justify-between gap-gutter-sm">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Add New Product</h1>
+              <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Register smart metering hardware, CT transformers, or enclosures into the Umbane depot catalogue.</p>
+            </div>
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm"><span class="text-error">*</span> Required fields</span>
+          </div>
+        </section>
+
+        <!-- Save Feedback Banner -->
+        <div id="product-save-banner" class="hidden rounded-lg border border-outline-variant bg-primary-container px-gutter-md py-gutter-sm flex items-center justify-between gap-gutter-sm">
+          <div class="flex items-center gap-gutter-sm">
+            <span class="material-symbols-outlined text-title-md text-primary" aria-hidden="true">check_circle</span>
+            <span id="product-save-text" class="font-label text-label-md text-on-primary-container" data-design-text-token="label-md">Product registered in inventory catalogue.</span>
+          </div>
+          <a href="UmbaneProductsList.html" class="font-label text-label-md text-primary hover:underline" data-design-text-token="label-md">View Products</a>
+        </div>
+
+        <form id="add-product-form" class="flex flex-col gap-gutter-lg" novalidate>
+
+          <!-- Section 1: Product Information -->
+          <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+              </span>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Product Information</h2>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Product Name <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="product-name" type="text" required placeholder="e.g. Three-Phase Smart CT Meter (600A)" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">SKU <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="product-sku" type="text" required placeholder="e.g. UMB-CT-600" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-mono text-mono-sm text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Category <span class="text-error" aria-hidden="true">*</span></span>
+                <select id="product-category" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <option value="Commercial CT Meters" selected>Commercial CT Meters</option>
+                  <option value="Smart Prepaid Meters">Smart Prepaid Meters</option>
+                  <option value="Telemetry &amp; LTE Modems">Telemetry &amp; LTE Modems</option>
+                  <option value="Enclosures &amp; Accessories">Enclosures &amp; Accessories</option>
+                </select>
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Supplier <span class="text-error" aria-hidden="true">*</span></span>
+                <select id="product-supplier" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <option value="Conlog SA (Durban)" selected>Conlog SA (Durban)</option>
+                  <option value="Landis+Gyr South Africa">Landis+Gyr South Africa</option>
+                  <option value="Hexing Metering Africa">Hexing Metering Africa</option>
+                  <option value="Schneider Electric SA">Schneider Electric SA</option>
+                  <option value="Actom Electrical Products">Actom Electrical Products</option>
+                </select>
+              </label>
+
+              <label class="md:col-span-2 flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Description</span>
+                <textarea id="product-description" rows="3" placeholder="Enter technical specifications, voltage rating, STS/DLMS compliance, and warranty terms..." class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20"></textarea>
+              </label>
+            </div>
+          </section>
+
+          <!-- Section 2: Pricing & Stock Levels -->
+          <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">payments</span>
+              </span>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Pricing &amp; Stock Levels</h2>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Purchase Price (ZAR) <span class="text-error" aria-hidden="true">*</span></span>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3 font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">R</span>
+                  <input id="purchase-price" type="number" min="0" step="10" required placeholder="11800" class="w-full rounded-md border border-outline-variant bg-surface pl-8 pr-gutter-md py-2.5 font-body text-body-md text-on-surface tabular-nums placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Selling Price (ZAR) <span class="text-error" aria-hidden="true">*</span></span>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3 font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">R</span>
+                  <input id="selling-price" type="number" min="0" step="10" required placeholder="16900" class="w-full rounded-md border border-outline-variant bg-surface pl-8 pr-gutter-md py-2.5 font-body text-body-md text-on-surface tabular-nums placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Initial Quantity <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="initial-quantity" type="number" min="0" step="1" required placeholder="40" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface tabular-nums placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Minimum Stock Level <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="min-stock-level" type="number" min="0" step="1" required placeholder="10" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface tabular-nums placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+            </div>
+          </section>
+
+          <!-- Section 3: Product Image Upload -->
+          <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_photo_alternate</span>
+              </span>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Product Image Upload</h2>
+            </header>
+
+            <label for="product-image-input" class="rounded-lg border-2 border-dashed border-outline-variant bg-surface-container-low p-gutter-xl flex flex-col items-center justify-center gap-gutter-sm text-center cursor-pointer transition-colors duration-state-change hover:border-secondary hover:bg-primary-container/30">
+              <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-headline-md" aria-hidden="true">cloud_upload</span>
+              </span>
+              <div class="flex flex-col gap-gutter-xs">
+                <span id="upload-filename" class="font-label text-label-lg text-primary" data-design-text-token="label-lg">Click to upload or drag and drop product photo</span>
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">PNG, JPG, or WebP up to 5 MB (recommended 800x800px)</span>
+              </div>
+              <input id="product-image-input" type="file" accept="image/png,image/jpeg,image/webp" class="sr-only">
+            </label>
+          </section>
+
+          <!-- Form Action Footer -->
+          <footer class="flex flex-wrap items-center justify-end gap-gutter-sm pt-gutter-xs">
+            <a href="UmbaneProductsList.html" class="inline-flex items-center justify-center rounded-md border border-outline-variant bg-surface px-gutter-lg py-2.5 font-label text-label-lg text-on-surface transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary" data-design-text-token="label-lg">
+              Cancel
+            </a>
+
+            <!-- COMPONENT: button-with-icon -->
+            <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="submit" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2.5 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">save</span>
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Save Product</span>
+            </button>
+          </footer>
+
+        </form>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const imageInput = document.getElementById('product-image-input');
+      const uploadFilename = document.getElementById('upload-filename');
+      if (imageInput && uploadFilename) {
+        imageInput.addEventListener('change', function () {
+          if (imageInput.files && imageInput.files[0]) {
+            uploadFilename.textContent = 'Selected: ' + imageInput.files[0].name;
+          }
+        });
+      }
+
+      const form = document.getElementById('add-product-form');
+      const banner = document.getElementById('product-save-banner');
+      const bannerText = document.getElementById('product-save-text');
+
+      if (form && banner && bannerText) {
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+          const name = (document.getElementById('product-name').value || '').trim() || 'New Product';
+          const sku = (document.getElementById('product-sku').value || '').trim() || 'UMB-NEW';
+          bannerText.textContent = name + ' (' + sku + ') registered in the Umbane inventory catalogue.';
+          banner.classList.remove('hidden');
+          banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

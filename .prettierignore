@@ -2,3 +2,4 @@ dist
 node_modules
 package-lock.json
 IMPLEMENTATION-v1.1.md
+docs/designs

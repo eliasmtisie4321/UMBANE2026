@@ -1,0 +1,649 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports Dashboard — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Reports active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="../communications/UmbaneCommunicationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="../team/UmbaneTeamDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="UmbaneReportsDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">analytics</span>
+              <span data-design-text-token="label-md">Reports</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-full">
+
+        <!-- Page Heading & Date Filters + Export Actions -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-gutter-md">
+          <div>
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-on-surface" data-design-text-token="headline-lg">Reports Dashboard</h1>
+            <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">
+              Executive analytics across revenue, electricity consumption, customers, sales, and operations.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-gutter-sm shrink-0">
+            <select id="report-date-range" aria-label="Reporting date range" class="rounded-md border border-outline-variant bg-surface pl-3 pr-8 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              <option value="30d">Last 30 Days</option>
+              <option value="q4">Q4 2026 (Oct – Dec)</option>
+              <option value="ytd">Year to Date 2026</option>
+              <option value="custom">Custom Date Range</option>
+            </select>
+
+            <button type="button" class="inline-flex items-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">download</span>
+              <span data-design-text-token="label-md">Export CSV</span>
+            </button>
+
+            <button type="button" class="inline-flex items-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 font-label text-label-lg text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">picture_as_pdf</span>
+              <span data-design-text-token="label-lg">Export PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Executive Summary KPI Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-md" aria-label="Analytics Summary">
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Total Revenue</span>
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">payments</span>
+              </span>
+            </div>
+            <p class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">R 2,845,200</p>
+            <p class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+14.2% vs prior period</p>
+          </div>
+
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Energy Billed</span>
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-tertiary-container text-on-tertiary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+              </span>
+            </div>
+            <p class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">1,482 MWh</p>
+            <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">99.4% meter telemetry</p>
+          </div>
+
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Collection Rate</span>
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-surface-container text-success">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">verified</span>
+              </span>
+            </div>
+            <p class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">94.8%</p>
+            <p class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+1.6% invoice recovery</p>
+          </div>
+
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">Active Properties</span>
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-secondary-container text-on-secondary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+              </span>
+            </div>
+            <p class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">128</p>
+            <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">1,940 smart meters live</p>
+          </div>
+        </section>
+
+        <!-- 8 Report Categories -->
+        <section class="flex flex-col gap-gutter-md" aria-label="Report Categories">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Report Categories</h2>
+            <span class="font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">8 Modules</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">payments</span>
+                </span>
+                <span class="font-mono text-mono-sm text-success tabular-nums" data-design-text-token="mono-sm">R 2.85M</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Revenue Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Monthly recurring billing, VAT, and prepaid token revenue.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-secondary-container text-on-secondary-container">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+                </span>
+                <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">1,248</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Customer Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Account growth, retention, and residential vs. commercial mix.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+                </span>
+                <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">128</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Property Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Estate occupancy, sub-meter coverage, and regional yield.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-tertiary-container text-on-tertiary-container">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+                </span>
+                <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">1,482 MWh</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Electricity Consumption Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Peak kWh load, TOU tariff tiers, and tamper anomaly logs.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-surface-container text-success">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+                </span>
+                <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">312 orders</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Sales Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Hardware orders, installation quotes, and conversion pipeline.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+                </span>
+                <span class="font-mono text-mono-sm text-success tabular-nums" data-design-text-token="mono-sm">94.8% paid</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Invoice Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Aging receivables, credit notes, and EFT settlement batches.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-secondary-container text-on-secondary-container">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+                </span>
+                <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">842 SKUs</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Inventory Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Depot stock valuation, meter turnover, and reorder alerts.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+            <article class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md hover:border-secondary transition-colors">
+              <div class="flex items-start justify-between gap-2">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-tertiary-container text-on-tertiary-container">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+                </span>
+                <span class="font-mono text-mono-sm text-success tabular-nums" data-design-text-token="mono-sm">96.4% SLA</span>
+              </div>
+              <div>
+                <h3 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Employee Performance Reports</h3>
+                <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Technician dispatch velocity, ticket SLA, and task completion.</p>
+              </div>
+              <button type="button" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline self-start">
+                <span data-design-text-token="label-md">Open Report</span>
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_forward</span>
+              </button>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- Data Visualization & Recent Reports -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
+
+          <!-- Revenue & Energy Consumption Chart -->
+          <section class="lg:col-span-7 bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-md min-w-0">
+            <div class="flex flex-wrap items-center justify-between gap-gutter-sm">
+              <div>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Revenue vs. Energy Consumption</h2>
+                <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">6-month billing revenue (ZAR) compared to metered kWh</p>
+              </div>
+              <div class="flex items-center gap-gutter-md shrink-0">
+                <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">
+                  <span class="h-2.5 w-2.5 rounded-sm bg-primary"></span>Revenue
+                </span>
+                <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">
+                  <span class="h-2.5 w-2.5 rounded-sm bg-tertiary"></span>MWh Billed
+                </span>
+              </div>
+            </div>
+
+            <!-- SVG Bar Chart -->
+            <div class="w-full pt-gutter-xs">
+              <svg viewBox="0 0 600 220" class="w-full h-56" role="img" aria-label="6-month revenue and energy consumption bar chart">
+                <!-- Horizontal Grid Lines -->
+                <line x1="40" y1="25" x2="585" y2="25" stroke="#D5DCEB" stroke-dasharray="3 3"></line>
+                <line x1="40" y1="75" x2="585" y2="75" stroke="#D5DCEB" stroke-dasharray="3 3"></line>
+                <line x1="40" y1="125" x2="585" y2="125" stroke="#D5DCEB" stroke-dasharray="3 3"></line>
+                <line x1="40" y1="175" x2="585" y2="175" stroke="#D5DCEB"></line>
+
+                <!-- Y-Axis Labels -->
+                <text x="32" y="29" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">R3.0M</text>
+                <text x="32" y="79" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">R2.0M</text>
+                <text x="32" y="129" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">R1.0M</text>
+                <text x="32" y="179" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">R0</text>
+
+                <!-- Jun -->
+                <rect x="68" y="72" width="22" height="103" rx="4" fill="#174EA6"></rect>
+                <rect x="94" y="92" width="22" height="83" rx="4" fill="#F5B700"></rect>
+                <text x="92" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Jun</text>
+
+                <!-- Jul -->
+                <rect x="158" y="64" width="22" height="111" rx="4" fill="#174EA6"></rect>
+                <rect x="184" y="84" width="22" height="91" rx="4" fill="#F5B700"></rect>
+                <text x="182" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Jul</text>
+
+                <!-- Aug -->
+                <rect x="248" y="58" width="22" height="117" rx="4" fill="#174EA6"></rect>
+                <rect x="274" y="78" width="22" height="97" rx="4" fill="#F5B700"></rect>
+                <text x="272" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Aug</text>
+
+                <!-- Sep -->
+                <rect x="338" y="50" width="22" height="125" rx="4" fill="#174EA6"></rect>
+                <rect x="364" y="72" width="22" height="103" rx="4" fill="#F5B700"></rect>
+                <text x="362" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Sep</text>
+
+                <!-- Oct -->
+                <rect x="428" y="42" width="22" height="133" rx="4" fill="#174EA6"></rect>
+                <rect x="454" y="64" width="22" height="111" rx="4" fill="#F5B700"></rect>
+                <text x="452" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Oct</text>
+
+                <!-- Nov -->
+                <rect x="518" y="32" width="22" height="143" rx="4" fill="#174EA6"></rect>
+                <rect x="544" y="54" width="22" height="121" rx="4" fill="#F5B700"></rect>
+                <text x="542" y="198" text-anchor="middle" fill="#1A1B21" font-weight="600" font-size="12" font-family="Inter, sans-serif">Nov</text>
+              </svg>
+            </div>
+          </section>
+
+          <!-- Recent Reports -->
+          <section class="lg:col-span-5 bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-md min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Recent Reports</h2>
+              <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary whitespace-nowrap" data-design-text-token="label-sm">4 Ready</span>
+            </div>
+
+            <ul class="flex flex-col gap-gutter-sm">
+              <li class="rounded-md border border-outline-variant/80 bg-surface-container-low p-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="min-w-0">
+                  <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Nov Revenue &amp; VAT Summary</p>
+                  <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">23 Nov 2026 · PDF</p>
+                </div>
+                <button type="button" aria-label="Download Nov Revenue &amp; VAT Summary" class="shrink-0 rounded-md border border-outline-variant bg-surface px-2.5 py-1.5 font-label text-label-sm text-primary hover:bg-primary-container transition-colors">
+                  Download
+                </button>
+              </li>
+
+              <li class="rounded-md border border-outline-variant/80 bg-surface-container-low p-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="min-w-0">
+                  <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Sandton Grid kWh Audit</p>
+                  <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">22 Nov 2026 · CSV</p>
+                </div>
+                <button type="button" aria-label="Download Sandton Grid kWh Audit" class="shrink-0 rounded-md border border-outline-variant bg-surface px-2.5 py-1.5 font-label text-label-sm text-primary hover:bg-primary-container transition-colors">
+                  Download
+                </button>
+              </li>
+
+              <li class="rounded-md border border-outline-variant/80 bg-surface-container-low p-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="min-w-0">
+                  <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Q4 Technician SLA Scorecard</p>
+                  <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">20 Nov 2026 · PDF</p>
+                </div>
+                <button type="button" aria-label="Download Q4 Technician SLA Scorecard" class="shrink-0 rounded-md border border-outline-variant bg-surface px-2.5 py-1.5 font-label text-label-sm text-primary hover:bg-primary-container transition-colors">
+                  Download
+                </button>
+              </li>
+
+              <li class="rounded-md border border-outline-variant/80 bg-surface-container-low p-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="min-w-0">
+                  <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Overdue Invoices Aging</p>
+                  <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">18 Nov 2026 · CSV</p>
+                </div>
+                <button type="button" aria-label="Download Overdue Invoices Aging" class="shrink-0 rounded-md border border-outline-variant bg-surface px-2.5 py-1.5 font-label text-label-sm text-primary hover:bg-primary-container transition-colors">
+                  Download
+                </button>
+              </li>
+            </ul>
+          </section>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+    })();
+  </script>
+
+
+</body></html>

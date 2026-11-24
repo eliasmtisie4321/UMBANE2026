@@ -1,0 +1,640 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Record Meter Reading — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Electricity & Meters active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">electric_meter</span>
+              <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#leads" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="#sales-orders" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="#invoices" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="#inventory" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Record Meter Reading Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Back Navigation & Page Heading -->
+        <section class="flex flex-col gap-gutter-sm">
+          <a href="../meters/UmbaneElectricityMeters.html" class="inline-flex items-center gap-gutter-xs self-start font-label text-label-md text-secondary hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Electricity &amp; Meters</span>
+          </a>
+          <div class="flex flex-wrap items-end justify-between gap-gutter-sm">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Record Meter Reading</h1>
+              <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Submit a verified electricity meter reading, calculate period consumption, and attach field evidence.</p>
+            </div>
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm"><span class="text-error">*</span> Required fields</span>
+          </div>
+        </section>
+
+        <form id="record-reading-form" class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start" novalidate>
+
+          <!-- Left Column: Reading Form Sections (7 cols) -->
+          <div class="lg:col-span-7 flex flex-col gap-gutter-lg">
+
+            <!-- Section 1: Meter & Account Selection -->
+            <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+              <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+                </span>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Meter &amp; Property Details</h2>
+              </header>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Select Meter <span class="text-error" aria-hidden="true">*</span></span>
+                  <select id="meter-select" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <option value="MTR-ZA-88412" selected>MTR-ZA-88412 — Sandown Hub</option>
+                    <option value="MTR-ZA-77204">MTR-ZA-77204 — Sea Point Promenade</option>
+                    <option value="MTR-ZA-64109">MTR-ZA-64109 — Umhlanga Ridge Block B</option>
+                    <option value="MTR-ZA-51903">MTR-ZA-51903 — Midrand Cold Depot</option>
+                  </select>
+                </label>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Serial Number</span>
+                  <input id="meter-serial" type="text" readonly value="MTR-ZA-88412" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-gutter-md py-2.5 font-mono text-mono-sm text-on-surface-variant">
+                </label>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Customer Name</span>
+                  <input id="customer-name" type="text" readonly value="Kagiso Logistics (Pty) Ltd" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-gutter-md py-2.5 font-body text-body-md text-on-surface-variant">
+                </label>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Property Address</span>
+                  <input id="property-address" type="text" readonly value="142 Rivonia Road, Sandown, Sandton, 2196" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-gutter-md py-2.5 font-body text-body-md text-on-surface-variant">
+                </label>
+              </div>
+            </section>
+
+            <!-- Section 2: Reading Capture & Consumption -->
+            <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+              <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">speed</span>
+                </span>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Reading Capture</h2>
+              </header>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Previous Reading (kWh)</span>
+                  <div class="relative flex items-center">
+                    <input id="previous-reading" type="number" readonly value="145810.0" class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-gutter-md pr-14 py-2.5 font-body text-body-md text-on-surface-variant tabular-nums">
+                    <span class="pointer-events-none absolute right-3 font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">kWh</span>
+                  </div>
+                </label>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Current Reading (kWh) <span class="text-error" aria-hidden="true">*</span></span>
+                  <div class="relative flex items-center">
+                    <input id="current-reading" type="number" step="0.1" required value="148920.4" class="w-full rounded-md border border-outline-variant bg-surface pl-gutter-md pr-14 py-2.5 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <span class="pointer-events-none absolute right-3 font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">kWh</span>
+                  </div>
+                </label>
+
+                <!-- Automatically Calculated Consumption Difference -->
+                <div class="md:col-span-2 rounded-lg border border-outline-variant bg-primary-container/50 p-gutter-md flex flex-wrap items-center justify-between gap-gutter-sm">
+                  <div class="flex items-center gap-gutter-sm">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-DEFAULT bg-primary text-on-primary">
+                      <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+                    </span>
+                    <div>
+                      <p class="font-label text-label-md text-on-primary-container" data-design-text-token="label-md">Calculated Consumption Difference</p>
+                      <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Current reading minus previous verified register</p>
+                    </div>
+                  </div>
+                  <span id="consumption-diff" class="font-headline text-headline-md text-primary tabular-nums" data-design-text-token="headline-md">3,110.4 kWh</span>
+                </div>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Reading Date <span class="text-error" aria-hidden="true">*</span></span>
+                  <input id="reading-date" type="date" required value="2026-11-23" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </label>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Reading Method <span class="text-error" aria-hidden="true">*</span></span>
+                  <select id="reading-method" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <option value="Manual Field Capture" selected>Manual Field Capture</option>
+                    <option value="Optical Probe / Handheld">Optical Probe / Handheld</option>
+                    <option value="Customer Self-Submission">Customer Self-Submission</option>
+                    <option value="AMI Sync Override">AMI Sync Override</option>
+                  </select>
+                </label>
+
+                <label class="md:col-span-2 flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Technician Name <span class="text-error" aria-hidden="true">*</span></span>
+                  <select id="technician-name" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <option value="Sipho Dlamini (WL-8492)" selected>Sipho Dlamini (WL-8492)</option>
+                    <option value="Johan Pretorius (WL-7310)">Johan Pretorius (WL-7310)</option>
+                    <option value="Thabo Mokoena (WL-9104)">Thabo Mokoena (WL-9104)</option>
+                    <option value="Craig Naidoo (WL-6825)">Craig Naidoo (WL-6825)</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <!-- Section 3: Photograph & Notes -->
+            <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+              <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">photo_camera</span>
+                </span>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Verification Photo &amp; Notes</h2>
+              </header>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+                <div class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Upload Meter Reading Photograph</span>
+                  <label class="flex flex-col items-center justify-center gap-gutter-xs rounded-lg border border-dashed border-outline bg-surface-container-low p-gutter-lg text-center cursor-pointer transition-colors duration-state-change hover:border-secondary hover:bg-primary-container/30">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary-container text-primary">
+                      <span class="material-symbols-outlined text-title-lg" aria-hidden="true">add_a_photo</span>
+                    </span>
+                    <span id="upload-label" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Upload meter display photo</span>
+                    <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">JPG, PNG, or HEIC up to 15 MB</span>
+                    <input id="photo-upload" type="file" accept="image/*" class="sr-only">
+                  </label>
+                </div>
+
+                <label class="flex flex-col gap-gutter-xs">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Notes</span>
+                  <textarea id="reading-notes" rows="5" placeholder="Note seal condition, enclosure access, or abnormal load observations..." class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20"></textarea>
+                </label>
+              </div>
+            </section>
+
+            <!-- Feedback Banner -->
+            <p id="submit-feedback" class="hidden rounded-DEFAULT bg-primary-container px-gutter-md py-gutter-sm font-body text-body-md text-on-primary-container" role="status" data-design-text-token="body-md"></p>
+
+            <!-- Form Action Buttons -->
+            <div class="flex flex-wrap items-center justify-end gap-gutter-sm pb-gutter-lg">
+              <a href="../meters/UmbaneElectricityMeters.html" class="inline-flex items-center justify-center rounded-md border border-outline-variant bg-surface px-gutter-lg py-3 font-label text-label-lg text-on-surface transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary" data-design-text-token="label-lg">Cancel</a>
+
+              <!-- COMPONENT: button-primary-lg -->
+              <button data-component-id="button-primary-lg" data-component-type="button" data-component-variant="primary" type="submit" class="inline-flex items-center justify-center gap-gutter-sm rounded-md bg-primary px-gutter-xl py-3 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                <span class="font-label text-label-lg" data-design-text-token="label-lg">Submit Reading</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Live Reading Summary Card (5 cols) -->
+          <aside class="lg:col-span-5 rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md lg:sticky lg:top-24" aria-label="Reading Summary">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center justify-between gap-gutter-sm">
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Reading Summary</h2>
+              <span class="rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container shrink-0 whitespace-nowrap" data-design-text-token="label-sm">Pre-Submit</span>
+            </header>
+
+            <dl class="flex flex-col gap-gutter-sm">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Meter Serial</dt>
+                <dd id="sum-serial" class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">MTR-ZA-88412</dd>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Customer</dt>
+                <dd id="sum-customer" class="font-label text-label-md text-on-surface text-right" data-design-text-token="label-md">Kagiso Logistics (Pty) Ltd</dd>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Reading Date</dt>
+                <dd id="sum-date" class="font-body text-body-md text-on-surface tabular-nums" data-design-text-token="body-md">23 Nov 2026</dd>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Capture Method</dt>
+                <dd id="sum-method" class="font-body text-body-md text-on-surface text-right" data-design-text-token="body-md">Manual Field Capture</dd>
+              </div>
+            </dl>
+
+            <div class="border-t border-outline-variant/60 pt-gutter-md flex flex-col gap-gutter-sm">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Previous Register</span>
+                <span id="sum-prev" class="font-body text-body-md text-on-surface tabular-nums" data-design-text-token="body-md">145,810.0 kWh</span>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">New Register</span>
+                <span id="sum-curr" class="font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">148,920.4 kWh</span>
+              </div>
+              <div class="rounded-DEFAULT bg-surface-container-low p-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Net Consumption</span>
+                <span id="sum-diff" class="font-title text-title-md text-primary tabular-nums" data-design-text-token="title-md">3,110.4 kWh</span>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Est. Billing Value</span>
+                <span id="sum-zar" class="font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 8,864.64</span>
+              </div>
+            </div>
+          </aside>
+
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const meterData = {
+        'MTR-ZA-88412': {
+          customer: 'Kagiso Logistics (Pty) Ltd',
+          address: '142 Rivonia Road, Sandown, Sandton, 2196',
+          prev: 145810.0
+        },
+        'MTR-ZA-77204': {
+          customer: 'Atlantic Retail Trust',
+          address: '88 Beach Road, Sea Point, Cape Town, 8005',
+          prev: 89575.0
+        },
+        'MTR-ZA-64109': {
+          customer: 'Ndlovu Residential Estates',
+          address: '14 Zenith Drive, Umhlanga Ridge, Durban, 4319',
+          prev: 33760.0
+        },
+        'MTR-ZA-51903': {
+          customer: 'Kagiso Logistics (Pty) Ltd',
+          address: '22 Old Pretoria Road, Midrand, Johannesburg, 1685',
+          prev: 210120.0
+        }
+      };
+
+      const meterSelect = document.getElementById('meter-select');
+      const serialInput = document.getElementById('meter-serial');
+      const customerInput = document.getElementById('customer-name');
+      const addressInput = document.getElementById('property-address');
+      const prevInput = document.getElementById('previous-reading');
+      const currInput = document.getElementById('current-reading');
+      const diffEl = document.getElementById('consumption-diff');
+      const dateInput = document.getElementById('reading-date');
+      const methodSelect = document.getElementById('reading-method');
+
+      const sumSerial = document.getElementById('sum-serial');
+      const sumCustomer = document.getElementById('sum-customer');
+      const sumDate = document.getElementById('sum-date');
+      const sumMethod = document.getElementById('sum-method');
+      const sumPrev = document.getElementById('sum-prev');
+      const sumCurr = document.getElementById('sum-curr');
+      const sumDiff = document.getElementById('sum-diff');
+      const sumZar = document.getElementById('sum-zar');
+
+      function fmt(n) {
+        return n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      }
+
+      function updateCalculations() {
+        const prev = parseFloat(prevInput.value) || 0;
+        const curr = parseFloat(currInput.value) || 0;
+        const diff = curr - prev;
+        const zar = Math.max(0, diff) * 2.85;
+
+        sumPrev.textContent = fmt(prev) + ' kWh';
+        sumCurr.textContent = fmt(curr) + ' kWh';
+
+        if (diff < 0) {
+          diffEl.textContent = 'Invalid (< prev)';
+          diffEl.classList.remove('text-primary');
+          diffEl.classList.add('text-error');
+          sumDiff.textContent = 'Invalid';
+          sumZar.textContent = 'R 0.00';
+        } else {
+          diffEl.textContent = fmt(diff) + ' kWh';
+          diffEl.classList.remove('text-error');
+          diffEl.classList.add('text-primary');
+          sumDiff.textContent = fmt(diff) + ' kWh';
+          sumZar.textContent = 'R ' + zar.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        if (dateInput.value) {
+          const d = new Date(dateInput.value + 'T00:00:00');
+          sumDate.textContent = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+        sumMethod.textContent = methodSelect.value;
+      }
+
+      meterSelect.addEventListener('change', () => {
+        const info = meterData[meterSelect.value];
+        if (!info) return;
+        serialInput.value = meterSelect.value;
+        customerInput.value = info.customer;
+        addressInput.value = info.address;
+        prevInput.value = info.prev.toFixed(1);
+        currInput.value = (info.prev + 2850).toFixed(1);
+        sumSerial.textContent = meterSelect.value;
+        sumCustomer.textContent = info.customer;
+        updateCalculations();
+      });
+
+      currInput.addEventListener('input', updateCalculations);
+      dateInput.addEventListener('change', updateCalculations);
+      methodSelect.addEventListener('change', updateCalculations);
+
+      const photoInput = document.getElementById('photo-upload');
+      const uploadLabel = document.getElementById('upload-label');
+      if (photoInput && uploadLabel) {
+        photoInput.addEventListener('change', () => {
+          if (photoInput.files && photoInput.files.length > 0) {
+            uploadLabel.textContent = photoInput.files[0].name;
+          }
+        });
+      }
+
+      const form = document.getElementById('record-reading-form');
+      const feedback = document.getElementById('submit-feedback');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const prev = parseFloat(prevInput.value) || 0;
+        const curr = parseFloat(currInput.value) || 0;
+        if (curr < prev) {
+          feedback.textContent = 'Current reading cannot be lower than the previous reading.';
+          feedback.classList.remove('hidden', 'bg-primary-container', 'text-on-primary-container');
+          feedback.classList.add('bg-error-container', 'text-on-error-container');
+          return;
+        }
+        feedback.textContent = 'Reading of ' + fmt(curr) + ' kWh recorded for ' + serialInput.value + ' (' + fmt(curr - prev) + ' kWh consumed).';
+        feedback.classList.remove('hidden', 'bg-error-container', 'text-on-error-container');
+        feedback.classList.add('bg-primary-container', 'text-on-primary-container');
+      });
+    })();
+  </script>
+
+
+</body></html>
