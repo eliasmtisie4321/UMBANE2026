@@ -19,3 +19,11 @@
 - **Production:** Vercel production environment variables
 
 Anything prefixed `VITE_` is bundled into the client, so only put public values there.
+
+## Deployment (Vercel)
+
+- Production: https://umbane2026.vercel.app (deploys from `main`).
+- Build: `npm run build`, output `dist`. `vercel.json` rewrites unknown paths to `index.html` so
+  client-side routes work on refresh and deep links.
+- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for Production and Preview in
+  Vercel → Project Settings → Environment Variables. Never add the service-role key.
