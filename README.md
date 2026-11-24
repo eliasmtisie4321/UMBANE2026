@@ -1,5 +1,7 @@
 # Umbane CRM
 
+[![CI](https://github.com/eliasmtisie4321/UMBANE2026/actions/workflows/ci.yml/badge.svg)](https://github.com/eliasmtisie4321/UMBANE2026/actions/workflows/ci.yml)
+
 React + TypeScript + Vite + Tailwind CSS, with Supabase as the backend. See
 [IMPLEMENTATION-v1.1.md](IMPLEMENTATION-v1.1.md) for the phased plan.
 

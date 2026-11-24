@@ -46,33 +46,33 @@ Every phase is complete only when its acceptance criteria are met, tests and bui
 **Goal:** A deployed, empty Umbane CRM application with a working development pipeline.
 
 ### 0.1 Repository and project setup
-- [ ] Confirm the GitHub repository and use `main` as the stable branch.
-- [ ] Scaffold the React, TypeScript and Vite frontend.
-- [ ] Set up the Node.js, Express and TypeScript backend if a separate API server is part of the agreed architecture.
-- [ ] Configure Tailwind CSS and Lucide React icons.
-- [ ] Add ESLint and Prettier.
-- [ ] Add Vitest and React Testing Library for unit/component tests.
-- [ ] Add Playwright for browser-based end-to-end tests.
-- [ ] Add npm scripts for linting, formatting, typechecking, testing and building.
-- [ ] Add `.gitignore` and `.env.example`.
-- [ ] Document the required Node.js version and local setup instructions.
+- [x] Confirm the GitHub repository and use `main` as the stable branch.
+- [x] Scaffold the React, TypeScript and Vite frontend.
+- [ ] Set up the Node.js, Express and TypeScript backend if a separate API server is part of the agreed architecture. _(Deferred: Supabase + RLS is the data layer; see docs/CONVENTIONS.md.)_
+- [x] Configure Tailwind CSS and Lucide React icons.
+- [x] Add ESLint and Prettier.
+- [x] Add Vitest and React Testing Library for unit/component tests.
+- [x] Add Playwright for browser-based end-to-end tests.
+- [x] Add npm scripts for linting, formatting, typechecking, testing and building.
+- [x] Add `.gitignore` and `.env.example`.
+- [x] Document the required Node.js version and local setup instructions.
 
 ### 0.2 Project structure and standards
-- [ ] Organize screens, components, layouts, hooks, services, types and utilities.
+- [x] Organize screens, components, layouts, hooks, services, types and utilities.
 - [ ] If using Express, separate routes, controllers, middleware, services and database access.
-- [ ] Establish naming conventions and shared TypeScript types.
-- [ ] Add consistent API response and error-handling patterns.
-- [ ] Configure path aliases if useful.
+- [x] Establish naming conventions and shared TypeScript types.
+- [x] Add consistent API response and error-handling patterns.
+- [x] Configure path aliases if useful.
 
 ### 0.3 GitHub Actions and CI
-- [ ] Create a GitHub Actions workflow triggered by pull requests to `main`.
-- [ ] Install dependencies with `npm ci`.
-- [ ] Run ESLint.
-- [ ] Run TypeScript typechecking.
-- [ ] Run unit and component tests.
-- [ ] Run the production build.
-- [ ] Configure branch protection so required checks pass before merge.
-- [ ] Add a CI status badge to the README when the workflow is stable.
+- [x] Create a GitHub Actions workflow triggered by pull requests to `main`.
+- [x] Install dependencies with `npm ci`.
+- [x] Run ESLint.
+- [x] Run TypeScript typechecking.
+- [x] Run unit and component tests.
+- [x] Run the production build.
+- [x] Configure branch protection so required checks pass before merge.
+- [x] Add a CI status badge to the README when the workflow is stable.
 
 ### 0.4 Supabase and environment configuration
 - [ ] Create the Supabase project.
