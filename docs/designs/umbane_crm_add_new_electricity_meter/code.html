@@ -1,0 +1,561 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Electricity Meter — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Electricity & Meters active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">electric_meter</span>
+              <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#leads" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="#sales-orders" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="#invoices" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="#inventory" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Add New Electricity Meter Form Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-5xl w-full mx-auto">
+
+        <!-- Breadcrumb & Page Heading -->
+        <section class="flex flex-col gap-gutter-sm">
+          <a href="../meters/UmbaneElectricityMeters.html" class="inline-flex items-center gap-gutter-xs self-start font-label text-label-md text-secondary hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Electricity &amp; Meters</span>
+          </a>
+          <div class="flex flex-wrap items-end justify-between gap-gutter-sm">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Add New Electricity Meter</h1>
+              <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Commission a new electricity meter, link it to a customer and property, and record installation telemetry.</p>
+            </div>
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm"><span class="text-error">*</span> Required fields</span>
+          </div>
+        </section>
+
+        <form id="add-meter-form" class="flex flex-col gap-gutter-lg" novalidate>
+
+          <!-- Section 1: Meter Identification & Classification -->
+          <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+              </span>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Meter Specifications</h2>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Serial Number <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="meter-serial" type="text" required placeholder="e.g. MTR-ZA-88450" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-mono text-mono-sm text-on-surface placeholder:text-outline placeholder:font-body focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Type <span class="text-error" aria-hidden="true">*</span></span>
+                <select id="meter-type" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <option value>Select meter type</option>
+                  <option value="Three-Phase CT" selected>Three-Phase CT</option>
+                  <option value="Smart Prepaid">Smart Prepaid</option>
+                  <option value="Conventional">Conventional</option>
+                  <option value="Split Keypad STS">Split Keypad STS</option>
+                </select>
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Category <span class="text-error" aria-hidden="true">*</span></span>
+                <select id="meter-category" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <option value>Select meter category</option>
+                  <option value="Commercial Bulk" selected>Commercial Bulk</option>
+                  <option value="Residential Sub-Meter">Residential Sub-Meter</option>
+                  <option value="Industrial High-Voltage">Industrial High-Voltage</option>
+                  <option value="Common Area / Essential">Common Area / Essential</option>
+                </select>
+              </label>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Initial Meter Reading (kWh) <span class="text-error" aria-hidden="true">*</span></span>
+                <div class="relative flex items-center">
+                  <input id="initial-reading" type="number" min="0" step="0.1" required placeholder="e.g. 0.0" class="w-full rounded-md border border-outline-variant bg-surface pl-gutter-md pr-14 py-2.5 font-body text-body-md text-on-surface tabular-nums placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <span class="pointer-events-none absolute right-3 font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">kWh</span>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <!-- Section 2: Account, Property & Installation Assignment -->
+          <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">hub</span>
+              </span>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Site &amp; Installation Assignment</h2>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+              <!-- Searchable Customer Dropdown -->
+              <div class="flex flex-col gap-gutter-xs relative">
+                <label for="customer-search-select" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Linked Customer <span class="text-error" aria-hidden="true">*</span></label>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">search</span>
+                  </span>
+                  <input id="customer-search-select" type="text" autocomplete="off" placeholder="Search customer by name or ID..." value="CUST-1048 · Kagiso Logistics (Pty) Ltd" class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-10 py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <span class="pointer-events-none absolute right-3 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">expand_more</span>
+                  </span>
+                </div>
+                <ul id="customer-dropdown" class="hidden absolute top-full left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-md border border-outline-variant bg-surface p-1 shadow-lg">
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">CUST-1048 · Kagiso Logistics (Pty) Ltd</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">CUST-1047 · Atlantic Retail Trust</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">CUST-1046 · Menlyn Maine Precinct</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">CUST-1045 · Ndlovu Residential Estates</button></li>
+                </ul>
+              </div>
+
+              <!-- Searchable Property Dropdown -->
+              <div class="flex flex-col gap-gutter-xs relative">
+                <label for="property-search-select" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Linked Property <span class="text-error" aria-hidden="true">*</span></label>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">search</span>
+                  </span>
+                  <input id="property-search-select" type="text" autocomplete="off" placeholder="Search property by name or ref..." value="PROP-4012 · Sandown Hub (Sandton)" class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-10 py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <span class="pointer-events-none absolute right-3 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">expand_more</span>
+                  </span>
+                </div>
+                <ul id="property-dropdown" class="hidden absolute top-full left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-md border border-outline-variant bg-surface p-1 shadow-lg">
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">PROP-4012 · Sandown Hub (Sandton)</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">PROP-4009 · Midrand Cold Depot (Midrand)</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">PROP-4004 · Sea Point Promenade (Cape Town)</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">PROP-3998 · Umhlanga Ridge Block B (Durban)</button></li>
+                </ul>
+              </div>
+
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Installation Date <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="installation-date" type="date" value="2026-11-23" required class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+
+              <!-- Searchable Technician Dropdown -->
+              <div class="flex flex-col gap-gutter-xs relative">
+                <label for="technician-search-select" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Installation Technician <span class="text-error" aria-hidden="true">*</span></label>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">search</span>
+                  </span>
+                  <input id="technician-search-select" type="text" autocomplete="off" placeholder="Search technician by name or license..." value="TECH-014 · Sipho Dlamini (WL-8492)" class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-10 py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <span class="pointer-events-none absolute right-3 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">expand_more</span>
+                  </span>
+                </div>
+                <ul id="technician-dropdown" class="hidden absolute top-full left-0 right-0 z-30 mt-1 max-h-48 overflow-y-auto rounded-md border border-outline-variant bg-surface p-1 shadow-lg">
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">TECH-014 · Sipho Dlamini (WL-8492)</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">TECH-019 · Johan Pretorius (WL-7310)</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">TECH-023 · Thabo Mokoena (WL-9104)</button></li>
+                  <li><button type="button" class="searchable-option w-full text-left rounded-DEFAULT px-3 py-2 font-body text-body-md text-on-surface hover:bg-primary-container/50">TECH-028 · Craig Naidoo (WL-6825)</button></li>
+                </ul>
+              </div>
+
+              <label class="md:col-span-2 flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Location <span class="text-error" aria-hidden="true">*</span></span>
+                <input id="meter-location" type="text" required placeholder="e.g. Main LV Distribution Board, Basement Level 1 — Bay B" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+            </div>
+          </section>
+
+          <!-- Section 3: Description & Installation Photos -->
+          <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">photo_camera</span>
+              </span>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Notes &amp; Installation Photos</h2>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md">
+              <label class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Description</span>
+                <textarea id="meter-desc" rows="4" placeholder="Record CT ratio (e.g. 400/5A), breaker rating, tamper seal ID, or AMI SIM ICCID..." class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20"></textarea>
+              </label>
+
+              <div class="flex flex-col gap-gutter-xs">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Upload Installation Photos</span>
+                <label class="flex flex-col items-center justify-center gap-gutter-xs rounded-lg border border-dashed border-outline bg-surface-container-low p-gutter-lg text-center cursor-pointer transition-colors duration-state-change hover:border-secondary hover:bg-primary-container/30">
+                  <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary-container text-primary">
+                    <span class="material-symbols-outlined text-title-lg" aria-hidden="true">add_a_photo</span>
+                  </span>
+                  <span id="upload-label" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Upload meter faceplate, seal &amp; DB photos</span>
+                  <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">JPG, PNG, or HEIC up to 15 MB per photo</span>
+                  <input id="photo-upload" type="file" accept="image/*" multiple class="sr-only">
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- Feedback Banner -->
+          <p id="save-feedback" class="hidden rounded-DEFAULT bg-primary-container px-gutter-md py-gutter-sm font-body text-body-md text-on-primary-container" role="status" data-design-text-token="body-md"></p>
+
+          <!-- Form Action Buttons -->
+          <div class="flex flex-wrap items-center justify-end gap-gutter-sm pb-gutter-lg">
+            <a href="../meters/UmbaneElectricityMeters.html" class="inline-flex items-center justify-center rounded-md border border-outline-variant bg-surface px-gutter-lg py-3 font-label text-label-lg text-on-surface transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary" data-design-text-token="label-lg">Cancel</a>
+
+            <!-- COMPONENT: button-primary-lg -->
+            <button data-component-id="button-primary-lg" data-component-type="button" data-component-variant="primary" type="submit" class="inline-flex items-center justify-center gap-gutter-sm rounded-md bg-primary px-gutter-xl py-3 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Save Meter</span>
+            </button>
+          </div>
+
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      function setupSearchableDropdown(inputId, dropdownId) {
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(dropdownId);
+        if (!input || !dropdown) return;
+
+        const options = Array.from(dropdown.querySelectorAll('.searchable-option'));
+
+        input.addEventListener('focus', () => {
+          dropdown.classList.remove('hidden');
+        });
+
+        input.addEventListener('input', () => {
+          const query = input.value.toLowerCase().trim();
+          dropdown.classList.remove('hidden');
+          options.forEach((opt) => {
+            opt.parentElement.classList.toggle('hidden', !opt.textContent.toLowerCase().includes(query));
+          });
+        });
+
+        options.forEach((opt) => {
+          opt.addEventListener('click', () => {
+            input.value = opt.textContent.trim();
+            dropdown.classList.add('hidden');
+          });
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      setupSearchableDropdown('customer-search-select', 'customer-dropdown');
+      setupSearchableDropdown('property-search-select', 'property-dropdown');
+      setupSearchableDropdown('technician-search-select', 'technician-dropdown');
+
+      const photoInput = document.getElementById('photo-upload');
+      const uploadLabel = document.getElementById('upload-label');
+      if (photoInput && uploadLabel) {
+        photoInput.addEventListener('change', () => {
+          if (photoInput.files && photoInput.files.length > 0) {
+            uploadLabel.textContent = photoInput.files.length === 1
+              ? photoInput.files[0].name
+              : photoInput.files.length + ' installation photos selected';
+          }
+        });
+      }
+
+      const form = document.getElementById('add-meter-form');
+      const feedback = document.getElementById('save-feedback');
+      if (form && feedback) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const serial = document.getElementById('meter-serial').value.trim();
+          if (!serial) {
+            feedback.textContent = 'Please enter a meter serial number before saving.';
+            feedback.classList.remove('hidden', 'bg-primary-container', 'text-on-primary-container');
+            feedback.classList.add('bg-error-container', 'text-on-error-container');
+            return;
+          }
+          feedback.textContent = 'Meter ' + serial + ' commissioned and linked to the property.';
+          feedback.classList.remove('hidden', 'bg-error-container', 'text-on-error-container');
+          feedback.classList.add('bg-primary-container', 'text-on-primary-container');
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

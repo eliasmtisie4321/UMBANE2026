@@ -1,11 +1,15 @@
-import { Zap } from 'lucide-react'
+import { Card } from '@/components/ui'
+import { AppLayout } from '@/layouts/AppLayout'
 
 export default function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50">
-      <h1 className="flex items-center gap-2 text-3xl font-semibold text-slate-900">
-        <Zap aria-hidden="true" /> Umbane CRM
-      </h1>
-    </main>
+    <AppLayout>
+      <h1 className="mb-6 text-headline-md font-semibold text-on-surface">Umbane CRM</h1>
+      <Card>
+        <p className="text-on-surface-variant">
+          The foundation is in place. Features arrive phase by phase.
+        </p>
+      </Card>
+    </AppLayout>
   )
 }

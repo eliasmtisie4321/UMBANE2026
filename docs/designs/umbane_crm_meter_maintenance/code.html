@@ -1,0 +1,672 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meter Maintenance — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Electricity & Meters active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">electric_meter</span>
+              <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#leads" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="#sales-orders" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="#invoices" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="#inventory" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Meter Maintenance Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Back Navigation + Page Heading & Schedule Maintenance Button -->
+        <section class="flex flex-col gap-gutter-sm">
+          <a href="../meters/UmbaneElectricityMeters.html" class="inline-flex items-center gap-gutter-xs self-start font-label text-label-md text-secondary hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Electricity &amp; Meters</span>
+          </a>
+
+          <div class="flex flex-wrap items-center justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs">
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Meter Maintenance</h1>
+              <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Coordinate field dispatches, calibration checks, and urgent fault repairs across your meter fleet.</p>
+            </div>
+            <!-- COMPONENT: button-with-icon -->
+            <button id="schedule-modal-btn" data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2.5 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">calendar_add_on</span>
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Schedule Maintenance</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 5 Maintenance KPI Cards -->
+        <section aria-label="Maintenance Summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-gutter-md">
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Scheduled Maintenance</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">28</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">event_available</span>
+              </span>
+            </div>
+            <span class="font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">+6 this week</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Pending Maintenance</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">16</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-tertiary-container text-on-tertiary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">hourglass_top</span>
+              </span>
+            </div>
+            <span class="font-label text-label-sm text-on-tertiary-container tabular-nums" data-design-text-token="label-sm">Awaiting dispatch</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">In Progress</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">9</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-secondary-container text-on-secondary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">engineering</span>
+              </span>
+            </div>
+            <span class="font-label text-label-sm text-secondary tabular-nums" data-design-text-token="label-sm">4 techs on site</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Completed Maintenance</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">142</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">task_alt</span>
+              </span>
+            </div>
+            <span class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">98.2% SLA met</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs sm:col-span-2 lg:col-span-1">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Urgent Maintenance</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">5</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-error-container text-on-error-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">priority_high</span>
+              </span>
+            </div>
+            <span class="font-label text-label-sm text-error tabular-nums" data-design-text-token="label-sm">Immediate action</span>
+          </article>
+        </section>
+
+        <!-- Maintenance Work Orders Table -->
+        <section class="rounded-lg border border-outline-variant bg-surface shadow-sm overflow-hidden">
+          <header class="px-gutter-lg py-gutter-md border-b border-outline-variant flex flex-wrap items-center justify-between gap-gutter-md">
+            <div>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Active Maintenance Queue</h2>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Track scheduled, pending, in-progress, and urgent meter work orders</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-gutter-sm">
+              <label class="relative flex items-center">
+                <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                  <span class="material-symbols-outlined text-title-md">search</span>
+                </span>
+                <input id="maint-search-input" type="search" placeholder="Search ID, meter, tech..." class="w-52 rounded-md border border-outline-variant bg-surface-container-low pl-9 pr-3 py-1.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </label>
+
+              <select id="maint-priority-filter" aria-label="Filter by priority" class="rounded-md border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value="all">All Priorities</option>
+                <option value="Urgent">Urgent</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Routine">Routine</option>
+              </select>
+
+              <select id="maint-status-filter" aria-label="Filter by status" class="rounded-md border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value="all">All Statuses</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </header>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface-container-low">
+                  <th class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Maintenance ID</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Meter Number</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Customer</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Property</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Issue</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Assigned Technician</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Scheduled Date</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Priority</th>
+                  <th class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant text-right whitespace-nowrap" data-design-text-token="label-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody id="maint-table-body" class="divide-y divide-outline-variant/60">
+                <tr data-priority="Urgent" data-status="In Progress" class="hover:bg-surface-container-low/60">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MNT-2026-418</td>
+                  <td class="px-gutter-md py-3.5 font-mono text-mono-sm text-on-surface whitespace-nowrap" data-design-text-token="mono-sm">MTR-ZA-40218</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Menlyn Maine Precinct</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Menlyn Central Tower</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">CT Phase B voltage drift</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Sipho Dlamini</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="body-md">23 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Urgent</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">In Progress</span>
+                  </td>
+                </tr>
+
+                <tr data-priority="Urgent" data-status="Pending" class="hover:bg-surface-container-low/60">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MNT-2026-417</td>
+                  <td class="px-gutter-md py-3.5 font-mono text-mono-sm text-on-surface whitespace-nowrap" data-design-text-token="mono-sm">MTR-ZA-55102</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Paarl Valley Logistics</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Paarl Logistics Hub</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Modem signal loss (48h)</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Johan Pretorius</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="body-md">24 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Urgent</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Pending</span>
+                  </td>
+                </tr>
+
+                <tr data-priority="High" data-status="Scheduled" class="hover:bg-surface-container-low/60">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MNT-2026-415</td>
+                  <td class="px-gutter-md py-3.5 font-mono text-mono-sm text-on-surface whitespace-nowrap" data-design-text-token="mono-sm">MTR-ZA-39841</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Rosebank Living (Pty) Ltd</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Rosebank Lofts</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Tamper seal inspection due</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Thabo Mokoena</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="body-md">25 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">High</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Scheduled</span>
+                  </td>
+                </tr>
+
+                <tr data-priority="Medium" data-status="Scheduled" class="hover:bg-surface-container-low/60">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MNT-2026-412</td>
+                  <td class="px-gutter-md py-3.5 font-mono text-mono-sm text-on-surface whitespace-nowrap" data-design-text-token="mono-sm">MTR-ZA-61290</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Morningside Body Corp</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Morningside Villas</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">STS keypad firmware update</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Craig Naidoo</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="body-md">27 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">Medium</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Scheduled</span>
+                  </td>
+                </tr>
+
+                <tr data-priority="Routine" data-status="Completed" class="hover:bg-surface-container-low/60">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MNT-2026-409</td>
+                  <td class="px-gutter-md py-3.5 font-mono text-mono-sm text-on-surface whitespace-nowrap" data-design-text-token="mono-sm">MTR-ZA-88412</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Kagiso Logistics (Pty) Ltd</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Sandown Hub</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Annual CT ratio verification</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Sipho Dlamini</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="body-md">21 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Routine</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <footer class="px-gutter-lg py-gutter-md border-t border-outline-variant flex flex-wrap items-center justify-between gap-gutter-sm bg-surface">
+            <p class="font-body text-body-md text-on-surface-variant tabular-nums" data-design-text-token="body-md">Showing 1–5 of 58 active &amp; recent work orders</p>
+            <div class="flex items-center gap-gutter-xs">
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:bg-surface-container-low">Previous</button>
+              <button type="button" aria-current="page" class="rounded-DEFAULT bg-primary px-3 py-1.5 font-label text-label-sm text-on-primary tabular-nums">1</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums">2</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low">Next</button>
+            </div>
+          </footer>
+        </section>
+
+        <!-- Maintenance History Log -->
+        <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+          <header class="pb-gutter-sm border-b border-outline-variant/60 flex items-center justify-between gap-gutter-sm">
+            <div class="flex items-center gap-gutter-sm">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">history</span>
+              </span>
+              <div>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Maintenance History</h2>
+                <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Recently closed inspections, firmware patches, and hardware replacements</p>
+              </div>
+            </div>
+            <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">142 completed YTD</span>
+          </header>
+
+          <ul class="divide-y divide-outline-variant/60">
+            <li class="py-gutter-sm first:pt-0 last:pb-0 flex flex-wrap items-center justify-between gap-gutter-sm">
+              <div class="flex items-start gap-gutter-sm min-w-0">
+                <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+                <div>
+                  <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">MNT-2026-409 · MTR-ZA-88412 (Sandown Hub)</p>
+                  <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Annual CT ratio verification &amp; SANS 10142-1 seal check signed off by Sipho Dlamini.</p>
+                </div>
+              </div>
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums shrink-0" data-design-text-token="label-sm">21 Nov 2026</span>
+            </li>
+
+            <li class="py-gutter-sm first:pt-0 last:pb-0 flex flex-wrap items-center justify-between gap-gutter-sm">
+              <div class="flex items-start gap-gutter-sm min-w-0">
+                <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+                <div>
+                  <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">MNT-2026-404 · MTR-ZA-77204 (Sea Point Promenade)</p>
+                  <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Replaced LTE telemetry antenna and restored 15-minute AMI interval sync by Johan Pretorius.</p>
+                </div>
+              </div>
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums shrink-0" data-design-text-token="label-sm">18 Nov 2026</span>
+            </li>
+
+            <li class="py-gutter-sm first:pt-0 last:pb-0 flex flex-wrap items-center justify-between gap-gutter-sm">
+              <div class="flex items-start gap-gutter-sm min-w-0">
+                <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+                <div>
+                  <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">MNT-2026-399 · MTR-ZA-64109 (Umhlanga Ridge Block B)</p>
+                  <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Completed quarterly mechanical register calibration and enclosure torque check by Craig Naidoo.</p>
+                </div>
+              </div>
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums shrink-0" data-design-text-token="label-sm">14 Nov 2026</span>
+            </li>
+          </ul>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Schedule Maintenance Modal -->
+  <div id="schedule-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-on-surface/50 p-gutter-md" role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title">
+    <div class="w-full max-w-lg rounded-xl border border-outline-variant bg-surface p-gutter-lg shadow-xl flex flex-col gap-gutter-md">
+      <div class="flex items-center justify-between gap-gutter-sm pb-gutter-sm border-b border-outline-variant/60">
+        <h3 id="schedule-modal-title" class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Schedule Meter Maintenance</h3>
+        <button id="close-modal-btn" type="button" aria-label="Close modal" class="rounded-DEFAULT p-1 text-on-surface-variant hover:bg-surface-container">
+          <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <form id="schedule-form" class="flex flex-col gap-gutter-md">
+        <label class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Meter Number</span>
+          <select class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-body text-body-md text-on-surface">
+            <option>MTR-ZA-88412 — Sandown Hub</option>
+            <option>MTR-ZA-40218 — Menlyn Central Tower</option>
+            <option>MTR-ZA-55102 — Paarl Logistics Hub</option>
+          </select>
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+          <label class="flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Scheduled Date</span>
+            <input type="date" value="2026-11-26" class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-body text-body-md text-on-surface">
+          </label>
+          <label class="flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Priority</span>
+            <select class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-body text-body-md text-on-surface">
+              <option>Routine</option>
+              <option>Medium</option>
+              <option>High</option>
+              <option>Urgent</option>
+            </select>
+          </label>
+        </div>
+        <label class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Assigned Technician</span>
+          <select class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-body text-body-md text-on-surface">
+            <option>Sipho Dlamini (WL-8492)</option>
+            <option>Johan Pretorius (WL-7310)</option>
+            <option>Thabo Mokoena (WL-9104)</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-gutter-xs">
+          <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Issue / Task Description</span>
+          <textarea rows="2" placeholder="Describe inspection or repair scope..." class="w-full rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-body text-body-md text-on-surface"></textarea>
+        </label>
+        <div class="flex items-center justify-end gap-gutter-sm pt-gutter-xs">
+          <button id="cancel-modal-btn" type="button" class="rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface hover:bg-surface-container-low">Cancel</button>
+          <button type="submit" class="rounded-md bg-primary px-gutter-lg py-2 font-label text-label-md text-on-primary hover:bg-primary-hover">Create Work Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const searchInput = document.getElementById('maint-search-input');
+      const priorityFilter = document.getElementById('maint-priority-filter');
+      const statusFilter = document.getElementById('maint-status-filter');
+      const rows = Array.from(document.querySelectorAll('#maint-table-body tr'));
+
+      function filterRows() {
+        const query = (searchInput.value || '').toLowerCase().trim();
+        const prioVal = priorityFilter.value;
+        const statVal = statusFilter.value;
+
+        rows.forEach((row) => {
+          const text = row.textContent.toLowerCase();
+          const rowPrio = row.getAttribute('data-priority');
+          const rowStat = row.getAttribute('data-status');
+          const matchesQuery = !query || text.includes(query);
+          const matchesPrio = prioVal === 'all' || rowPrio === prioVal;
+          const matchesStat = statVal === 'all' || rowStat === statVal;
+          row.classList.toggle('hidden', !(matchesQuery && matchesPrio && matchesStat));
+        });
+      }
+
+      if (searchInput) searchInput.addEventListener('input', filterRows);
+      if (priorityFilter) priorityFilter.addEventListener('change', filterRows);
+      if (statusFilter) statusFilter.addEventListener('change', filterRows);
+
+      const modal = document.getElementById('schedule-modal');
+      const openModalBtn = document.getElementById('schedule-modal-btn');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const cancelModalBtn = document.getElementById('cancel-modal-btn');
+      const scheduleForm = document.getElementById('schedule-form');
+
+      if (openModalBtn) openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+      if (closeModalBtn) closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+      if (cancelModalBtn) cancelModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+      if (scheduleForm) {
+        scheduleForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          modal.classList.add('hidden');
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

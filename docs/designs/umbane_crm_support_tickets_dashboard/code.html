@@ -1,0 +1,587 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support Tickets Dashboard — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Support Tickets active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="flex items-center gap-gutter-xs">
+              <span class="rounded-full bg-surface px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+              <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+            </span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Support Tickets Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Page Heading & Action -->
+        <section class="flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Support Tickets</h1>
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Track customer metering faults, billing queries, and field support SLAs across South Africa.</p>
+          </div>
+
+          <!-- COMPONENT: button-with-icon -->
+          <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2.5 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_task</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Create Ticket</span>
+          </button>
+        </section>
+
+        <!-- 5 Support KPI Cards -->
+        <section aria-label="Support Ticket Summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-gutter-md">
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Total Tickets</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              </span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">318</span>
+            <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Q4 2026 queue</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Open Tickets</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-secondary-container text-on-secondary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">mark_email_unread</span>
+              </span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">24</span>
+            <span class="font-label text-label-sm text-secondary tabular-nums" data-design-text-token="label-sm">Awaiting triage</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">In Progress</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-tertiary-container text-on-tertiary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">pending_actions</span>
+              </span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">16</span>
+            <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Assigned to field</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Resolved</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-primary-container text-success">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">task_alt</span>
+              </span>
+            </div>
+            <span class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">278</span>
+            <span class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">94.2% within SLA</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Urgent Tickets</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-error-container text-on-error-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">priority_high</span>
+              </span>
+            </div>
+            <span class="font-headline text-headline-md text-error tabular-nums" data-design-text-token="headline-md">5</span>
+            <span class="font-label text-label-sm text-error tabular-nums" data-design-text-token="label-sm">SLA &lt; 4 hrs</span>
+          </article>
+        </section>
+
+        <!-- Search & Filter Bar -->
+        <section aria-label="Ticket Filters" class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter-sm">
+            <div class="lg:col-span-5">
+              <label for="ticket-search" class="sr-only">Search tickets</label>
+              <div class="relative flex items-center">
+                <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                  <span class="material-symbols-outlined text-title-md">search</span>
+                </span>
+                <input id="ticket-search" type="search" placeholder="Search ticket ID, customer, or issue..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+            </div>
+
+            <div class="lg:col-span-3">
+              <label for="filter-category" class="sr-only">Filter by category</label>
+              <select id="filter-category" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value>All Categories</option>
+                <option value="Meter Fault">Meter Fault</option>
+                <option value="Telemetry">Telemetry</option>
+                <option value="Billing">Billing</option>
+                <option value="Prepaid Token">Prepaid Token</option>
+              </select>
+            </div>
+
+            <div class="lg:col-span-2">
+              <label for="filter-priority" class="sr-only">Filter by priority</label>
+              <select id="filter-priority" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value>All Priorities</option>
+                <option value="Urgent">Urgent</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+
+            <div class="lg:col-span-2">
+              <label for="filter-status" class="sr-only">Filter by status</label>
+              <select id="filter-status" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value>All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Support Tickets Table -->
+        <section aria-label="Support Tickets Table" class="rounded-lg border border-outline-variant bg-surface shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-max text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-outline-variant">
+                  <th class="pl-gutter-md pr-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Ticket ID</th>
+                  <th class="px-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Customer</th>
+                  <th class="px-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Issue Title</th>
+                  <th class="px-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Category</th>
+                  <th class="px-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Priority</th>
+                  <th class="px-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Assigned Employee</th>
+                  <th class="px-2 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Created Date</th>
+                  <th class="pl-2 pr-gutter-md py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-table-body" class="divide-y divide-outline-variant/70">
+                <tr class="ticket-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-category="Meter Fault" data-priority="Urgent" data-status="Open">
+                  <td class="pl-gutter-md pr-2 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">TKT-2026-418</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">CT breaker trip on DB-04</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Meter Fault</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Urgent</span>
+                  </td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Elias Nkosi</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">23 Nov 2026</td>
+                  <td class="pl-2 pr-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">Open</span>
+                  </td>
+                </tr>
+
+                <tr class="ticket-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-category="Telemetry" data-priority="High" data-status="In Progress">
+                  <td class="pl-gutter-md pr-2 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">TKT-2026-417</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">V&amp;A Waterfront</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Gateway LTE signal drop</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Telemetry</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">High</span>
+                  </td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Thabo Mokoena</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">22 Nov 2026</td>
+                  <td class="pl-2 pr-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">In Progress</span>
+                  </td>
+                </tr>
+
+                <tr class="ticket-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-category="Prepaid Token" data-priority="Medium" data-status="Open">
+                  <td class="pl-gutter-md pr-2 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">TKT-2026-416</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Umhlanga Ridge</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">STS token rejected Unit 14B</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Prepaid Token</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Medium</span>
+                  </td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Lerato Khumalo</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">22 Nov 2026</td>
+                  <td class="pl-2 pr-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">Open</span>
+                  </td>
+                </tr>
+
+                <tr class="ticket-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-category="Billing" data-priority="Low" data-status="Resolved">
+                  <td class="pl-gutter-md pr-2 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">TKT-2026-415</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Menlyn Maine</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">VAT statement export query</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Billing</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container-low border border-outline-variant px-2.5 py-0.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Low</span>
+                  </td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Zanele Khumalo</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">20 Nov 2026</td>
+                  <td class="pl-2 pr-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Resolved</span>
+                  </td>
+                </tr>
+
+                <tr class="ticket-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-category="Meter Fault" data-priority="Urgent" data-status="In Progress">
+                  <td class="pl-gutter-md pr-2 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">TKT-2026-414</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Rosebank Towers</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Phase imbalance alert L2</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Meter Fault</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Urgent</span>
+                  </td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Pieter Botha</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">19 Nov 2026</td>
+                  <td class="pl-2 pr-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">In Progress</span>
+                  </td>
+                </tr>
+
+                <tr class="ticket-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-category="Telemetry" data-priority="Medium" data-status="Resolved">
+                  <td class="pl-gutter-md pr-2 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">TKT-2026-413</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Century City Mgmt</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Hourly interval sync lag</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Telemetry</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Medium</span>
+                  </td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Thabo Mokoena</td>
+                  <td class="px-1.5 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">18 Nov 2026</td>
+                  <td class="pl-2 pr-gutter-md py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Resolved</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <footer class="px-gutter-lg py-gutter-md border-t border-outline-variant bg-surface-container-low/50 flex flex-wrap items-center justify-between gap-gutter-sm">
+            <span id="tickets-count-label" class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Showing 1–6 of 318 tickets</span>
+
+            <nav aria-label="Support tickets pagination" class="flex items-center gap-gutter-xs">
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:bg-surface-container-low" data-design-text-token="label-sm">Previous</button>
+              <button type="button" aria-current="page" class="rounded-DEFAULT bg-primary px-3 py-1.5 font-label text-label-sm text-on-primary tabular-nums" data-design-text-token="label-sm">1</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums" data-design-text-token="label-sm">2</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums" data-design-text-token="label-sm">3</button>
+              <span class="px-1 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">…</span>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums" data-design-text-token="label-sm">53</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-primary hover:bg-surface-container-low" data-design-text-token="label-sm">Next</button>
+            </nav>
+          </footer>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const searchInput = document.getElementById('ticket-search');
+      const categorySelect = document.getElementById('filter-category');
+      const prioritySelect = document.getElementById('filter-priority');
+      const statusSelect = document.getElementById('filter-status');
+      const rows = Array.from(document.querySelectorAll('.ticket-row'));
+      const countLabel = document.getElementById('tickets-count-label');
+
+      function applyFilters() {
+        const q = (searchInput.value || '').trim().toLowerCase();
+        const catVal = categorySelect.value;
+        const prioVal = prioritySelect.value;
+        const statusVal = statusSelect.value;
+        let visible = 0;
+
+        rows.forEach(function (row) {
+          const text = row.textContent.toLowerCase();
+          const matchQ = !q || text.includes(q);
+          const matchCat = !catVal || row.getAttribute('data-category') === catVal;
+          const matchPrio = !prioVal || row.getAttribute('data-priority') === prioVal;
+          const matchStatus = !statusVal || row.getAttribute('data-status') === statusVal;
+          const show = matchQ && matchCat && matchPrio && matchStatus;
+          row.classList.toggle('hidden', !show);
+          if (show) visible += 1;
+        });
+
+        if (countLabel) {
+          countLabel.textContent = visible === rows.length
+            ? 'Showing 1–6 of 318 tickets'
+            : 'Showing ' + visible + ' matching tickets';
+        }
+      }
+
+      [searchInput, categorySelect, prioritySelect, statusSelect].forEach(function (el) {
+        if (el) el.addEventListener('input', applyFilters);
+        if (el) el.addEventListener('change', applyFilters);
+      });
+    })();
+  </script>
+
+
+</body></html>

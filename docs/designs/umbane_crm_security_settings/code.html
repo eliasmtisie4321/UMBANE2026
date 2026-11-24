@@ -1,0 +1,592 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Settings — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Settings active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="../communications/UmbaneCommunicationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="../team/UmbaneTeamDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="../reports/UmbaneReportsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="../automations/UmbaneAutomationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="../notifications/UmbaneNotificationsCentre.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+              <span data-design-text-token="label-md">Notifications</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="UmbaneSettingsDashboard.html" aria-current="page" class="flex items-center gap-gutter-sm rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <a href="../notifications/UmbaneNotificationsCentre.html" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-5xl">
+
+        <!-- Contextual Back & Page Header -->
+        <div class="flex flex-col gap-gutter-sm">
+          <a href="UmbaneSettingsDashboard.html" class="inline-flex items-center gap-gutter-xs self-start rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-md text-on-surface-variant shadow-sm transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Settings</span>
+          </a>
+
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-gutter-md">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-on-surface" data-design-text-token="headline-lg">Security Settings</h1>
+              <p class="mt-1 font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+                Manage your account password, two-factor authentication, active sessions, and login history.
+              </p>
+            </div>
+
+            <span class="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-full bg-surface-container px-3 py-1.5 font-label text-label-sm text-on-surface shrink-0" data-design-text-token="label-sm">
+              <span class="h-2 w-2 rounded-full bg-success" aria-hidden="true"></span>
+              <span>Security Status: Protected</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Feedback Banner -->
+        <div id="security-banner" class="hidden rounded-lg border border-outline-variant bg-surface px-gutter-md py-3 flex items-center gap-gutter-sm shadow-sm" role="status">
+          <span class="material-symbols-outlined text-title-md text-success" aria-hidden="true">check_circle</span>
+          <span id="security-banner-text" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Security settings updated.</span>
+        </div>
+
+        <!-- 1. Change Password -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="password-heading">
+          <div class="flex items-center justify-between gap-gutter-md">
+            <div>
+              <h2 id="password-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Change Password</h2>
+              <p class="mt-0.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Use at least 12 characters with mixed case, numbers, and symbols.</p>
+            </div>
+          </div>
+
+          <form id="password-form" class="grid grid-cols-1 sm:grid-cols-3 gap-gutter-md" novalidate>
+            <div class="flex flex-col gap-1.5">
+              <label for="current-password" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Current Password</label>
+              <input id="current-password" type="password" placeholder="Enter current password" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="new-password" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">New Password</label>
+              <input id="new-password" type="password" placeholder="Enter new password" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="confirm-password" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Confirm New Password</label>
+              <input id="confirm-password" type="password" placeholder="Confirm new password" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+            </div>
+
+            <div class="sm:col-span-3 flex items-center justify-end pt-gutter-xs">
+              <button type="submit" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2 font-label text-label-lg text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">save</span>
+                <span data-design-text-token="label-lg">Save Changes</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- 2. Two-Factor Authentication -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="tfa-heading">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-gutter-md">
+            <div class="flex items-start gap-gutter-md">
+              <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-lg" aria-hidden="true">verified_user</span>
+              </span>
+              <div>
+                <div class="flex flex-wrap items-center gap-gutter-xs">
+                  <h2 id="tfa-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Two-Factor Authentication</h2>
+                  <span id="tfa-badge" class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">
+                    <span id="tfa-dot" class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+                    <span id="tfa-badge-text">Enabled</span>
+                  </span>
+                </div>
+                <p class="mt-0.5 font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+                  Authenticator app (TOTP) verification is required on every new browser or device sign-in.
+                </p>
+              </div>
+            </div>
+
+            <button id="tfa-toggle-btn" type="button" role="switch" aria-checked="true" aria-label="Toggle Two-Factor Authentication" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-primary transition-colors duration-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary self-start sm:self-center">
+              <span id="tfa-toggle-knob" class="pointer-events-none inline-block h-5 w-5 translate-x-5 rounded-full bg-surface shadow-sm transition-transform duration-state-change"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 3. Session Management & Active Sessions -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm overflow-hidden" aria-labelledby="sessions-heading">
+          <div class="p-gutter-lg border-b border-outline-variant/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-gutter-md">
+            <div>
+              <h2 id="sessions-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Session Management &amp; Active Sessions</h2>
+              <p class="mt-0.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Devices currently authenticated to your Umbane CRM account.</p>
+            </div>
+
+            <button id="open-signout-dialog-btn" type="button" class="inline-flex items-center justify-center gap-gutter-xs self-start sm:self-auto rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-error shadow-sm transition-colors duration-state-change hover:bg-error-container/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary shrink-0">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">logout</span>
+              <span data-design-text-token="label-md">Sign Out Other Sessions</span>
+            </button>
+          </div>
+
+          <div id="sessions-list" class="divide-y divide-outline-variant/70">
+            <div class="p-gutter-lg flex flex-wrap items-center justify-between gap-gutter-md">
+              <div class="flex items-center gap-gutter-md">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary-container text-primary shrink-0">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">laptop_mac</span>
+                </span>
+                <div>
+                  <div class="flex flex-wrap items-center gap-gutter-xs">
+                    <p class="font-label text-label-lg text-on-surface" data-design-text-token="label-lg">Chrome on macOS</p>
+                    <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Current Session</span>
+                  </div>
+                  <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Sandton, Johannesburg • IP 102.182.44.19</p>
+                </div>
+              </div>
+              <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">Active now</span>
+            </div>
+
+            <div class="other-session p-gutter-lg flex flex-wrap items-center justify-between gap-gutter-md">
+              <div class="flex items-center gap-gutter-md">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-surface-container text-on-surface-variant shrink-0">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">smartphone</span>
+                </span>
+                <div>
+                  <p class="font-label text-label-lg text-on-surface" data-design-text-token="label-lg">Umbane Field iOS App</p>
+                  <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Pretoria, Gauteng • IP 196.25.118.42</p>
+                </div>
+              </div>
+              <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">2 hours ago</span>
+            </div>
+
+            <div class="other-session p-gutter-lg flex flex-wrap items-center justify-between gap-gutter-md">
+              <div class="flex items-center gap-gutter-md">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-surface-container text-on-surface-variant shrink-0">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">desktop_windows</span>
+                </span>
+                <div>
+                  <p class="font-label text-label-lg text-on-surface" data-design-text-token="label-lg">Edge on Windows 11</p>
+                  <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Cape Town, Western Cape • IP 41.13.90.77</p>
+                </div>
+              </div>
+              <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">Yesterday, 16:08</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Login History & Recent Security Activity -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm overflow-hidden" aria-labelledby="history-heading">
+          <div class="p-gutter-lg border-b border-outline-variant/70">
+            <h2 id="history-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Login History &amp; Recent Security Activity</h2>
+            <p class="mt-0.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Audit trail of authentication events and security changes.</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface-container-low">
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Security Event</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Location</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">IP Address</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Timestamp</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/70">
+                <tr>
+                  <td class="px-gutter-md py-3 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">2FA Login Verified</td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">Sandton, Johannesburg</td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">102.182.44.19</td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">23 Nov 2026, 08:12</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Verified</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-gutter-md py-3 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Mobile Session Refreshed</td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">Pretoria, Gauteng</td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">196.25.118.42</td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">23 Nov 2026, 12:04</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Verified</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-gutter-md py-3 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Failed Password Attempt</td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">Durban, KwaZulu-Natal</td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">154.73.209.11</td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">21 Nov 2026, 22:47</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Blocked</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Confirmation Dialog for Sign Out Other Sessions -->
+  <div id="signout-dialog" class="hidden fixed inset-0 z-50 bg-on-surface/50 flex items-center justify-center p-gutter-md" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="bg-surface rounded-lg border border-outline-variant shadow-lg max-w-md w-full p-gutter-lg flex flex-col gap-gutter-md">
+      <div class="flex items-start gap-gutter-sm">
+        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-error-container text-on-error-container">
+          <span class="material-symbols-outlined text-title-lg" aria-hidden="true">logout</span>
+        </span>
+        <div>
+          <h3 id="dialog-title" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Sign out all other sessions?</h3>
+          <p class="mt-1 font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+            This will immediately revoke access on all other browsers and mobile devices. Your current session will stay signed in.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-gutter-sm pt-gutter-xs">
+        <button id="cancel-signout-btn" type="button" class="rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface hover:bg-surface-container-low">
+          Cancel
+        </button>
+        <button id="confirm-signout-btn" type="button" class="rounded-md bg-error px-gutter-md py-2 font-label text-label-md text-on-error shadow-sm hover:opacity-90">
+          Confirm Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const banner = document.getElementById('security-banner');
+      const bannerText = document.getElementById('security-banner-text');
+
+      function showBanner(msg) {
+        bannerText.textContent = msg;
+        banner.classList.remove('hidden');
+        banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      const passwordForm = document.getElementById('password-form');
+      if (passwordForm) {
+        passwordForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          showBanner('Password updated successfully.');
+          passwordForm.reset();
+        });
+      }
+
+      const tfaBtn = document.getElementById('tfa-toggle-btn');
+      const tfaKnob = document.getElementById('tfa-toggle-knob');
+      const tfaDot = document.getElementById('tfa-dot');
+      const tfaBadgeText = document.getElementById('tfa-badge-text');
+
+      if (tfaBtn) {
+        tfaBtn.addEventListener('click', function () {
+          const enabled = tfaBtn.getAttribute('aria-checked') !== 'true';
+          tfaBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+          tfaBtn.className = 'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary self-start sm:self-center ' +
+            (enabled ? 'bg-primary' : 'bg-outline-variant');
+          tfaKnob.className = 'pointer-events-none inline-block h-5 w-5 rounded-full bg-surface shadow-sm transition-transform duration-state-change ' +
+            (enabled ? 'translate-x-5' : 'translate-x-0');
+          tfaDot.className = 'h-1.5 w-1.5 rounded-full ' + (enabled ? 'bg-success' : 'bg-outline');
+          tfaBadgeText.textContent = enabled ? 'Enabled' : 'Disabled';
+          showBanner('Two-factor authentication ' + (enabled ? 'enabled.' : 'disabled.'));
+        });
+      }
+
+      const dialog = document.getElementById('signout-dialog');
+      const openDialogBtn = document.getElementById('open-signout-dialog-btn');
+      const cancelDialogBtn = document.getElementById('cancel-signout-btn');
+      const confirmDialogBtn = document.getElementById('confirm-signout-btn');
+
+      if (openDialogBtn) {
+        openDialogBtn.addEventListener('click', function () {
+          dialog.classList.remove('hidden');
+        });
+      }
+
+      if (cancelDialogBtn) {
+        cancelDialogBtn.addEventListener('click', function () {
+          dialog.classList.add('hidden');
+        });
+      }
+
+      if (confirmDialogBtn) {
+        confirmDialogBtn.addEventListener('click', function () {
+          document.querySelectorAll('.other-session').forEach((el) => el.remove());
+          dialog.classList.add('hidden');
+          showBanner('All other active sessions have been signed out.');
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

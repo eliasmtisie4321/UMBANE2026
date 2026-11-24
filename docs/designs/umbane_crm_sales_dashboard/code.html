@@ -1,0 +1,768 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Dashboard — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Sales & Orders active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="#sales-orders" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">shopping_bag</span>
+              <span data-design-text-token="label-md">Sales &amp; Orders</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#invoices" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="#inventory" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Sales Dashboard Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Page Heading, Date Filters & Create Order Button -->
+        <section class="flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Sales Dashboard</h1>
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Track commercial metering orders, monthly Rand revenue, and service line performance.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-gutter-sm">
+            <!-- Date Range Filter -->
+            <div class="flex items-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-3 py-2 shadow-sm">
+              <span class="material-symbols-outlined text-title-md text-on-surface-variant" aria-hidden="true">calendar_today</span>
+              <label for="sales-date-range" class="sr-only">Filter sales by date range</label>
+              <select id="sales-date-range" class="border-0 bg-transparent p-0 pr-6 font-label text-label-md text-on-surface focus:ring-0">
+                <option value="nov-2026" selected>Nov 2026 (Current Month)</option>
+                <option value="q4-2026">Q4 2026 (Oct – Dec)</option>
+                <option value="ytd-2026">Year to Date (2026)</option>
+              </select>
+            </div>
+
+            <!-- COMPONENT: button-with-icon -->
+            <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2.5 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Create Order</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 5 Sales KPI Cards -->
+        <section aria-label="Sales Summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-gutter-md">
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Total Sales</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">payments</span>
+              </span>
+            </div>
+            <span id="kpi-total-sales" class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">R 14.82M</span>
+            <span id="kpi-total-delta" class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+18.4% YoY</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Monthly Revenue</span>
+              <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-DEFAULT bg-secondary-container text-on-secondary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">trending_up</span>
+              </span>
+            </div>
+            <span id="kpi-monthly-rev" class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">R 1.94M</span>
+            <span id="kpi-monthly-delta" class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+12.1% vs Oct</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Pending Orders</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span id="kpi-pending" class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">38</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-tertiary-container text-on-tertiary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">hourglass_top</span>
+              </span>
+            </div>
+            <span id="kpi-pending-delta" class="font-label text-label-sm text-on-tertiary-container tabular-nums" data-design-text-token="label-sm">R 640k pipeline</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Completed Orders</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span id="kpi-completed" class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">312</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">task_alt</span>
+              </span>
+            </div>
+            <span id="kpi-completed-delta" class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">94.2% fulfilment</span>
+          </article>
+
+          <article class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-xs sm:col-span-2 lg:col-span-1">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Cancelled Orders</span>
+            <div class="flex items-center justify-between gap-gutter-xs">
+              <span id="kpi-cancelled" class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">9</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-DEFAULT bg-error-container text-on-error-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">cancel</span>
+              </span>
+            </div>
+            <span id="kpi-cancelled-delta" class="font-label text-label-sm text-error tabular-nums" data-design-text-token="label-sm">2.5% cancel rate</span>
+          </article>
+        </section>
+
+        <!-- Charts Row: Monthly Sales Line Chart + Sales by Service Chart -->
+        <section class="grid grid-cols-1 xl:grid-cols-12 gap-gutter-md">
+          <!-- Monthly Sales Line Chart -->
+          <article class="xl:col-span-7 rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="flex flex-wrap items-center justify-between gap-gutter-sm">
+              <div>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Monthly Sales Revenue</h2>
+                <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Recognized order revenue from June to November 2026</p>
+              </div>
+              <span class="rounded-full bg-primary-container px-3 py-1 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">R 1.94M in Nov</span>
+            </header>
+
+            <div class="w-full">
+              <svg viewBox="0 0 600 220" class="w-full h-auto" role="img" aria-label="Monthly sales line chart from June to November 2026 showing growth from R 1.24M to R 1.94M">
+                <defs>
+                  <linearGradient id="salesArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#174EA6" stop-opacity="0.16"></stop>
+                    <stop offset="100%" stop-color="#174EA6" stop-opacity="0"></stop>
+                  </linearGradient>
+                </defs>
+                <!-- Horizontal Grid Lines -->
+                <line x1="60" y1="30" x2="580" y2="30" stroke="#D5DCEB" stroke-dasharray="4 4"></line>
+                <line x1="60" y1="80" x2="580" y2="80" stroke="#D5DCEB" stroke-dasharray="4 4"></line>
+                <line x1="60" y1="130" x2="580" y2="130" stroke="#D5DCEB" stroke-dasharray="4 4"></line>
+                <line x1="60" y1="180" x2="580" y2="180" stroke="#D5DCEB"></line>
+
+                <!-- Y-Axis Labels -->
+                <text x="50" y="34" text-anchor="end" fill="#434752" font-family="Inter, sans-serif" font-size="11">R 2.1M</text>
+                <text x="50" y="84" text-anchor="end" fill="#434752" font-family="Inter, sans-serif" font-size="11">R 1.4M</text>
+                <text x="50" y="134" text-anchor="end" fill="#434752" font-family="Inter, sans-serif" font-size="11">R 0.7M</text>
+                <text x="50" y="184" text-anchor="end" fill="#434752" font-family="Inter, sans-serif" font-size="11">R 0</text>
+
+                <!-- Area Fill -->
+                <path d="M 80 91 L 176 80 L 272 68 L 368 74 L 464 56 L 560 41 L 560 180 L 80 180 Z" fill="url(#salesArea)"></path>
+
+                <!-- Line -->
+                <polyline fill="none" stroke="#174EA6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="80,91 176,80 272,68 368,74 464,56 560,41"></polyline>
+
+                <!-- Data Points -->
+                <circle cx="80" cy="91" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <circle cx="176" cy="80" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <circle cx="272" cy="68" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <circle cx="368" cy="74" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <circle cx="464" cy="56" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <circle cx="560" cy="41" r="5.5" fill="#F5B700" stroke="#174EA6" stroke-width="2.5"></circle>
+
+                <!-- X-Axis Labels -->
+                <text x="80" y="202" text-anchor="middle" fill="#434752" font-family="Inter, sans-serif" font-size="11">Jun</text>
+                <text x="176" y="202" text-anchor="middle" fill="#434752" font-family="Inter, sans-serif" font-size="11">Jul</text>
+                <text x="272" y="202" text-anchor="middle" fill="#434752" font-family="Inter, sans-serif" font-size="11">Aug</text>
+                <text x="368" y="202" text-anchor="middle" fill="#434752" font-family="Inter, sans-serif" font-size="11">Sep</text>
+                <text x="464" y="202" text-anchor="middle" fill="#434752" font-family="Inter, sans-serif" font-size="11">Oct</text>
+                <text x="560" y="202" text-anchor="middle" fill="#174EA6" font-weight="600" font-family="Inter, sans-serif" font-size="11">Nov</text>
+              </svg>
+            </div>
+          </article>
+
+          <!-- Sales by Service Chart -->
+          <article class="xl:col-span-5 rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col justify-between gap-gutter-md">
+            <header class="flex items-center justify-between gap-gutter-sm">
+              <div>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Sales by Service</h2>
+                <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Revenue by product line</p>
+              </div>
+              <span class="shrink-0 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">4 lines</span>
+            </header>
+
+            <div class="flex flex-col gap-gutter-md">
+              <!-- Service 1 -->
+              <div class="flex flex-col gap-gutter-xs">
+                <div class="flex items-center justify-between gap-gutter-sm">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Smart Prepaid Metering</span>
+                  <span class="font-label text-label-md text-primary tabular-nums" data-design-text-token="label-md">R 6.42M (43%)</span>
+                </div>
+                <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-primary" style="width: 43%;"></div>
+                </div>
+              </div>
+
+              <!-- Service 2 -->
+              <div class="flex flex-col gap-gutter-xs">
+                <div class="flex items-center justify-between gap-gutter-sm">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Commercial CT &amp; AMI</span>
+                  <span class="font-label text-label-md text-secondary tabular-nums" data-design-text-token="label-md">R 4.18M (28%)</span>
+                </div>
+                <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-secondary" style="width: 28%;"></div>
+                </div>
+              </div>
+
+              <!-- Service 3 -->
+              <div class="flex flex-col gap-gutter-xs">
+                <div class="flex items-center justify-between gap-gutter-sm">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Grid Telemetry &amp; SLA</span>
+                  <span class="font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 2.65M (18%)</span>
+                </div>
+                <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-tertiary" style="width: 18%;"></div>
+                </div>
+              </div>
+
+              <!-- Service 4 -->
+              <div class="flex flex-col gap-gutter-xs">
+                <div class="flex items-center justify-between gap-gutter-sm">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Installation &amp; Audits</span>
+                  <span class="font-label text-label-md text-on-surface-variant tabular-nums" data-design-text-token="label-md">R 1.57M (11%)</span>
+                </div>
+                <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-outline" style="width: 11%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-gutter-sm border-t border-outline-variant/70 flex items-center justify-between">
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Top Growth Segment</span>
+              <span class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">Commercial CT &amp; AMI (+24%)</span>
+            </div>
+          </article>
+        </section>
+
+        <!-- Recent Sales Table -->
+        <section class="rounded-lg border border-outline-variant bg-surface shadow-sm overflow-hidden">
+          <header class="px-gutter-lg py-gutter-md border-b border-outline-variant flex flex-wrap items-center justify-between gap-gutter-sm">
+            <div>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Recent Sales Orders</h2>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Latest commercial orders and metering contracts across active regions</p>
+            </div>
+            <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Showing 6 of 359 orders</span>
+          </header>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-outline-variant">
+                  <th class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Order ID</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Customer</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Service</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Order Date</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Amount</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Status</th>
+                  <th class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant text-right" data-design-text-token="label-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/70">
+                <tr class="hover:bg-surface-container-low/70 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-842</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Commercial CT &amp; AMI</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">22 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 485,000</td>
+                  <td class="px-gutter-md py-3.5">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/70 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-841</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface" data-design-text-token="label-md">V&amp;A Waterfront Properties</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Grid Telemetry &amp; SLA</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">21 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 312,500</td>
+                  <td class="px-gutter-md py-3.5">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Pending</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/70 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-839</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface" data-design-text-token="label-md">Umhlanga Ridge Estates</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Smart Prepaid Metering</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">19 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 278,400</td>
+                  <td class="px-gutter-md py-3.5">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/70 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-837</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface" data-design-text-token="label-md">Menlyn Maine Precinct</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Installation &amp; Audits</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">18 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 164,000</td>
+                  <td class="px-gutter-md py-3.5">
+                    <span class="inline-flex items-center rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">In Progress</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/70 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-834</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface" data-design-text-token="label-md">Rosebank Towers Body Corp</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Smart Prepaid Metering</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">15 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 92,800</td>
+                  <td class="px-gutter-md py-3.5">
+                    <span class="inline-flex items-center rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Cancelled</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/70 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-831</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface" data-design-text-token="label-md">Century City Management</td>
+                  <td class="px-gutter-md py-3.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Commercial CT &amp; AMI</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">12 Nov 2026</td>
+                  <td class="px-gutter-md py-3.5 font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 418,000</td>
+                  <td class="px-gutter-md py-3.5">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-gutter-lg py-3.5 text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Bottom Row: Top Customers + Sales Performance Summary -->
+        <section class="grid grid-cols-1 xl:grid-cols-12 gap-gutter-md">
+          <!-- Top Customers -->
+          <article class="xl:col-span-6 rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant flex items-center justify-between gap-gutter-sm">
+              <div class="flex items-center gap-gutter-sm">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">emoji_events</span>
+                </span>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Top Customers</h2>
+              </div>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">By annual spend</span>
+            </header>
+
+            <ul class="divide-y divide-outline-variant/70">
+              <li class="py-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="flex items-center gap-gutter-sm min-w-0">
+                  <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">SC</span>
+                  <div class="min-w-0">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</p>
+                    <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">14 orders · Johannesburg</p>
+                  </div>
+                </div>
+                <span class="font-label text-label-md text-primary tabular-nums shrink-0" data-design-text-token="label-md">R 2.84M</span>
+              </li>
+
+              <li class="py-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="flex items-center gap-gutter-sm min-w-0">
+                  <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-container font-label text-label-md text-on-secondary-container">VA</span>
+                  <div class="min-w-0">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">V&amp;A Waterfront Properties</p>
+                    <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">11 orders · Cape Town</p>
+                  </div>
+                </div>
+                <span class="font-label text-label-md text-primary tabular-nums shrink-0" data-design-text-token="label-md">R 2.19M</span>
+              </li>
+
+              <li class="py-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="flex items-center gap-gutter-sm min-w-0">
+                  <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary-container font-label text-label-md text-on-tertiary-container">CC</span>
+                  <div class="min-w-0">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Century City Management</p>
+                    <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">9 orders · Cape Town</p>
+                  </div>
+                </div>
+                <span class="font-label text-label-md text-primary tabular-nums shrink-0" data-design-text-token="label-md">R 1.76M</span>
+              </li>
+
+              <li class="py-gutter-sm flex items-center justify-between gap-gutter-sm">
+                <div class="flex items-center gap-gutter-sm min-w-0">
+                  <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container font-label text-label-md text-on-surface-variant">UR</span>
+                  <div class="min-w-0">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Umhlanga Ridge Estates</p>
+                    <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">8 orders · Durban</p>
+                  </div>
+                </div>
+                <span class="font-label text-label-md text-primary tabular-nums shrink-0" data-design-text-token="label-md">R 1.42M</span>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Sales Performance Summary -->
+          <article class="xl:col-span-6 rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col justify-between gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant flex items-center justify-between gap-gutter-sm">
+              <div class="flex items-center gap-gutter-sm">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-DEFAULT bg-primary-container text-primary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">insights</span>
+                </span>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Sales Performance Summary</h2>
+              </div>
+              <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">On Target</span>
+            </header>
+
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+              <div class="rounded-md bg-surface-container-low border border-outline-variant/70 p-gutter-md flex flex-col gap-gutter-xs">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Average Order Value</dt>
+                <dd class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">R 41,280</dd>
+                <span class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+6.8% vs Q3</span>
+              </div>
+
+              <div class="rounded-md bg-surface-container-low border border-outline-variant/70 p-gutter-md flex flex-col gap-gutter-xs">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Quote-to-Order Rate</dt>
+                <dd class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">68.4%</dd>
+                <span class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+4.2 pts</span>
+              </div>
+
+              <div class="rounded-md bg-surface-container-low border border-outline-variant/70 p-gutter-md flex flex-col gap-gutter-xs">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">On-Time Fulfilment</dt>
+                <dd class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">94.2%</dd>
+                <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Target: 92.0%</span>
+              </div>
+
+              <div class="rounded-md bg-surface-container-low border border-outline-variant/70 p-gutter-md flex flex-col gap-gutter-xs">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Recurring Telemetry Share</dt>
+                <dd class="font-headline text-headline-md text-on-surface tabular-nums" data-design-text-token="headline-md">31.5%</dd>
+                <span class="font-label text-label-sm text-secondary tabular-nums" data-design-text-token="label-sm">36-mo SLA contracts</span>
+              </div>
+            </dl>
+
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+              Commercial CT &amp; AMI deployments in Gauteng and the Western Cape drove 71% of November revenue growth, keeping Q4 ahead of the R 5.4M target.
+            </p>
+          </article>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const rangeSelect = document.getElementById('sales-date-range');
+      const presets = {
+        'nov-2026': {
+          total: 'R 14.82M', totalDelta: '+18.4% YoY',
+          monthly: 'R 1.94M', monthlyDelta: '+12.1% vs Oct',
+          pending: '38', pendingDelta: 'R 640k pipeline',
+          completed: '312', completedDelta: '94.2% fulfilment',
+          cancelled: '9', cancelledDelta: '2.5% cancel rate'
+        },
+        'q4-2026': {
+          total: 'R 5.48M', totalDelta: '+15.2% vs Q3',
+          monthly: 'R 1.83M', monthlyDelta: 'Q4 avg/month',
+          pending: '38', pendingDelta: 'R 640k pipeline',
+          completed: '124', completedDelta: '93.9% fulfilment',
+          cancelled: '4', cancelledDelta: '2.4% cancel rate'
+        },
+        'ytd-2026': {
+          total: 'R 14.82M', totalDelta: '+18.4% YoY',
+          monthly: 'R 1.35M', monthlyDelta: '11-mo avg',
+          pending: '38', pendingDelta: 'R 640k pipeline',
+          completed: '312', completedDelta: '94.2% fulfilment',
+          cancelled: '9', cancelledDelta: '2.5% cancel rate'
+        }
+      };
+
+      if (rangeSelect) {
+        rangeSelect.addEventListener('change', function () {
+          const data = presets[rangeSelect.value] || presets['nov-2026'];
+          document.getElementById('kpi-total-sales').textContent = data.total;
+          document.getElementById('kpi-total-delta').textContent = data.totalDelta;
+          document.getElementById('kpi-monthly-rev').textContent = data.monthly;
+          document.getElementById('kpi-monthly-delta').textContent = data.monthlyDelta;
+          document.getElementById('kpi-pending').textContent = data.pending;
+          document.getElementById('kpi-pending-delta').textContent = data.pendingDelta;
+          document.getElementById('kpi-completed').textContent = data.completed;
+          document.getElementById('kpi-completed-delta').textContent = data.completedDelta;
+          document.getElementById('kpi-cancelled').textContent = data.cancelled;
+          document.getElementById('kpi-cancelled-delta').textContent = data.cancelledDelta;
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

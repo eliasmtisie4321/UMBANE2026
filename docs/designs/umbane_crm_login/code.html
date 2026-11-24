@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+  <div class="min-h-[1024px] flex flex-col justify-between bg-background" data-stitch-vh="min-h-[1024px]===min-h-screen">
+    <!-- Top Brand Header -->
+    <header class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin pt-gutter-lg lg:pt-gutter-xl">
+      <a href="#top" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+          </svg>
+        </span>
+        <span class="flex items-baseline gap-gutter-xs">
+          <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+          <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+        </span>
+      </a>
+    </header>
+
+    <!-- Main Two-Column Auth Layout -->
+    <main class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin py-gutter-xl lg:py-section flex-1 flex items-center">
+      <div class="w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-gutter-xl lg:gap-section">
+        
+        <!-- Left Section: Welcome Message & Electricity Grid Illustration -->
+        <section class="lg:col-span-7 flex flex-col gap-gutter-lg">
+          <div class="flex flex-col gap-gutter-md max-w-xl">
+            <div class="inline-flex items-center gap-gutter-sm self-start rounded-full border border-outline-variant bg-surface-container-low px-3 py-1">
+              <span class="h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Smart Grid &amp; Utility Operations</span>
+            </div>
+
+            <h1 data-component-id="typography-display" data-component-type="typography" data-component-variant="display" data-design-text-token="display-lg" class="font-display text-display-lg-mobile lg:text-display-lg text-on-surface text-balance">Welcome Back to Umbane</h1>
+
+            <p data-component-id="typography-body" data-component-type="typography" data-component-variant="body" data-design-text-token="body-lg" class="font-body text-body-lg text-on-surface-variant text-pretty max-w-prose">Manage your customers, properties, electricity meters and business operations in one place.</p>
+          </div>
+
+          <div class="w-full max-w-xl pt-gutter-xs">
+            <img src="https://lh3.googleusercontent.com/aida/ALJJyrAnUxMGZ7R8YLnI-f6wlL1be5_yWb3fUU9pS9G91CaXuwmI7gMUSRXUuACf1_7bwsGjiwWznpDnpgx240KmUnGXmuVLY37x1ph9XJiSGlNoV6NxrUlZaEXF5OsmvT_aD8uKsgQ4ObAYrpVgMVP1bvJXP9nI5WGUCZiFhZry0DWGexTcE5pOOnj8vnxz9sAe7P3YIdPrc2pZZN9QlJFsI7hN3P0jAphc5XAbQa68GeXNlYdtSnrTaqgwfYEQeO1VLgb6Atw" alt="Abstract smart electricity grid connecting properties, solar panels, and meters" class="w-full h-auto rounded-xl border border-outline-variant/60 object-cover">
+          </div>
+        </section>
+
+        <!-- Right Section: Login Card -->
+        <section class="lg:col-span-5 flex justify-center lg:justify-end">
+          <!-- COMPONENT: card-elevated -->
+          <article data-component-id="card-elevated" data-component-type="card" data-component-variant="elevated" class="w-full max-w-md rounded-xl border border-outline-variant bg-surface-container-lowest p-gutter-lg sm:p-gutter-xl shadow-lg">
+            <!-- SLOT: header -->
+            <header class="mb-gutter-lg flex flex-col gap-gutter-xs">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <h2 class="font-headline text-headline-md text-on-surface" data-design-text-token="headline-md">Sign In</h2>
+                <span class="h-1 w-8 rounded-full bg-tertiary" aria-hidden="true"></span>
+              </div>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">
+                Enter your workspace credentials to continue.
+              </p>
+            </header>
+
+            <!-- SLOT: body -->
+            <form id="login-form" class="flex flex-col gap-gutter-md" novalidate>
+              <!-- Email Address Input -->
+              <!-- COMPONENT: input-field-icon -->
+              <label data-component-id="input-field-icon" data-component-type="input-field" data-component-variant="with-icon" class="flex flex-col gap-gutter-xs w-full">
+                <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Email address</span>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3.5 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">mail</span>
+                  </span>
+                  <input id="email-input" type="email" name="email" autocomplete="email" inputmode="email" placeholder="name@umbane.co.za" required class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-gutter-md py-3 font-body text-body-md text-on-surface placeholder:text-outline transition-colors duration-state-change ease-state-change focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+              </label>
+
+              <!-- Password Input with Show/Hide Icon -->
+              <!-- COMPONENT: input-field-password -->
+              <div data-component-id="input-field-password" data-component-type="input-field" data-component-variant="password" class="flex flex-col gap-gutter-xs w-full">
+                <label for="password-input" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Password</label>
+                <div class="relative flex items-center">
+                  <span class="pointer-events-none absolute left-3.5 text-outline flex items-center" aria-hidden="true">
+                    <span class="material-symbols-outlined text-title-md">lock</span>
+                  </span>
+                  <input id="password-input" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" required class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-12 py-3 font-body text-body-md text-on-surface placeholder:text-outline transition-colors duration-state-change ease-state-change focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <!-- COMPONENT: button-icon -->
+                  <button id="toggle-password-btn" data-component-id="button-icon" data-component-type="button" data-component-variant="icon" type="button" aria-label="Show password" aria-pressed="false" class="absolute right-2 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-outline transition-colors duration-state-change ease-state-change hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                    <span id="toggle-password-icon" class="material-symbols-outlined text-title-lg" aria-hidden="true">visibility</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Remember Me & Forgot Password Row -->
+              <div class="flex items-center justify-between gap-gutter-sm pt-gutter-xs">
+                <!-- COMPONENT: checkbox-standard -->
+                <label data-component-id="checkbox-standard" data-component-type="checkbox" data-component-variant="standard" class="inline-flex items-center gap-gutter-sm cursor-pointer select-none">
+                  <input id="remember-me" type="checkbox" name="remember" value="true" class="h-4 w-4 rounded-sm border-outline-variant text-primary focus:ring-2 focus:ring-secondary/30 focus:ring-offset-0">
+                  <span class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Remember me</span>
+                </label>
+
+                <a href="#forgot-password" class="font-label text-label-md text-secondary transition-colors duration-state-change ease-state-change hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-sm" data-design-text-token="label-md">Forgot password?</a>
+              </div>
+
+              <!-- Status Message Region -->
+              <p id="form-feedback" class="hidden rounded-DEFAULT bg-primary-container px-gutter-md py-gutter-sm font-body text-body-md text-on-primary-container" role="status" data-design-text-token="body-md"></p>
+
+              <!-- Primary Sign In Button -->
+              <div class="pt-gutter-xs">
+                <!-- COMPONENT: button-primary -->
+                <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="submit" class="w-full inline-flex items-center justify-center gap-gutter-sm rounded-md bg-primary px-gutter-lg py-3.5 text-on-primary shadow-sm transition-colors duration-state-change ease-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 active:bg-primary-hover">
+                  <span class="font-label text-label-lg" data-design-text-token="label-lg">Sign In</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Create Account Footer Link -->
+            <footer class="mt-gutter-lg pt-gutter-md border-t border-outline-variant/60 flex items-center justify-center gap-gutter-xs">
+              <span class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">New to Umbane?</span>
+              <a href="#create-account" class="font-label text-label-lg text-secondary transition-colors duration-state-change ease-state-change hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-sm" data-design-text-token="label-lg">Create account</a>
+            </footer>
+          </article>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Minimal Footer -->
+    <footer class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin pb-gutter-lg flex flex-wrap items-center justify-between gap-gutter-md text-on-surface-variant">
+      <span class="font-label text-label-sm" data-design-text-token="label-sm">© 2026 Umbane Energy Operations. All rights reserved.</span>
+      <span class="font-mono text-mono-sm" data-design-text-token="mono-sm">v2.4 · Grid Cloud</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var passwordInput = document.getElementById('password-input');
+      var toggleBtn = document.getElementById('toggle-password-btn');
+      var toggleIcon = document.getElementById('toggle-password-icon');
+      var loginForm = document.getElementById('login-form');
+      var emailInput = document.getElementById('email-input');
+      var feedback = document.getElementById('form-feedback');
+
+      if (toggleBtn && passwordInput && toggleIcon) {
+        toggleBtn.addEventListener('click', function () {
+          var isHidden = passwordInput.type === 'password';
+          passwordInput.type = isHidden ? 'text' : 'password';
+          toggleIcon.textContent = isHidden ? 'visibility_off' : 'visibility';
+          toggleBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+          toggleBtn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        });
+      }
+
+      if (loginForm && feedback) {
+        loginForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var emailVal = emailInput ? emailInput.value.trim() : '';
+          if (!emailVal || !passwordInput.value) {
+            feedback.textContent = 'Please enter both your email address and password.';
+            feedback.classList.remove('hidden', 'bg-primary-container', 'text-on-primary-container');
+            feedback.classList.add('bg-error-container', 'text-on-error-container');
+            return;
+          }
+          feedback.textContent = 'Signing in to Umbane CRM as ' + emailVal + '…';
+          feedback.classList.remove('hidden', 'bg-error-container', 'text-on-error-container');
+          feedback.classList.add('bg-primary-container', 'text-on-primary-container');
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

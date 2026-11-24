@@ -1,0 +1,706 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Calendar — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Marketing active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="UmbaneMarketingDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">campaign</span>
+              <span data-design-text-token="label-md">Marketing</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Calendar Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Page Heading & Action Button -->
+        <section class="flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Content Calendar</h1>
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Plan, schedule, and track social media and email content across November 2026.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-gutter-sm">
+            <!-- COMPONENT: button-with-icon -->
+            <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2.5 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">event_available</span>
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Schedule Post</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Calendar Toolbar: Month Nav, View Toggle (Monthly / Weekly), Status Legend -->
+        <section aria-label="Calendar Controls" class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex items-center gap-gutter-sm">
+            <button type="button" aria-label="Previous month" class="inline-flex h-9 w-9 items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">chevron_left</span>
+            </button>
+            <h2 class="font-title text-title-lg text-on-surface px-1 tabular-nums" data-design-text-token="title-lg">November 2026</h2>
+            <button type="button" aria-label="Next month" class="inline-flex h-9 w-9 items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">chevron_right</span>
+            </button>
+            <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-md text-primary hover:bg-surface-container-low" data-design-text-token="label-md">
+              Today
+            </button>
+          </div>
+
+          <!-- Status Legend -->
+          <div class="flex flex-wrap items-center gap-gutter-md">
+            <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+              <span class="h-2.5 w-2.5 rounded-full bg-success" aria-hidden="true"></span>
+              Published
+            </span>
+            <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+              <span class="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true"></span>
+              Scheduled
+            </span>
+            <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+              <span class="h-2.5 w-2.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+              Draft
+            </span>
+          </div>
+
+          <!-- Monthly / Weekly View Switcher -->
+          <div role="tablist" aria-label="Calendar view mode" class="inline-flex rounded-md border border-outline-variant bg-surface-container-low p-1">
+            <button id="tab-monthly" type="button" role="tab" aria-selected="true" class="rounded-sm bg-surface px-3 py-1 font-label text-label-md text-primary shadow-sm" data-design-text-token="label-md">
+              Monthly
+            </button>
+            <button id="tab-weekly" type="button" role="tab" aria-selected="false" class="rounded-sm px-3 py-1 font-label text-label-md text-on-surface-variant hover:text-primary" data-design-text-token="label-md">
+              Weekly
+            </button>
+          </div>
+        </section>
+
+        <!-- Monthly Calendar Grid -->
+        <section id="panel-monthly" aria-label="Monthly Calendar" class="rounded-lg border border-outline-variant bg-surface shadow-sm overflow-hidden">
+          <!-- Day Headers -->
+          <div class="grid grid-cols-7 border-b border-outline-variant bg-surface-container-low">
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Mon</div>
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Tue</div>
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Wed</div>
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Thu</div>
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Fri</div>
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Sat</div>
+            <div class="py-2 px-2 text-center font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Sun</div>
+          </div>
+
+          <!-- 5 Calendar Weeks (Nov 2 – Nov 30, 2026) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 divide-y lg:divide-y-0 lg:divide-x divide-outline-variant/60">
+            <!-- Week 1: Nov 2 - Nov 8 -->
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">2</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">FB</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">Solar Bundle</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">3</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">4</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">LI</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">AMI Telemetry</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">5</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">6</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">IG</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">DB-04 Install</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">7</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">8</span>
+            </div>
+
+            <!-- Week 2: Nov 9 - Nov 15 -->
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">9</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">10</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">EM</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">KZN Launch</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">11</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">12</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">LI</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">CT Metering</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">13</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">14</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">15</span>
+            </div>
+
+            <!-- Week 3: Nov 16 - Nov 22 -->
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">16</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">FB</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">Tenant Portal</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">17</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">18</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">X</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">Grid Uptime</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">19</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">20</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">LI</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">AMI Switch</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">21</span>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">22</span>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">IG</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">Token Top-Up</span>
+              </div>
+            </div>
+
+            <!-- Week 4: Nov 23 (Today) - Nov 29 -->
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 bg-primary-container/25 flex flex-col gap-1.5">
+              <div class="flex items-center justify-between">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary font-label text-label-sm text-on-primary tabular-nums" data-design-text-token="label-sm">23</span>
+                <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Today</span>
+              </div>
+              <div class="rounded-sm bg-surface-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">FB</span>
+                <span class="font-label text-label-sm text-on-surface truncate" data-design-text-token="label-sm">Hybrid Solar</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">24</span>
+              <div class="rounded-sm bg-primary-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">LI</span>
+                <span class="font-label text-label-sm text-primary truncate" data-design-text-token="label-sm">Rosebank Case</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">25</span>
+              <div class="rounded-sm bg-primary-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">FB</span>
+                <span class="font-label text-label-sm text-primary truncate" data-design-text-token="label-sm">STS Prepaid</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">26</span>
+              <div class="rounded-sm bg-tertiary-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-on-tertiary-container" data-design-text-token="mono-sm">EM</span>
+                <span class="font-label text-label-sm text-on-tertiary-container truncate" data-design-text-token="label-sm">Tariff Draft</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">27</span>
+              <div class="rounded-sm bg-primary-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">IG</span>
+                <span class="font-label text-label-sm text-primary truncate" data-design-text-token="label-sm">Sandton DB-04</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">28</span>
+              <div class="rounded-sm bg-primary-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">X</span>
+                <span class="font-label text-label-sm text-primary truncate" data-design-text-token="label-sm">2027 Tariff</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 border-b border-outline-variant/60 flex flex-col gap-1.5 bg-surface-container-low/50">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">29</span>
+            </div>
+
+            <!-- Week 5: Nov 30 + Dec 1-6 muted -->
+            <div class="min-h-24 p-2 flex flex-col gap-1.5">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">30</span>
+              <div class="rounded-sm bg-tertiary-container px-2 py-1 flex items-center gap-1.5">
+                <span class="font-mono text-mono-sm text-on-tertiary-container" data-design-text-token="mono-sm">LI</span>
+                <span class="font-label text-label-sm text-on-tertiary-container truncate" data-design-text-token="label-sm">Q1 Promo Draft</span>
+              </div>
+            </div>
+            <div class="min-h-24 p-2 flex flex-col gap-1.5 bg-surface-container-low/40">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">1 Dec</span>
+            </div>
+            <div class="min-h-24 p-2 flex flex-col gap-1.5 bg-surface-container-low/40">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">2 Dec</span>
+            </div>
+            <div class="min-h-24 p-2 flex flex-col gap-1.5 bg-surface-container-low/40">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">3 Dec</span>
+            </div>
+            <div class="min-h-24 p-2 flex flex-col gap-1.5 bg-surface-container-low/40">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">4 Dec</span>
+            </div>
+            <div class="min-h-24 p-2 flex flex-col gap-1.5 bg-surface-container-low/40">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">5 Dec</span>
+            </div>
+            <div class="min-h-24 p-2 flex flex-col gap-1.5 bg-surface-container-low/40">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">6 Dec</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Weekly View Panel (toggled via Weekly tab) -->
+        <section id="panel-weekly" aria-label="Weekly Calendar" class="hidden rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-gutter-sm">
+            <div class="rounded-md border border-primary bg-primary-container/25 p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">Mon 23 Nov</span>
+              <div class="rounded-sm bg-surface-container p-2 flex flex-col gap-1">
+                <span class="font-mono text-mono-sm text-success" data-design-text-token="mono-sm">FB · Published</span>
+                <span class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Hybrid Solar Estates</span>
+              </div>
+            </div>
+            <div class="rounded-md border border-outline-variant/70 bg-surface-container-low p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Tue 24 Nov</span>
+              <div class="rounded-sm bg-primary-container p-2 flex flex-col gap-1">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">LI · Scheduled</span>
+                <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Rosebank Case Study</span>
+              </div>
+            </div>
+            <div class="rounded-md border border-outline-variant/70 bg-surface-container-low p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Wed 25 Nov</span>
+              <div class="rounded-sm bg-primary-container p-2 flex flex-col gap-1">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">FB · Scheduled</span>
+                <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">STS Prepaid Guide</span>
+              </div>
+            </div>
+            <div class="rounded-md border border-outline-variant/70 bg-surface-container-low p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Thu 26 Nov</span>
+              <div class="rounded-sm bg-tertiary-container p-2 flex flex-col gap-1">
+                <span class="font-mono text-mono-sm text-on-tertiary-container" data-design-text-token="mono-sm">EM · Draft</span>
+                <span class="font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Eskom Tariff Briefing</span>
+              </div>
+            </div>
+            <div class="rounded-md border border-outline-variant/70 bg-surface-container-low p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Fri 27 Nov</span>
+              <div class="rounded-sm bg-primary-container p-2 flex flex-col gap-1">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">IG · Scheduled</span>
+                <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Sandton DB-04 Reel</span>
+              </div>
+            </div>
+            <div class="rounded-md border border-outline-variant/70 bg-surface-container-low p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Sat 28 Nov</span>
+              <div class="rounded-sm bg-primary-container p-2 flex flex-col gap-1">
+                <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">X · Scheduled</span>
+                <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">2027 Tariff Checklist</span>
+              </div>
+            </div>
+            <div class="rounded-md border border-outline-variant/70 bg-surface-container-low p-gutter-sm flex flex-col gap-gutter-xs">
+              <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Sun 29 Nov</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">No posts</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Post Preview Cards -->
+        <section aria-label="Post Preview Cards" class="flex flex-col gap-gutter-md">
+          <div class="flex items-center justify-between gap-gutter-sm">
+            <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Post Previews — This Week</h2>
+            <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">3 states shown</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-md items-stretch">
+            <!-- Scheduled Post Preview -->
+            <article class="h-full rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <div class="flex items-center justify-between gap-gutter-xs">
+                  <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-on-primary font-label text-label-sm">in</span>
+                    LinkedIn
+                  </span>
+                  <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Scheduled</span>
+                </div>
+                <h3 class="font-title text-title-md text-on-surface text-balance" data-design-text-token="title-md">Rosebank Towers Case Study</h3>
+                <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">How automated smart sub-metering cut utility arrears by 38% across 140 commercial suites.</p>
+              </div>
+              <div class="pt-gutter-sm border-t border-outline-variant/60 flex items-center justify-between">
+                <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">24 Nov · 08:30</span>
+                <button type="button" class="font-label text-label-md text-secondary hover:underline" data-design-text-token="label-md">Edit</button>
+              </div>
+            </article>
+
+            <!-- Published Post Preview -->
+            <article class="h-full rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <div class="flex items-center justify-between gap-gutter-xs">
+                  <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-secondary" data-design-text-token="label-sm">
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-sm bg-secondary text-on-secondary font-label text-label-sm">f</span>
+                    Facebook
+                  </span>
+                  <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Published</span>
+                </div>
+                <h3 class="font-title text-title-md text-on-surface text-balance" data-design-text-token="title-md">Hybrid Solar Estate Metering</h3>
+                <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Track solar generation alongside municipal grid import on one unified landlord dashboard.</p>
+              </div>
+              <div class="pt-gutter-sm border-t border-outline-variant/60 flex items-center justify-between">
+                <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">23 Nov · 10:15</span>
+                <span class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">142 likes</span>
+              </div>
+            </article>
+
+            <!-- Draft Post Preview -->
+            <article class="h-full rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm flex flex-col justify-between gap-gutter-md">
+              <div class="flex flex-col gap-gutter-sm">
+                <div class="flex items-center justify-between gap-gutter-xs">
+                  <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-sm bg-surface-container-high text-on-surface font-label text-label-sm">EM</span>
+                    Email
+                  </span>
+                  <span class="rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Draft</span>
+                </div>
+                <h3 class="font-title text-title-md text-on-surface text-balance" data-design-text-token="title-md">Eskom Tariff Update Briefing</h3>
+                <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Key 2027 municipal tariff adjustments and how to update prepaid meter rate tables.</p>
+              </div>
+              <div class="pt-gutter-sm border-t border-outline-variant/60 flex items-center justify-between">
+                <span class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">26 Nov · Unscheduled</span>
+                <button type="button" class="font-label text-label-md text-secondary hover:underline" data-design-text-token="label-md">Schedule</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const tabMonthly = document.getElementById('tab-monthly');
+      const tabWeekly = document.getElementById('tab-weekly');
+      const panelMonthly = document.getElementById('panel-monthly');
+      const panelWeekly = document.getElementById('panel-weekly');
+
+      function showView(view) {
+        const isMonthly = view === 'monthly';
+        panelMonthly.classList.toggle('hidden', !isMonthly);
+        panelWeekly.classList.toggle('hidden', isMonthly);
+
+        tabMonthly.setAttribute('aria-selected', String(isMonthly));
+        tabWeekly.setAttribute('aria-selected', String(!isMonthly));
+
+        tabMonthly.className = isMonthly
+          ? 'rounded-sm bg-surface px-3 py-1 font-label text-label-md text-primary shadow-sm'
+          : 'rounded-sm px-3 py-1 font-label text-label-md text-on-surface-variant hover:text-primary';
+
+        tabWeekly.className = !isMonthly
+          ? 'rounded-sm bg-surface px-3 py-1 font-label text-label-md text-primary shadow-sm'
+          : 'rounded-sm px-3 py-1 font-label text-label-md text-on-surface-variant hover:text-primary';
+      }
+
+      if (tabMonthly) tabMonthly.addEventListener('click', function () { showView('monthly'); });
+      if (tabWeekly) tabWeekly.addEventListener('click', function () { showView('weekly'); });
+    })();
+  </script>
+
+
+</body></html>

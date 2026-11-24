@@ -1,0 +1,659 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management &amp; Permissions — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Settings active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="../communications/UmbaneCommunicationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="../team/UmbaneTeamDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="../reports/UmbaneReportsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="../automations/UmbaneAutomationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="../notifications/UmbaneNotificationsCentre.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+              <span data-design-text-token="label-md">Notifications</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="UmbaneSettingsDashboard.html" aria-current="page" class="flex items-center gap-gutter-sm rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <a href="../notifications/UmbaneNotificationsCentre.html" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-full">
+
+        <!-- Contextual Back & Page Header -->
+        <div class="flex flex-col gap-gutter-sm">
+          <a href="UmbaneSettingsDashboard.html" class="inline-flex items-center gap-gutter-xs self-start rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-md text-on-surface-variant shadow-sm transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Settings</span>
+          </a>
+
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-gutter-md">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-on-surface" data-design-text-token="headline-lg">User Management &amp; Permissions</h1>
+              <p class="mt-1 font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+                Manage staff access, assign CRM roles, and configure module-level CRUD permissions.
+              </p>
+            </div>
+
+            <a href="../team/UmbaneAddEmployee.html" class="inline-flex items-center justify-center gap-gutter-xs self-start sm:self-auto rounded-md bg-primary px-gutter-md py-2 font-label text-label-lg text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary shrink-0">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_add</span>
+              <span data-design-text-token="label-lg">Invite User</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Section 1: User List -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm overflow-hidden" aria-labelledby="user-list-heading">
+          <div class="px-gutter-lg py-gutter-md border-b border-outline-variant/70 flex flex-wrap items-center justify-between gap-gutter-sm">
+            <div>
+              <h2 id="user-list-heading" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">User Directory</h2>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Active staff accounts and their assigned security roles.</p>
+            </div>
+            <span class="rounded-full bg-surface-container px-3 py-1 font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">6 Users Shown</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface-container-low">
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">User Profile</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Email</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Assigned Role</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Account Status</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Last Login</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/70">
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary shrink-0">EN</span>
+                      <div>
+                        <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</p>
+                        <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">elias.nkosi@umbane.co.za</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Administrator</span>
+                  </td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Active</span>
+                  </td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">23 Nov 2026, 13:40</td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-container font-label text-label-md text-primary shrink-0">TD</span>
+                      <div>
+                        <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Thandiwe Dlamini</p>
+                        <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Regional Manager</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">thandiwe.d@umbane.co.za</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Manager</span>
+                  </td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Active</span>
+                  </td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">23 Nov 2026, 11:18</td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-container font-label text-label-md text-on-tertiary-container shrink-0">LM</span>
+                      <div>
+                        <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Lerato Mokoena</p>
+                        <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Senior Billing Clerk</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">lerato.m@umbane.co.za</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Accountant</span>
+                  </td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Active</span>
+                  </td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">23 Nov 2026, 09:05</td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-container font-label text-label-md text-primary shrink-0">SK</span>
+                      <div>
+                        <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Sipho Khumalo</p>
+                        <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Field Meter Engineer</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">sipho.k@umbane.co.za</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Technician</span>
+                  </td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Active</span>
+                  </td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">22 Nov 2026, 17:44</td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-container font-label text-label-md text-primary shrink-0">KM</span>
+                      <div>
+                        <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Kagiso Molefe</p>
+                        <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Commercial Account Exec</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">kagiso.m@umbane.co.za</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Sales Representative</span>
+                  </td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Invited</span>
+                  </td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">Pending Invite</td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <div class="flex items-center gap-gutter-sm">
+                      <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-container font-label text-label-md text-primary shrink-0">ZN</span>
+                      <div>
+                        <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Zanele Ndlovu</p>
+                        <p class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Customer Desk Specialist</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter-md py-3 font-body text-body-md text-on-surface-variant whitespace-nowrap">zanele.n@umbane.co.za</td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Support Agent</span>
+                  </td>
+                  <td class="px-gutter-md py-3 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Suspended</span>
+                  </td>
+                  <td class="px-gutter-md py-3 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">18 Nov 2026, 15:22</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 2: Role & Permission Management -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="role-permissions-heading">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-gutter-md">
+            <div>
+              <h2 id="role-permissions-heading" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">Role &amp; Permission Management</h2>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Select a role to configure View, Create, Edit, and Delete permissions per CRM module.</p>
+            </div>
+
+            <button id="save-permissions-btn" type="button" class="inline-flex items-center justify-center gap-gutter-xs self-start sm:self-auto rounded-md bg-primary px-gutter-md py-2 font-label text-label-md text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary shrink-0">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">save</span>
+              <span data-design-text-token="label-md">Save Permissions</span>
+            </button>
+          </div>
+
+          <!-- Role Selector Tabs (6 Roles) -->
+          <div class="flex flex-wrap items-center gap-gutter-xs" role="tablist" aria-label="CRM Roles">
+            <button type="button" role="tab" aria-selected="true" data-role="Administrator" class="role-tab rounded-full bg-primary px-3.5 py-1.5 font-label text-label-md text-on-primary transition-colors duration-state-change">Administrator</button>
+            <button type="button" role="tab" aria-selected="false" data-role="Manager" class="role-tab rounded-full border border-outline-variant bg-surface px-3.5 py-1.5 font-label text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors duration-state-change">Manager</button>
+            <button type="button" role="tab" aria-selected="false" data-role="Accountant" class="role-tab rounded-full border border-outline-variant bg-surface px-3.5 py-1.5 font-label text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors duration-state-change">Accountant</button>
+            <button type="button" role="tab" aria-selected="false" data-role="Technician" class="role-tab rounded-full border border-outline-variant bg-surface px-3.5 py-1.5 font-label text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors duration-state-change">Technician</button>
+            <button type="button" role="tab" aria-selected="false" data-role="Sales Representative" class="role-tab rounded-full border border-outline-variant bg-surface px-3.5 py-1.5 font-label text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors duration-state-change">Sales Representative</button>
+            <button type="button" role="tab" aria-selected="false" data-role="Support Agent" class="role-tab rounded-full border border-outline-variant bg-surface px-3.5 py-1.5 font-label text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors duration-state-change">Support Agent</button>
+          </div>
+
+          <!-- Save Confirmation Banner -->
+          <div id="perm-saved-banner" class="hidden rounded-md border border-success/40 bg-success/10 px-gutter-md py-2.5 flex items-center gap-gutter-sm" role="status">
+            <span class="material-symbols-outlined text-title-md text-success" aria-hidden="true">check_circle</span>
+            <span id="perm-saved-text" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Permissions updated for Administrator.</span>
+          </div>
+
+          <!-- Permissions Matrix Table -->
+          <div class="overflow-x-auto rounded-lg border border-outline-variant">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface-container-low">
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">CRM Module</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant text-center whitespace-nowrap" data-design-text-token="label-sm">View</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant text-center whitespace-nowrap" data-design-text-token="label-sm">Create</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant text-center whitespace-nowrap" data-design-text-token="label-sm">Edit</th>
+                  <th class="px-gutter-md py-3 font-label text-label-sm text-on-surface-variant text-center whitespace-nowrap" data-design-text-token="label-sm">Delete</th>
+                </tr>
+              </thead>
+              <tbody id="permissions-tbody" class="divide-y divide-outline-variant/70">
+                <!-- Populated & updated interactively via inline script -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const modules = [
+        'Customers',
+        'Properties & Meters',
+        'Leads & Sales',
+        'Invoices & Payments',
+        'Inventory',
+        'Support Tickets',
+        'Reports & Analytics',
+        'Automations & Settings'
+      ];
+
+      const roleMatrix = {
+        'Administrator': [
+          [true, true, true, true],
+          [true, true, true, true],
+          [true, true, true, true],
+          [true, true, true, true],
+          [true, true, true, true],
+          [true, true, true, true],
+          [true, true, true, true],
+          [true, true, true, true]
+        ],
+        'Manager': [
+          [true, true, true, false],
+          [true, true, true, false],
+          [true, true, true, false],
+          [true, true, true, false],
+          [true, true, true, false],
+          [true, true, true, true],
+          [true, true, false, false],
+          [true, false, false, false]
+        ],
+        'Accountant': [
+          [true, false, false, false],
+          [true, false, false, false],
+          [true, false, false, false],
+          [true, true, true, false],
+          [true, false, false, false],
+          [false, false, false, false],
+          [true, true, false, false],
+          [false, false, false, false]
+        ],
+        'Technician': [
+          [true, false, false, false],
+          [true, true, true, false],
+          [false, false, false, false],
+          [false, false, false, false],
+          [true, false, true, false],
+          [true, true, true, false],
+          [false, false, false, false],
+          [false, false, false, false]
+        ],
+        'Sales Representative': [
+          [true, true, true, false],
+          [true, false, false, false],
+          [true, true, true, false],
+          [true, true, false, false],
+          [true, false, false, false],
+          [true, true, false, false],
+          [true, false, false, false],
+          [false, false, false, false]
+        ],
+        'Support Agent': [
+          [true, false, true, false],
+          [true, false, false, false],
+          [true, false, false, false],
+          [true, false, false, false],
+          [true, false, false, false],
+          [true, true, true, false],
+          [false, false, false, false],
+          [false, false, false, false]
+        ]
+      };
+
+      let activeRole = 'Administrator';
+      const tbody = document.getElementById('permissions-tbody');
+      const roleTabs = document.querySelectorAll('.role-tab');
+      const savePermBtn = document.getElementById('save-permissions-btn');
+      const permSavedBanner = document.getElementById('perm-saved-banner');
+      const permSavedText = document.getElementById('perm-saved-text');
+
+      function renderPermissions() {
+        const rows = roleMatrix[activeRole];
+        tbody.innerHTML = '';
+        modules.forEach((modName, modIdx) => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-surface-container-low/50';
+
+          const tdMod = document.createElement('td');
+          tdMod.className = 'px-gutter-md py-3 font-label text-label-md text-on-surface whitespace-nowrap';
+          tdMod.textContent = modName;
+          tr.appendChild(tdMod);
+
+          ['View', 'Create', 'Edit', 'Delete'].forEach((actionName, actIdx) => {
+            const td = document.createElement('td');
+            td.className = 'px-gutter-md py-3 text-center';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = rows[modIdx][actIdx];
+            checkbox.setAttribute('aria-label', activeRole + ' ' + actionName + ' ' + modName);
+            checkbox.className = 'h-4 w-4 rounded-sm border-outline text-primary focus:ring-secondary';
+            checkbox.addEventListener('change', function () {
+              roleMatrix[activeRole][modIdx][actIdx] = checkbox.checked;
+              permSavedBanner.classList.add('hidden');
+            });
+            td.appendChild(checkbox);
+            tr.appendChild(td);
+          });
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      roleTabs.forEach((tab) => {
+        tab.addEventListener('click', function () {
+          activeRole = tab.dataset.role;
+          roleTabs.forEach((t) => {
+            const isSelected = t === tab;
+            t.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+            t.className = isSelected
+              ? 'role-tab rounded-full bg-primary px-3.5 py-1.5 font-label text-label-md text-on-primary transition-colors duration-state-change'
+              : 'role-tab rounded-full border border-outline-variant bg-surface px-3.5 py-1.5 font-label text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors duration-state-change';
+          });
+          permSavedBanner.classList.add('hidden');
+          renderPermissions();
+        });
+      });
+
+      if (savePermBtn) {
+        savePermBtn.addEventListener('click', function () {
+          permSavedText.textContent = 'Permissions updated for ' + activeRole + '.';
+          permSavedBanner.classList.remove('hidden');
+        });
+      }
+
+      renderPermissions();
+    })();
+  </script>
+
+
+</body></html>

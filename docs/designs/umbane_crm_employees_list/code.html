@@ -1,0 +1,628 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employees List — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Team active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="../communications/UmbaneCommunicationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="UmbaneTeamDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">groups</span>
+              <span data-design-text-token="label-md">Team</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-full">
+
+        <!-- Breadcrumb & Page Heading -->
+        <div class="flex flex-col gap-gutter-sm">
+          <div>
+            <a href="UmbaneTeamDashboard.html" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+              <span data-design-text-token="label-md">Back to Team Dashboard</span>
+            </a>
+          </div>
+
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-gutter-md">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-on-surface" data-design-text-token="headline-lg">Employees List</h1>
+              <p class="mt-1 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">
+                Manage staff profiles, department assignments, job roles, and active task loads.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-gutter-sm shrink-0">
+              <button type="button" class="inline-flex items-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 font-label text-label-lg text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_add</span>
+                <span data-design-text-token="label-lg">Add Employee</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <section class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-gutter-md">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-gutter-sm flex-1">
+            <label class="relative flex items-center flex-1 max-w-md">
+              <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+                <span class="material-symbols-outlined text-title-md">search</span>
+              </span>
+              <input id="employee-search" type="search" placeholder="Search by employee name, email, or role..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+            </label>
+
+            <select id="department-filter" aria-label="Filter by department" class="rounded-md border border-outline-variant bg-surface-container-low pl-3 pr-8 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              <option value="all">All Departments</option>
+              <option value="Field Operations">Field Operations</option>
+              <option value="Customer Support">Customer Support</option>
+              <option value="Sales &amp; Billing">Sales &amp; Billing</option>
+              <option value="System Administration">System Administration</option>
+            </select>
+
+            <select id="status-filter" aria-label="Filter by employment status" class="rounded-md border border-outline-variant bg-surface-container-low pl-3 pr-8 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              <option value="all">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="In Field">In Field</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Training">Training</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-gutter-sm shrink-0">
+            <span id="employee-count-badge" class="rounded-full bg-primary-container px-3 py-1 font-label text-label-sm text-primary tabular-nums whitespace-nowrap" data-design-text-token="label-sm">7 of 48 employees</span>
+          </div>
+        </section>
+
+        <!-- Staff Management Table -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm overflow-hidden flex flex-col">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface-container-low">
+                  <th class="py-3 pl-gutter-lg pr-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Profile Photo</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Employee Name</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Email</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Phone</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Department</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Job Role</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Assigned Tasks</th>
+                  <th class="py-3 px-2 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Employment Status</th>
+                  <th class="py-3 pl-2 pr-gutter-lg text-right font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employees-table-body" class="divide-y divide-outline-variant/70">
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="Field Operations" data-status="In Field" data-search="sipho khumalo sipho.khumalo@umbane.co.za senior technician field operations">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">SK</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Sipho Khumalo</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-004</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">sipho.khumalo@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 82 310 4412</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Field Operations</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Senior Technician</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">6 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">In Field</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Sipho Khumalo" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Sipho Khumalo" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="Customer Support" data-status="Active" data-search="thandiwe moyo thandiwe.moyo@umbane.co.za support lead customer support">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container font-label text-label-md text-on-secondary-container">TM</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Thandiwe Moyo</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-011</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">thandiwe.moyo@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 83 519 2088</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Customer Support</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Support Lead</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">8 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Active</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Thandiwe Moyo" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Thandiwe Moyo" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="Sales &amp; Billing" data-status="Active" data-search="lerato dlamini lerato.dlamini@umbane.co.za billing specialist sales billing">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-container font-label text-label-md text-on-tertiary-container">LD</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Lerato Dlamini</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-015</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">lerato.dlamini@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 72 684 9103</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Sales &amp; Billing</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Billing Specialist</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">4 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Active</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Lerato Dlamini" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Lerato Dlamini" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="Field Operations" data-status="In Field" data-search="pieter botha pieter.botha@umbane.co.za field technician field operations">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-surface-container font-label text-label-md text-primary">PB</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Pieter Botha</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-019</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">pieter.botha@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 84 902 1745</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Field Operations</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Field Technician</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">5 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">In Field</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Pieter Botha" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Pieter Botha" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="System Administration" data-status="Active" data-search="elias nkosi elias.nkosi@umbane.co.za operations lead system administration">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-001</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">elias.nkosi@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 82 100 4820</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">System Administration</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Operations Lead</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">3 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Active</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Elias Nkosi" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Elias Nkosi" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="Customer Support" data-status="On Leave" data-search="nomsa mahlangu nomsa.mahlangu@umbane.co.za support agent customer support">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-container font-label text-label-md text-on-tertiary-container">NM</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Nomsa Mahlangu</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-027</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">nomsa.mahlangu@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 76 443 8819</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Customer Support</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Support Agent</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">0 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">On Leave</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Nomsa Mahlangu" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Nomsa Mahlangu" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="employee-row hover:bg-surface-container-low/60 transition-colors" data-department="Sales &amp; Billing" data-status="Training" data-search="kagiso molefe kagiso.molefe@umbane.co.za account executive sales billing">
+                  <td class="py-3 pl-gutter-lg pr-2 whitespace-nowrap">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container font-label text-label-md text-on-secondary-container">KM</span>
+                  </td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <p class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Kagiso Molefe</p>
+                    <p class="font-mono text-mono-sm text-on-surface-variant tabular-nums" data-design-text-token="mono-sm">EMP-034</p>
+                  </td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">kagiso.molefe@umbane.co.za</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">+27 79 205 6314</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface whitespace-nowrap" data-design-text-token="body-md">Sales &amp; Billing</td>
+                  <td class="py-3 px-2 font-body text-body-md text-on-surface-variant whitespace-nowrap" data-design-text-token="body-md">Account Executive</td>
+                  <td class="py-3 px-2 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">2 active</td>
+                  <td class="py-3 px-2 whitespace-nowrap">
+                    <span class="rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">Training</span>
+                  </td>
+                  <td class="py-3 pl-2 pr-gutter-lg text-right whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1">
+                      <button type="button" aria-label="View Kagiso Molefe" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                      </button>
+                      <button type="button" aria-label="Edit Kagiso Molefe" class="rounded-sm p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-title-md" aria-hidden="true">edit</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div class="px-gutter-lg py-gutter-md border-t border-outline-variant bg-surface-container-low/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-gutter-sm">
+            <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Showing 1–7 of 48 employees</p>
+            <div class="flex items-center gap-gutter-xs">
+              <button type="button" class="rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:text-primary transition-colors">Previous</button>
+              <button type="button" class="rounded-md bg-primary px-3 py-1.5 font-label text-label-sm text-on-primary tabular-nums">1</button>
+              <button type="button" class="rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:text-primary transition-colors tabular-nums">2</button>
+              <button type="button" class="rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:text-primary transition-colors tabular-nums">3</button>
+              <button type="button" class="rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:text-primary transition-colors">Next</button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      // Search & Filter
+      const searchInput = document.getElementById('employee-search');
+      const deptFilter = document.getElementById('department-filter');
+      const statusFilter = document.getElementById('status-filter');
+      const rows = document.querySelectorAll('.employee-row');
+      const countBadge = document.getElementById('employee-count-badge');
+
+      function applyFilters() {
+        const query = (searchInput.value || '').trim().toLowerCase();
+        const dept = deptFilter.value;
+        const status = statusFilter.value;
+        let visible = 0;
+
+        rows.forEach(function (row) {
+          const matchesQuery = !query || row.getAttribute('data-search').includes(query);
+          const matchesDept = dept === 'all' || row.getAttribute('data-department') === dept;
+          const matchesStatus = status === 'all' || row.getAttribute('data-status') === status;
+
+          if (matchesQuery && matchesDept && matchesStatus) {
+            row.classList.remove('hidden');
+            visible += 1;
+          } else {
+            row.classList.add('hidden');
+          }
+        });
+
+        countBadge.textContent = visible + ' of 48 employees';
+      }
+
+      if (searchInput) searchInput.addEventListener('input', applyFilters);
+      if (deptFilter) deptFilter.addEventListener('change', applyFilters);
+      if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    })();
+  </script>
+
+
+</body></html>
