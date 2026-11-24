@@ -1,0 +1,639 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create New Invoice — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Invoices active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="UmbaneInvoicesDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">receipt_long</span>
+              <span data-design-text-token="label-md">Invoices</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#inventory" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Create Invoice Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Back Link & Page Heading -->
+        <section class="flex flex-col gap-gutter-sm">
+          <a href="UmbaneInvoicesDashboard.html" class="inline-flex items-center gap-gutter-xs font-label text-label-md text-secondary hover:text-primary w-fit">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Invoices</span>
+          </a>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Create New Invoice</h1>
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Prepare a South African VAT tax invoice with live line-item totals and payment terms.</p>
+          </div>
+        </section>
+
+        <!-- Two-Column Invoice Form -->
+        <form id="create-invoice-form" class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
+
+          <!-- Left Column: Invoice Details, Line Items, Notes -->
+          <div class="lg:col-span-7 flex flex-col gap-gutter-lg">
+
+            <!-- Customer & Invoice Metadata -->
+            <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+              <header class="pb-gutter-sm border-b border-outline-variant">
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Invoice Details</h2>
+              </header>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+                <div>
+                  <label for="inv-customer" class="block font-label text-label-md text-on-surface mb-1.5" data-design-text-token="label-md">Select Customer</label>
+                  <select id="inv-customer" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <option value="Sandton City Holdings" selected>Sandton City Holdings</option>
+                    <option value="V&amp;A Waterfront Properties">V&amp;A Waterfront Properties</option>
+                    <option value="Umhlanga Ridge Estates">Umhlanga Ridge Estates</option>
+                    <option value="Menlyn Maine Precinct">Menlyn Maine Precinct</option>
+                    <option value="Century City Management">Century City Management</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="inv-property" class="block font-label text-label-md text-on-surface mb-1.5" data-design-text-token="label-md">Select Property</label>
+                  <select id="inv-property" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <option value="Sandton City — Tower B" selected>Sandton City — Tower B</option>
+                    <option value="Melrose Arch Phase 4">Melrose Arch Phase 4</option>
+                    <option value="V&amp;A Clocktower Precinct">V&amp;A Clocktower Precinct</option>
+                    <option value="Umhlanga Ridge Block C">Umhlanga Ridge Block C</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="inv-number" class="block font-label text-label-md text-on-surface mb-1.5" data-design-text-token="label-md">Invoice Number</label>
+                  <input id="inv-number" type="text" value="INV-2026-413" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-mono text-mono-sm text-primary tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+
+                <div>
+                  <label for="inv-terms" class="block font-label text-label-md text-on-surface mb-1.5" data-design-text-token="label-md">Payment Terms</label>
+                  <select id="inv-terms" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    <option value="Net 30 Days" selected>Net 30 Days</option>
+                    <option value="Net 14 Days">Net 14 Days</option>
+                    <option value="Due on Receipt">Due on Receipt</option>
+                    <option value="50% Deposit / 50% Commissioning">50% Deposit / 50% Commissioning</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="inv-date" class="block font-label text-label-md text-on-surface mb-1.5" data-design-text-token="label-md">Invoice Date</label>
+                  <input id="inv-date" type="date" value="2026-11-23" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+
+                <div>
+                  <label for="inv-due-date" class="block font-label text-label-md text-on-surface mb-1.5" data-design-text-token="label-md">Due Date</label>
+                  <input id="inv-due-date" type="date" value="2026-12-23" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                </div>
+              </div>
+            </section>
+
+            <!-- Add Products or Services -->
+            <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+              <header class="pb-gutter-sm border-b border-outline-variant flex items-center justify-between gap-gutter-sm">
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Products &amp; Services</h2>
+                <button id="add-inv-item-btn" type="button" class="shrink-0 whitespace-nowrap inline-flex items-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-md text-primary hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+                  <span data-design-text-token="label-md">Add Item</span>
+                </button>
+              </header>
+
+              <div id="inv-items-container" class="flex flex-col gap-gutter-md">
+                <div class="inv-item rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-gutter-sm">
+                  <div class="flex items-center justify-between gap-gutter-sm">
+                    <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Item 1</span>
+                    <button type="button" class="remove-inv-item font-label text-label-sm text-error hover:underline" data-design-text-token="label-sm">Remove</button>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-gutter-sm">
+                    <div class="sm:col-span-6">
+                      <label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Description</label>
+                      <input type="text" value="Smart Prepaid Metering Hardware (24 units)" class="inv-desc w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    </div>
+                    <div class="sm:col-span-3">
+                      <label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Quantity</label>
+                      <input type="number" min="1" value="24" class="inv-qty w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    </div>
+                    <div class="sm:col-span-3">
+                      <label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Unit Price (R)</label>
+                      <input type="number" min="0" step="100" value="5800" class="inv-price w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="inv-item rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-gutter-sm">
+                  <div class="flex items-center justify-between gap-gutter-sm">
+                    <span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Item 2</span>
+                    <button type="button" class="remove-inv-item font-label text-label-sm text-error hover:underline" data-design-text-token="label-sm">Remove</button>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-gutter-sm">
+                    <div class="sm:col-span-6">
+                      <label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Description</label>
+                      <input type="text" value="AMI Telemetry Platform &amp; Monthly SLA" class="inv-desc w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    </div>
+                    <div class="sm:col-span-3">
+                      <label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Quantity</label>
+                      <input type="number" min="1" value="1" class="inv-qty w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    </div>
+                    <div class="sm:col-span-3">
+                      <label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Unit Price (R)</label>
+                      <input type="number" min="0" step="100" value="24800" class="inv-price w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Additional Notes -->
+            <section class="rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-sm">
+              <label for="inv-notes" class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Additional Notes</label>
+              <textarea id="inv-notes" rows="3" placeholder="Include EFT banking details, VAT reference, or remittance instructions..." class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2.5 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">Please quote INV-2026-413 on all EFT remittances. FNB Commercial Cheque Acc #62849102488, Branch Code 250655.</textarea>
+            </section>
+          </div>
+
+          <!-- Right Column: Live Invoice Summary -->
+          <aside class="lg:col-span-5 rounded-lg border border-outline-variant bg-surface p-gutter-lg shadow-sm flex flex-col gap-gutter-md">
+            <header class="pb-gutter-sm border-b border-outline-variant flex items-center justify-between gap-gutter-sm">
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Live Invoice Summary</h2>
+              <span id="inv-summary-badge" class="shrink-0 whitespace-nowrap rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Draft</span>
+            </header>
+
+            <!-- Live Metadata Snapshot -->
+            <dl class="rounded-md bg-surface-container-low border border-outline-variant/70 p-gutter-md flex flex-col gap-gutter-xs">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Bill To</dt>
+                <dd id="live-customer" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</dd>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Property</dt>
+                <dd id="live-property" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Sandton City — Tower B</dd>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Invoice #</dt>
+                <dd id="live-number" class="font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">INV-2026-413</dd>
+              </div>
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <dt class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Payment Terms</dt>
+                <dd id="live-terms" class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Net 30 Days</dd>
+              </div>
+            </dl>
+
+            <!-- Financial Calculations -->
+            <div class="flex flex-col gap-gutter-sm">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Subtotal</span>
+                <span id="inv-subtotal" class="font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 164,000.00</span>
+              </div>
+
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <label for="inv-discount" class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Discount (%)</label>
+                <div class="flex items-center gap-gutter-sm">
+                  <input id="inv-discount" type="number" min="0" max="100" value="0" class="w-20 rounded-md border border-outline-variant bg-surface-container-low px-2.5 py-1 text-right font-label text-label-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <span id="inv-discount-amt" class="font-label text-label-md text-success tabular-nums" data-design-text-token="label-md">- R 0.00</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">VAT (15% SA)</span>
+                <span id="inv-vat" class="font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 24,600.00</span>
+              </div>
+
+              <div class="pt-gutter-sm border-t border-outline-variant flex items-center justify-between gap-gutter-sm">
+                <span class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Total Amount</span>
+                <span id="inv-total" class="font-headline text-headline-md text-primary tabular-nums" data-design-text-token="headline-md">R 188,600.00</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons: Send Invoice, Preview Invoice, Save Draft -->
+            <div class="pt-gutter-sm flex flex-col gap-gutter-sm">
+              <!-- COMPONENT: button-primary -->
+              <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="submit" class="w-full inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">send</span>
+                <span class="font-label text-label-lg" data-design-text-token="label-lg">Send Invoice</span>
+              </button>
+
+              <div class="grid grid-cols-2 gap-gutter-sm">
+                <button id="preview-inv-btn" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-3 py-2 font-label text-label-md text-primary hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">visibility</span>
+                  <span data-design-text-token="label-md">Preview Invoice</span>
+                </button>
+
+                <button id="save-draft-btn" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-3 py-2 font-label text-label-md text-on-surface hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">save</span>
+                  <span data-design-text-token="label-md">Save Draft</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="inv-feedback-banner" class="hidden rounded-md bg-primary-container border border-primary/20 p-gutter-sm flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md text-primary" aria-hidden="true">task_alt</span>
+              <span id="inv-feedback-text" class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Invoice INV-2026-413 sent.</span>
+            </div>
+          </aside>
+
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const container = document.getElementById('inv-items-container');
+      const addBtn = document.getElementById('add-inv-item-btn');
+      const discountInput = document.getElementById('inv-discount');
+      const form = document.getElementById('create-invoice-form');
+      const previewBtn = document.getElementById('preview-inv-btn');
+      const draftBtn = document.getElementById('save-draft-btn');
+      const banner = document.getElementById('inv-feedback-banner');
+      const bannerText = document.getElementById('inv-feedback-text');
+
+      function formatRand(amount) {
+        return 'R ' + amount.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function syncMeta() {
+        document.getElementById('live-customer').textContent = document.getElementById('inv-customer').value;
+        document.getElementById('live-property').textContent = document.getElementById('inv-property').value;
+        document.getElementById('live-number').textContent = document.getElementById('inv-number').value || 'INV-2026-413';
+        document.getElementById('live-terms').textContent = document.getElementById('inv-terms').value;
+      }
+
+      function recalc() {
+        let subtotal = 0;
+        container.querySelectorAll('.inv-item').forEach(function (item, idx) {
+          const label = item.querySelector('span[data-design-text-token="label-sm"]');
+          if (label) label.textContent = 'Item ' + (idx + 1);
+          const qty = parseFloat(item.querySelector('.inv-qty').value) || 0;
+          const price = parseFloat(item.querySelector('.inv-price').value) || 0;
+          subtotal += qty * price;
+        });
+
+        const pct = Math.min(100, Math.max(0, parseFloat(discountInput.value) || 0));
+        const disc = subtotal * (pct / 100);
+        const taxable = subtotal - disc;
+        const vat = taxable * 0.15;
+        const total = taxable + vat;
+
+        document.getElementById('inv-subtotal').textContent = formatRand(subtotal);
+        document.getElementById('inv-discount-amt').textContent = '- ' + formatRand(disc);
+        document.getElementById('inv-vat').textContent = formatRand(vat);
+        document.getElementById('inv-total').textContent = formatRand(total);
+      }
+
+      ['inv-customer', 'inv-property', 'inv-number', 'inv-terms'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', syncMeta);
+          el.addEventListener('change', syncMeta);
+        }
+      });
+
+      container.addEventListener('input', recalc);
+      if (discountInput) discountInput.addEventListener('input', recalc);
+
+      container.addEventListener('click', function (e) {
+        const btn = e.target.closest('.remove-inv-item');
+        if (btn && container.querySelectorAll('.inv-item').length > 1) {
+          btn.closest('.inv-item').remove();
+          recalc();
+        }
+      });
+
+      if (addBtn) {
+        addBtn.addEventListener('click', function () {
+          const el = document.createElement('div');
+          el.className = 'inv-item rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-gutter-sm';
+          el.innerHTML =
+            '<div class="flex items-center justify-between gap-gutter-sm">' +
+              '<span class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Item</span>' +
+              '<button type="button" class="remove-inv-item font-label text-label-sm text-error hover:underline" data-design-text-token="label-sm">Remove</button>' +
+            '</div>' +
+            '<div class="grid grid-cols-1 sm:grid-cols-12 gap-gutter-sm">' +
+              '<div class="sm:col-span-6">' +
+                '<label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Description</label>' +
+                '<input type="text" placeholder="Enter product or service..." class="inv-desc w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">' +
+              '</div>' +
+              '<div class="sm:col-span-3">' +
+                '<label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Quantity</label>' +
+                '<input type="number" min="1" value="1" class="inv-qty w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">' +
+              '</div>' +
+              '<div class="sm:col-span-3">' +
+                '<label class="block font-label text-label-sm text-on-surface-variant mb-1" data-design-text-token="label-sm">Unit Price (R)</label>' +
+                '<input type="number" min="0" step="100" value="4500" class="inv-price w-full rounded-md border border-outline-variant bg-surface px-3 py-2 font-body text-body-md text-on-surface tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">' +
+              '</div>' +
+            '</div>';
+          container.appendChild(el);
+          recalc();
+        });
+      }
+
+      function showBanner(msg) {
+        if (bannerText) bannerText.textContent = msg;
+        if (banner) banner.classList.remove('hidden');
+      }
+
+      if (previewBtn) {
+        previewBtn.addEventListener('click', function () {
+          showBanner('Tax invoice preview ready for ' + document.getElementById('inv-number').value + '.');
+        });
+      }
+
+      if (draftBtn) {
+        draftBtn.addEventListener('click', function () {
+          showBanner('Draft saved for ' + document.getElementById('inv-number').value + '.');
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          document.getElementById('inv-summary-badge').textContent = 'Sent';
+          showBanner('Invoice ' + document.getElementById('inv-number').value + ' sent to ' + document.getElementById('inv-customer').value + '.');
+        });
+      }
+
+      syncMeta();
+      recalc();
+    })();
+  </script>
+
+
+</body></html>

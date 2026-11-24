@@ -1,0 +1,500 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Profile Settings — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Settings active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="../communications/UmbaneCommunicationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="../team/UmbaneTeamDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="../reports/UmbaneReportsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="../automations/UmbaneAutomationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="../notifications/UmbaneNotificationsCentre.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+              <span data-design-text-token="label-md">Notifications</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="UmbaneSettingsDashboard.html" aria-current="page" class="flex items-center gap-gutter-sm rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <a href="../notifications/UmbaneNotificationsCentre.html" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-4xl">
+
+        <!-- Contextual Back & Page Header -->
+        <div class="flex flex-col gap-gutter-sm">
+          <a href="UmbaneSettingsDashboard.html" class="inline-flex items-center gap-gutter-xs self-start rounded-md border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-md text-on-surface-variant shadow-sm transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+            <span data-design-text-token="label-md">Back to Settings</span>
+          </a>
+
+          <div>
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-on-surface" data-design-text-token="headline-lg">Business Profile Settings</h1>
+            <p class="mt-1 font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+              Update your legal entity details, VAT registration, contact information, and brand logo shown on invoices.
+            </p>
+          </div>
+        </div>
+
+        <!-- Save Confirmation Banner (Hidden by default) -->
+        <div id="save-banner" class="hidden rounded-lg border border-success/40 bg-success/10 px-gutter-md py-3 flex items-center justify-between gap-gutter-md" role="status">
+          <div class="flex items-center gap-gutter-sm">
+            <span class="material-symbols-outlined text-title-md text-success" aria-hidden="true">check_circle</span>
+            <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Business profile changes saved successfully.</span>
+          </div>
+        </div>
+
+        <!-- Business Profile Form -->
+        <form id="business-profile-form" class="flex flex-col gap-gutter-lg" novalidate>
+
+          <!-- 1. Business Logo Section -->
+          <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="logo-heading">
+            <div>
+              <h2 id="logo-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Business Logo</h2>
+              <p class="mt-0.5 font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">
+                Displayed on customer invoices, statements, and email headers. PNG, JPG, or SVG up to 2 MB.
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center gap-gutter-md">
+              <div id="logo-preview-box" class="h-20 w-20 shrink-0 rounded-lg border border-outline-variant bg-primary flex items-center justify-center overflow-hidden shadow-sm">
+                <svg id="default-logo-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+                </svg>
+                <img id="uploaded-logo-img" src alt="Uploaded business logo" class="hidden h-full w-full object-contain bg-surface p-1.5">
+              </div>
+
+              <div class="flex flex-wrap items-center gap-gutter-sm">
+                <input id="logo-file-input" type="file" accept="image/png,image/jpeg,image/svg+xml" class="sr-only">
+                <label for="logo-file-input" class="cursor-pointer inline-flex items-center justify-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface shadow-sm transition-colors duration-state-change hover:bg-surface-container-low focus-within:ring-2 focus-within:ring-secondary">
+                  <span class="material-symbols-outlined text-title-md text-primary" aria-hidden="true">upload</span>
+                  <span data-design-text-token="label-md">Upload Logo</span>
+                </label>
+
+                <button id="reset-logo-btn" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-error">
+                  <span class="material-symbols-outlined text-title-md" aria-hidden="true">delete_outline</span>
+                  <span data-design-text-token="label-md">Reset Default</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Company & Tax Identification -->
+          <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="company-heading">
+            <h2 id="company-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Company &amp; Tax Details</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+              <div class="sm:col-span-2 flex flex-col gap-1.5">
+                <label for="business-name" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Business Name</label>
+                <input id="business-name" name="businessName" type="text" value="Umbane Energy (Pty) Ltd" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="reg-number" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Registration Number</label>
+                <input id="reg-number" name="registrationNumber" type="text" value="2019/482910/07" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-mono-sm text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="vat-number" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">VAT Number</label>
+                <input id="vat-number" name="vatNumber" type="text" value="4910283746" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-mono-sm text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="sm:col-span-2 flex flex-col gap-1.5">
+                <label for="business-description" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Business Description</label>
+                <textarea id="business-description" name="businessDescription" rows="3" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">Commercial and industrial electricity sub-metering, municipal utility telemetry, and automated energy billing services across South Africa.</textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Contact Information -->
+          <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="contact-heading">
+            <h2 id="contact-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Contact &amp; Web</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+              <div class="flex flex-col gap-1.5">
+                <label for="email-address" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Email Address</label>
+                <input id="email-address" name="emailAddress" type="email" value="accounts@umbane.co.za" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="phone-number" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Phone Number</label>
+                <input id="phone-number" name="phoneNumber" type="tel" value="+27 10 500 4210" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-mono-sm text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="sm:col-span-2 flex flex-col gap-1.5">
+                <label for="website-url" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Website</label>
+                <input id="website-url" name="website" type="url" value="https://www.umbane.co.za" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+            </div>
+          </section>
+
+          <!-- 4. Physical Address -->
+          <section class="bg-surface rounded-lg border border-outline-variant shadow-sm p-gutter-lg flex flex-col gap-gutter-md" aria-labelledby="address-heading">
+            <h2 id="address-heading" class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">Business Address</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+              <div class="sm:col-span-2 flex flex-col gap-1.5">
+                <label for="street-address" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Business Address</label>
+                <input id="street-address" name="businessAddress" type="text" value="140 West Street, Sandton" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="city" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">City</label>
+                <input id="city" name="city" type="text" value="Johannesburg" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="province" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Province</label>
+                <select id="province" name="province" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-body text-body-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                  <option value="Gauteng" selected>Gauteng</option>
+                  <option value="Western Cape">Western Cape</option>
+                  <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                  <option value="Eastern Cape">Eastern Cape</option>
+                  <option value="Free State">Free State</option>
+                  <option value="Limpopo">Limpopo</option>
+                  <option value="Mpumalanga">Mpumalanga</option>
+                  <option value="North West">North West</option>
+                  <option value="Northern Cape">Northern Cape</option>
+                </select>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="postal-code" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Postal Code</label>
+                <input id="postal-code" name="postalCode" type="text" value="2196" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-mono-sm text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+            </div>
+          </section>
+
+          <!-- Form Footer Actions -->
+          <div class="flex flex-wrap items-center justify-end gap-gutter-sm pt-gutter-xs">
+            <a href="UmbaneSettingsDashboard.html" class="inline-flex items-center justify-center rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface shadow-sm transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span data-design-text-token="label-md">Cancel</span>
+            </a>
+
+            <button type="submit" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2 font-label text-label-lg text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">save</span>
+              <span data-design-text-token="label-lg">Save Changes</span>
+            </button>
+          </div>
+        </form>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const fileInput = document.getElementById('logo-file-input');
+      const defaultSvg = document.getElementById('default-logo-svg');
+      const uploadedImg = document.getElementById('uploaded-logo-img');
+      const resetLogoBtn = document.getElementById('reset-logo-btn');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', function (e) {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            uploadedImg.src = ev.target.result;
+            uploadedImg.classList.remove('hidden');
+            defaultSvg.classList.add('hidden');
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (resetLogoBtn) {
+        resetLogoBtn.addEventListener('click', function () {
+          if (fileInput) fileInput.value = '';
+          uploadedImg.src = '';
+          uploadedImg.classList.add('hidden');
+          defaultSvg.classList.remove('hidden');
+        });
+      }
+
+      const form = document.getElementById('business-profile-form');
+      const saveBanner = document.getElementById('save-banner');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          saveBanner.classList.remove('hidden');
+          saveBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

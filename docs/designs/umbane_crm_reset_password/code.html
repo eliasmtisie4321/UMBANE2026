@@ -1,0 +1,365 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+  <div class="min-h-[1024px] flex flex-col justify-between bg-background" data-stitch-vh="min-h-[1024px]===min-h-screen">
+    <!-- Top Brand Header (matches Screens 1 & 2) -->
+    <header class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin pt-gutter-lg lg:pt-gutter-xl">
+      <a href="../login/UmbaneLogin.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-primary shadow-sm">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+          </svg>
+        </span>
+        <span class="flex items-baseline gap-gutter-xs">
+          <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+          <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+        </span>
+      </a>
+    </header>
+
+    <!-- Centered Reset Password Card -->
+    <main class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin py-gutter-xl lg:py-section flex-1 flex items-center justify-center">
+      <div class="w-full max-w-md">
+        <!-- COMPONENT: card-elevated -->
+        <article data-component-id="card-elevated" data-component-type="card" data-component-variant="elevated" class="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-gutter-lg sm:p-gutter-xl shadow-lg">
+          <header class="mb-gutter-lg flex flex-col gap-gutter-sm">
+            <div class="flex items-center justify-between gap-gutter-sm">
+              <span class="inline-flex h-11 w-11 items-center justify-center rounded-md bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-headline-md" aria-hidden="true">verified_user</span>
+              </span>
+              <span class="h-1 w-8 rounded-full bg-tertiary" aria-hidden="true"></span>
+            </div>
+
+            <h1 data-component-id="typography-headline" data-component-type="typography" data-component-variant="headline" data-design-text-token="headline-md" class="font-headline text-headline-md text-primary text-balance pt-gutter-xs">Create a New Password</h1>
+
+            <p data-component-id="typography-body" data-component-type="typography" data-component-variant="body" data-design-text-token="body-md" class="font-body text-body-md text-on-surface-variant text-pretty">Choose a strong, unique password to protect your Umbane CRM workspace and meter operations.</p>
+          </header>
+
+          <form id="reset-form" class="flex flex-col gap-gutter-md" novalidate>
+            <!-- New Password Input -->
+            <!-- COMPONENT: input-field-password -->
+            <div data-component-id="input-field-password" data-component-type="input-field" data-component-variant="password" class="flex flex-col gap-gutter-xs w-full">
+              <label for="new-password" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">New password</label>
+              <div class="relative flex items-center">
+                <span class="pointer-events-none absolute left-3.5 text-outline flex items-center" aria-hidden="true">
+                  <span class="material-symbols-outlined text-title-md">lock</span>
+                </span>
+                <input id="new-password" type="password" name="newPassword" autocomplete="new-password" placeholder="Enter new password" required class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-12 py-3 font-body text-body-md text-on-surface placeholder:text-outline transition-colors duration-state-change ease-state-change focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <!-- COMPONENT: button-icon -->
+                <button type="button" data-toggle-target="new-password" data-component-id="button-icon" data-component-type="button" data-component-variant="icon" aria-label="Show new password" aria-pressed="false" class="password-toggle absolute right-2 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-outline transition-colors duration-state-change ease-state-change hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                  <span class="material-symbols-outlined text-title-lg" aria-hidden="true">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Password Strength Indicator -->
+            <div class="flex flex-col gap-gutter-xs" aria-live="polite">
+              <div class="flex items-center justify-between gap-gutter-sm">
+                <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Password strength</span>
+                <span id="strength-label" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Enter a password</span>
+              </div>
+              <div class="grid grid-cols-4 gap-gutter-xs">
+                <span id="strength-bar-1" class="h-1.5 rounded-full bg-surface-container-high transition-colors duration-state-change ease-state-change"></span>
+                <span id="strength-bar-2" class="h-1.5 rounded-full bg-surface-container-high transition-colors duration-state-change ease-state-change"></span>
+                <span id="strength-bar-3" class="h-1.5 rounded-full bg-surface-container-high transition-colors duration-state-change ease-state-change"></span>
+                <span id="strength-bar-4" class="h-1.5 rounded-full bg-surface-container-high transition-colors duration-state-change ease-state-change"></span>
+              </div>
+            </div>
+
+            <!-- Password Requirements Checklist -->
+            <ul class="rounded-lg border border-outline-variant bg-surface-container-low p-gutter-md grid grid-cols-1 sm:grid-cols-2 gap-gutter-sm" aria-label="Password requirements">
+              <li id="req-length" class="flex items-center gap-gutter-xs text-on-surface-variant">
+                <span class="material-symbols-outlined text-title-md text-outline" aria-hidden="true">radio_button_unchecked</span>
+                <span class="font-label text-label-sm" data-design-text-token="label-sm">At least 8 characters</span>
+              </li>
+              <li id="req-upper" class="flex items-center gap-gutter-xs text-on-surface-variant">
+                <span class="material-symbols-outlined text-title-md text-outline" aria-hidden="true">radio_button_unchecked</span>
+                <span class="font-label text-label-sm" data-design-text-token="label-sm">One uppercase letter</span>
+              </li>
+              <li id="req-number" class="flex items-center gap-gutter-xs text-on-surface-variant">
+                <span class="material-symbols-outlined text-title-md text-outline" aria-hidden="true">radio_button_unchecked</span>
+                <span class="font-label text-label-sm" data-design-text-token="label-sm">One number</span>
+              </li>
+              <li id="req-symbol" class="flex items-center gap-gutter-xs text-on-surface-variant">
+                <span class="material-symbols-outlined text-title-md text-outline" aria-hidden="true">radio_button_unchecked</span>
+                <span class="font-label text-label-sm" data-design-text-token="label-sm">One special character</span>
+              </li>
+            </ul>
+
+            <!-- Confirm Password Input -->
+            <!-- COMPONENT: input-field-password -->
+            <div data-component-id="input-field-confirm-password" data-component-type="input-field" data-component-variant="password" class="flex flex-col gap-gutter-xs w-full">
+              <label for="confirm-password" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Confirm password</label>
+              <div class="relative flex items-center">
+                <span class="pointer-events-none absolute left-3.5 text-outline flex items-center" aria-hidden="true">
+                  <span class="material-symbols-outlined text-title-md" data-original-icon="lock_check">circle</span>
+                </span>
+                <input id="confirm-password" type="password" name="confirmPassword" autocomplete="new-password" placeholder="Re-enter new password" required class="w-full rounded-md border border-outline-variant bg-surface pl-10 pr-12 py-3 font-body text-body-md text-on-surface placeholder:text-outline transition-colors duration-state-change ease-state-change focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <!-- COMPONENT: button-icon -->
+                <button type="button" data-toggle-target="confirm-password" data-component-id="button-icon" data-component-type="button" data-component-variant="icon" aria-label="Show confirm password" aria-pressed="false" class="password-toggle absolute right-2 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-outline transition-colors duration-state-change ease-state-change hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                  <span class="material-symbols-outlined text-title-lg" aria-hidden="true">visibility</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Feedback Message -->
+            <p id="reset-feedback" class="hidden rounded-DEFAULT bg-primary-container px-gutter-md py-gutter-sm font-body text-body-md text-on-primary-container" role="status" data-design-text-token="body-md"></p>
+
+            <!-- Primary Reset Password Button -->
+            <div class="pt-gutter-xs">
+              <!-- COMPONENT: button-primary -->
+              <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="submit" class="w-full inline-flex items-center justify-center gap-gutter-sm rounded-md bg-primary px-gutter-lg py-3.5 text-on-primary shadow-sm transition-colors duration-state-change ease-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 active:bg-primary-hover">
+                <span class="font-label text-label-lg" data-design-text-token="label-lg">Reset Password</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Return to Login Link -->
+          <footer class="mt-gutter-lg pt-gutter-md border-t border-outline-variant/60 flex items-center justify-center">
+            <a href="../login/UmbaneLogin.html" class="inline-flex items-center gap-gutter-xs font-label text-label-md text-secondary transition-colors duration-state-change ease-state-change hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+              <span data-design-text-token="label-md">Return to Login</span>
+            </a>
+          </footer>
+        </article>
+      </div>
+    </main>
+
+    <!-- Minimal Footer (matches Screens 1 & 2) -->
+    <footer class="w-full max-w-7xl mx-auto px-gutter-lg lg:px-page-margin pb-gutter-lg flex flex-wrap items-center justify-between gap-gutter-md text-on-surface-variant">
+      <span class="font-label text-label-sm" data-design-text-token="label-sm">© 2026 Umbane Energy Operations. All rights reserved.</span>
+      <span class="font-mono text-mono-sm" data-design-text-token="mono-sm">v2.4 · Grid Cloud</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var toggles = document.querySelectorAll('.password-toggle');
+      toggles.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var targetId = btn.getAttribute('data-toggle-target');
+          var input = document.getElementById(targetId);
+          var icon = btn.querySelector('.material-symbols-outlined');
+          if (!input || !icon) return;
+          var isHidden = input.type === 'password';
+          input.type = isHidden ? 'text' : 'password';
+          icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+          btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        });
+      });
+
+      var newPass = document.getElementById('new-password');
+      var confirmPass = document.getElementById('confirm-password');
+      var strengthLabel = document.getElementById('strength-label');
+      var bars = [
+        document.getElementById('strength-bar-1'),
+        document.getElementById('strength-bar-2'),
+        document.getElementById('strength-bar-3'),
+        document.getElementById('strength-bar-4')
+      ];
+      var reqLength = document.getElementById('req-length');
+      var reqUpper = document.getElementById('req-upper');
+      var reqNumber = document.getElementById('req-number');
+      var reqSymbol = document.getElementById('req-symbol');
+      var resetForm = document.getElementById('reset-form');
+      var feedback = document.getElementById('reset-feedback');
+
+      function updateChecklistItem(el, passed) {
+        if (!el) return;
+        var icon = el.querySelector('.material-symbols-outlined');
+        if (passed) {
+          el.classList.remove('text-on-surface-variant');
+          el.classList.add('text-on-surface');
+          if (icon) {
+            icon.textContent = 'check_circle';
+            icon.classList.remove('text-outline');
+            icon.classList.add('text-success');
+          }
+        } else {
+          el.classList.remove('text-on-surface');
+          el.classList.add('text-on-surface-variant');
+          if (icon) {
+            icon.textContent = 'radio_button_unchecked';
+            icon.classList.remove('text-success');
+            icon.classList.add('text-outline');
+          }
+        }
+      }
+
+      function evaluatePassword(val) {
+        var hasLength = val.length >= 8;
+        var hasUpper = /[A-Z]/.test(val);
+        var hasNumber = /[0-9]/.test(val);
+        var hasSymbol = /[^A-Za-z0-9]/.test(val);
+
+        updateChecklistItem(reqLength, hasLength);
+        updateChecklistItem(reqUpper, hasUpper);
+        updateChecklistItem(reqNumber, hasNumber);
+        updateChecklistItem(reqSymbol, hasSymbol);
+
+        var score = (hasLength ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNumber ? 1 : 0) + (hasSymbol ? 1 : 0);
+        var labels = ['Enter a password', 'Weak', 'Fair', 'Good', 'Strong'];
+        var colorClass = score <= 1 ? 'bg-error' : (score === 2 ? 'bg-tertiary' : (score === 3 ? 'bg-secondary' : 'bg-success'));
+
+        if (strengthLabel) {
+          strengthLabel.textContent = val.length === 0 ? labels[0] : labels[score];
+        }
+
+        bars.forEach(function (bar, idx) {
+          if (!bar) return;
+          bar.className = 'h-1.5 rounded-full transition-colors duration-state-change ease-state-change ' +
+            (idx < score && val.length > 0 ? colorClass : 'bg-surface-container-high');
+        });
+      }
+
+      if (newPass) {
+        newPass.addEventListener('input', function () {
+          evaluatePassword(newPass.value);
+        });
+      }
+
+      if (resetForm && feedback) {
+        resetForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var v1 = newPass ? newPass.value : '';
+          var v2 = confirmPass ? confirmPass.value : '';
+          if (v1.length < 8) {
+            feedback.textContent = 'Your new password must be at least 8 characters long.';
+            feedback.classList.remove('hidden', 'bg-primary-container', 'text-on-primary-container');
+            feedback.classList.add('bg-error-container', 'text-on-error-container');
+            return;
+          }
+          if (v1 !== v2) {
+            feedback.textContent = 'Passwords do not match. Please re-enter to confirm.';
+            feedback.classList.remove('hidden', 'bg-primary-container', 'text-on-primary-container');
+            feedback.classList.add('bg-error-container', 'text-on-error-container');
+            return;
+          }
+          feedback.textContent = 'Password updated successfully. You can now return to login.';
+          feedback.classList.remove('hidden', 'bg-error-container', 'text-on-error-container');
+          feedback.classList.add('bg-primary-container', 'text-on-primary-container');
+        });
+      }
+    })();
+  </script>
+
+
+</body></html>

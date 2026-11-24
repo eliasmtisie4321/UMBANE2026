@@ -1,0 +1,598 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders List — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Sales & Orders active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="UmbaneSalesDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">shopping_bag</span>
+              <span data-design-text-token="label-md">Sales &amp; Orders</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#invoices" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="#inventory" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="#support-tickets" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="#marketing" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="#communications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="#team" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="#reports" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">analytics</span>
+            <span data-design-text-token="label-md">Reports</span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Orders List Main Content -->
+      <main class="p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-7xl w-full mx-auto">
+
+        <!-- Page Heading & Action -->
+        <section class="flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-primary" data-design-text-token="headline-lg">Orders List</h1>
+            <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Manage commercial metering orders, payment status, and fulfilment across South African accounts.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-gutter-sm">
+            <a href="UmbaneSalesDashboard.html" class="inline-flex items-center justify-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-gutter-md py-2.5 text-primary shadow-sm transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">monitoring</span>
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Sales Dashboard</span>
+            </a>
+
+            <!-- COMPONENT: button-with-icon -->
+            <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-lg py-2.5 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">add_shopping_cart</span>
+              <span class="font-label text-label-lg" data-design-text-token="label-lg">Create Order</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Search & Filter Bar -->
+        <section aria-label="Order Filters" class="rounded-lg border border-outline-variant bg-surface p-gutter-md shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter-sm">
+            <!-- Search -->
+            <div class="lg:col-span-4">
+              <label for="order-search" class="sr-only">Search orders</label>
+              <div class="relative flex items-center">
+                <span class="pointer-events-none absolute left-3 text-outline flex items-center" aria-hidden="true">
+                  <span class="material-symbols-outlined text-title-md">search</span>
+                </span>
+                <input id="order-search" type="search" placeholder="Search order ID, customer, or service..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              </div>
+            </div>
+
+            <!-- Date Filter -->
+            <div class="lg:col-span-3">
+              <label for="filter-date" class="sr-only">Filter by date</label>
+              <select id="filter-date" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value>All Dates</option>
+                <option value="Nov 2026">November 2026</option>
+                <option value="Oct 2026">October 2026</option>
+                <option value="Sep 2026">September 2026</option>
+              </select>
+            </div>
+
+            <!-- Customer Filter -->
+            <div class="lg:col-span-3">
+              <label for="filter-customer" class="sr-only">Filter by customer</label>
+              <select id="filter-customer" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value>All Customers</option>
+                <option value="Sandton City Holdings">Sandton City Holdings</option>
+                <option value="V&amp;A Waterfront Properties">V&amp;A Waterfront Properties</option>
+                <option value="Umhlanga Ridge Estates">Umhlanga Ridge Estates</option>
+                <option value="Menlyn Maine Precinct">Menlyn Maine Precinct</option>
+                <option value="Rosebank Towers Body Corp">Rosebank Towers Body Corp</option>
+                <option value="Century City Management">Century City Management</option>
+                <option value="Waterfall Logistics Park">Waterfall Logistics Park</option>
+              </select>
+            </div>
+
+            <!-- Order Status Filter -->
+            <div class="lg:col-span-2">
+              <label for="filter-status" class="sr-only">Filter by order status</label>
+              <select id="filter-status" class="w-full rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+                <option value>All Statuses</option>
+                <option value="Completed">Completed</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Pending">Pending</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Orders Data Table -->
+        <section aria-label="Orders Table" class="rounded-lg border border-outline-variant bg-surface shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-max text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-outline-variant">
+                  <th class="pl-gutter-lg pr-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Order ID</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Customer</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Order Date</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Products / Services</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Total Amount</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Payment Status</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Order Status</th>
+                  <th class="px-3 py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Assigned Employee</th>
+                  <th class="pl-3 pr-gutter-lg py-3 whitespace-nowrap font-label text-label-sm text-on-surface-variant text-right" data-design-text-token="label-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body" class="divide-y divide-outline-variant/70">
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Sandton City Holdings" data-date="Nov 2026" data-status="Completed">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-842</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">22 Nov 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Commercial CT &amp; AMI (24 units)</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 485,000</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Paid</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Elias Nkosi</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="V&amp;A Waterfront Properties" data-date="Nov 2026" data-status="Pending">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-841</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">V&amp;A Waterfront Properties</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">21 Nov 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Grid Telemetry &amp; 36-Mo SLA</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 312,500</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Partial</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Pending</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Thabo Mokoena</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Umhlanga Ridge Estates" data-date="Nov 2026" data-status="Completed">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-839</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Umhlanga Ridge Estates</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">19 Nov 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Smart Prepaid Metering (48 units)</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 278,400</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Paid</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Lerato Khumalo</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Menlyn Maine Precinct" data-date="Nov 2026" data-status="In Progress">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-837</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Menlyn Maine Precinct</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">18 Nov 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Installation &amp; Sub-Meter Audit</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 164,000</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Partial</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">In Progress</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Sipho Dlamini</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Rosebank Towers Body Corp" data-date="Nov 2026" data-status="Cancelled">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-834</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Rosebank Towers Body Corp</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">15 Nov 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Smart Prepaid Metering (16 units)</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 92,800</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Refunded</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Cancelled</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Elias Nkosi</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Century City Management" data-date="Nov 2026" data-status="Completed">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-831</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Century City Management</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">12 Nov 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Commercial CT &amp; AMI (20 units)</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 418,000</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Paid</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Thabo Mokoena</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Waterfall Logistics Park" data-date="Oct 2026" data-status="In Progress">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-824</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Waterfall Logistics Park</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">29 Oct 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">3-Phase Bulk Metering &amp; LTE</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 365,000</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-error-container px-2.5 py-0.5 font-label text-label-sm text-on-error-container" data-design-text-token="label-sm">Unpaid</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-secondary-container px-2.5 py-0.5 font-label text-label-sm text-on-secondary-container" data-design-text-token="label-sm">In Progress</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Sipho Dlamini</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+
+                <tr class="order-row hover:bg-surface-container-low/70 transition-colors duration-state-change" data-customer="Sandton City Holdings" data-date="Sep 2026" data-status="Completed">
+                  <td class="pl-gutter-lg pr-3 py-3.5 whitespace-nowrap font-mono text-mono-sm text-primary tabular-nums" data-design-text-token="mono-sm">ORD-2026-798</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface" data-design-text-token="label-md">Sandton City Holdings</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">24 Sep 2026</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Substation Telemetry Upgrade</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-label text-label-md text-on-surface tabular-nums" data-design-text-token="label-md">R 520,000</td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Paid</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary" data-design-text-token="label-sm">Completed</span>
+                  </td>
+                  <td class="px-3 py-3.5 whitespace-nowrap font-body text-body-md text-on-surface" data-design-text-token="body-md">Lerato Khumalo</td>
+                  <td class="pl-3 pr-gutter-lg py-3.5 whitespace-nowrap text-right">
+                    <button type="button" class="font-label text-label-md text-secondary hover:text-primary" data-design-text-token="label-md">View</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <footer class="px-gutter-lg py-gutter-md border-t border-outline-variant bg-surface-container-low/50 flex flex-wrap items-center justify-between gap-gutter-sm">
+            <span id="orders-count-label" class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">Showing 1–8 of 359 orders</span>
+
+            <nav aria-label="Orders pagination" class="flex items-center gap-gutter-xs">
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface-variant hover:bg-surface-container-low" data-design-text-token="label-sm">Previous</button>
+              <button type="button" aria-current="page" class="rounded-DEFAULT bg-primary px-3 py-1.5 font-label text-label-sm text-on-primary tabular-nums" data-design-text-token="label-sm">1</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums" data-design-text-token="label-sm">2</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums" data-design-text-token="label-sm">3</button>
+              <span class="px-1 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">…</span>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-on-surface hover:bg-surface-container-low tabular-nums" data-design-text-token="label-sm">45</button>
+              <button type="button" class="rounded-DEFAULT border border-outline-variant bg-surface px-3 py-1.5 font-label text-label-sm text-primary hover:bg-surface-container-low" data-design-text-token="label-sm">Next</button>
+            </nav>
+          </footer>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+      const searchInput = document.getElementById('order-search');
+      const dateSelect = document.getElementById('filter-date');
+      const customerSelect = document.getElementById('filter-customer');
+      const statusSelect = document.getElementById('filter-status');
+      const rows = Array.from(document.querySelectorAll('.order-row'));
+      const countLabel = document.getElementById('orders-count-label');
+
+      function applyFilters() {
+        const q = (searchInput.value || '').trim().toLowerCase();
+        const dateVal = dateSelect.value;
+        const custVal = customerSelect.value;
+        const statusVal = statusSelect.value;
+        let visible = 0;
+
+        rows.forEach(function (row) {
+          const text = row.textContent.toLowerCase();
+          const matchQ = !q || text.includes(q);
+          const matchDate = !dateVal || row.getAttribute('data-date') === dateVal;
+          const matchCust = !custVal || row.getAttribute('data-customer') === custVal;
+          const matchStatus = !statusVal || row.getAttribute('data-status') === statusVal;
+          const show = matchQ && matchDate && matchCust && matchStatus;
+          row.classList.toggle('hidden', !show);
+          if (show) visible += 1;
+        });
+
+        if (countLabel) {
+          countLabel.textContent = visible === rows.length
+            ? 'Showing 1–8 of 359 orders'
+            : 'Showing ' + visible + ' matching orders';
+        }
+      }
+
+      [searchInput, dateSelect, customerSelect, statusSelect].forEach(function (el) {
+        if (el) el.addEventListener('input', applyFilters);
+        if (el) el.addEventListener('change', applyFilters);
+      });
+    })();
+  </script>
+
+
+</body></html>

@@ -1,0 +1,739 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electricity Consumption Reports — Umbane CRM</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'umbane-navy': '#174EA6',
+        'electric-blue': '#2563EB',
+        'volt-yellow': '#F5B700',
+        'on-volt': '#261A00',
+        'primary': '#174EA6',
+        'on-primary': '#FFFFFF',
+        'primary-hover': '#003781',
+        'primary-container': '#EDF0FF',
+        'on-primary-container': '#001944',
+        'secondary': '#2563EB',
+        'on-secondary': '#FFFFFF',
+        'secondary-container': '#DBE1FF',
+        'on-secondary-container': '#002A78',
+        'tertiary': '#F5B700',
+        'on-tertiary': '#261A00',
+        'tertiary-container': '#FFEFD5',
+        'on-tertiary-container': '#402D00',
+        'background': '#FFFFFF',
+        'on-background': '#1A1B21',
+        'surface': '#FFFFFF',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F8FAFF',
+        'surface-container': '#F1F5FD',
+        'surface-container-high': '#E8EEF9',
+        'on-surface': '#1A1B21',
+        'on-surface-variant': '#434752',
+        'outline': '#737783',
+        'outline-variant': '#D5DCEB',
+        'success': '#15803D',
+        'on-success': '#FFFFFF',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+        'error-container': '#FFDAD6',
+        'on-error-container': '#93000A',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '32px',
+      },
+      fontFamily: {
+        'display': ['"Inter"', 'sans-serif'],
+        'headline': ['"Inter"', 'sans-serif'],
+        'title': ['"Inter"', 'sans-serif'],
+        'body': ['"Inter"', 'sans-serif'],
+        'label': ['"Inter"', 'sans-serif'],
+        'mono': ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '52px', letterSpacing: '-0.9px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.6px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.3px', fontWeight: '600' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '-0.2px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '-0.1px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.1px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '16px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '220ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-low text-on-surface font-body antialiased">
+  <div class="min-h-[1024px] flex bg-surface-container-low" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 z-30 bg-on-surface/40 lg:hidden"></div>
+
+    <!-- Fixed Left Sidebar (verbatim shell; Reports active) -->
+    <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 -translate-x-full lg:translate-x-0 lg:static lg:inset-auto min-h-[1024px] shrink-0 bg-surface border-r border-outline-variant flex flex-col justify-between transition-transform duration-surface-enter ease-surface-enter" aria-label="Primary Navigation" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <div class="h-16 px-gutter-lg border-b border-outline-variant/70 flex items-center justify-between">
+          <a href="../dashboard/UmbaneDashboard.html" class="inline-flex items-center gap-gutter-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-DEFAULT">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13.5 2L5 13.5H11.5L10.5 22L19 10.5H12.5L13.5 2Z" fill="#F5B700"></path>
+              </svg>
+            </span>
+            <span class="flex items-baseline gap-gutter-xs">
+              <span class="font-headline text-title-lg text-primary" data-design-text-token="title-lg">Umbane</span>
+              <span class="rounded-sm bg-tertiary-container px-1.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">CRM</span>
+            </span>
+          </a>
+          <button id="close-sidebar-btn" type="button" aria-label="Close navigation menu" class="lg:hidden min-w-0 inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Sidebar Navigation Items (16 items) -->
+        <nav class="px-gutter-sm py-gutter-md flex flex-col gap-1">
+          <a href="../dashboard/UmbaneDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">dashboard</span>
+            <span data-design-text-token="label-md">Overview</span>
+          </a>
+          <a href="../customers/UmbaneCustomers.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">group</span>
+            <span data-design-text-token="label-md">Customers</span>
+          </a>
+          <a href="../properties/UmbaneProperties.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">apartment</span>
+            <span data-design-text-token="label-md">Properties</span>
+          </a>
+          <a href="../meters/UmbaneElectricityMeters.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">electric_meter</span>
+            <span data-design-text-token="label-md">Electricity &amp; Meters</span>
+          </a>
+          <a href="../leads/UmbaneLeads.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">person_search</span>
+            <span data-design-text-token="label-md">Leads</span>
+          </a>
+          <a href="../sales/UmbaneSalesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">shopping_bag</span>
+            <span data-design-text-token="label-md">Sales &amp; Orders</span>
+          </a>
+          <a href="../invoices/UmbaneInvoicesDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">receipt_long</span>
+            <span data-design-text-token="label-md">Invoices</span>
+          </a>
+          <a href="../inventory/UmbaneInventoryDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">inventory_2</span>
+            <span data-design-text-token="label-md">Inventory</span>
+          </a>
+          <a href="../support/UmbaneSupportTickets.html" class="flex items-center justify-between rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">confirmation_number</span>
+              <span data-design-text-token="label-md">Support Tickets</span>
+            </span>
+            <span class="rounded-full bg-surface-container px-2 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">24</span>
+          </a>
+          <a href="../marketing/UmbaneMarketingDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">campaign</span>
+            <span data-design-text-token="label-md">Marketing</span>
+          </a>
+          <a href="../communications/UmbaneCommunicationsDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">forum</span>
+            <span data-design-text-token="label-md">Communications</span>
+          </a>
+          <a href="../team/UmbaneTeamDashboard.html" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">groups</span>
+            <span data-design-text-token="label-md">Team</span>
+          </a>
+          <a href="UmbaneReportsDashboard.html" aria-current="page" class="flex items-center justify-between rounded-DEFAULT bg-primary-container px-3 py-2 text-primary font-label text-label-md">
+            <span class="flex items-center gap-gutter-sm">
+              <span class="material-symbols-outlined text-title-md" style="font-variation-settings: &#39;FILL&#39; 1;" aria-hidden="true">analytics</span>
+              <span data-design-text-token="label-md">Reports</span>
+            </span>
+            <span class="h-1.5 w-1.5 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </a>
+          <a href="#automations" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+            <span data-design-text-token="label-md">Automations</span>
+          </a>
+          <a href="#notifications" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">notifications</span>
+            <span data-design-text-token="label-md">Notifications</span>
+          </a>
+          <a href="#settings" class="flex items-center gap-gutter-sm rounded-DEFAULT px-3 py-2 text-on-surface-variant font-label text-label-md transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">settings</span>
+            <span data-design-text-token="label-md">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Sidebar Grid Status Footer -->
+      <div class="p-gutter-md border-t border-outline-variant/70">
+        <div class="rounded-lg bg-surface-container-low border border-outline-variant/70 p-gutter-sm flex items-center gap-gutter-sm">
+          <span class="h-2 w-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Eskom &amp; Municipal Grid</p>
+            <p class="font-mono text-mono-sm text-on-surface-variant" data-design-text-token="mono-sm">99.4% telemetry live</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top Navigation Bar (verbatim shell) -->
+      <header class="sticky top-0 z-20 h-16 bg-surface border-b border-outline-variant px-gutter-md lg:px-gutter-xl flex items-center justify-between gap-gutter-md">
+        <div class="flex items-center gap-gutter-sm flex-1 max-w-md">
+          <button id="open-sidebar-btn" type="button" aria-label="Open navigation menu" class="lg:hidden inline-flex items-center justify-center rounded-DEFAULT p-gutter-xs text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">menu</span>
+          </button>
+
+          <label class="relative flex items-center w-full">
+            <span class="pointer-events-none absolute left-3 text-on-surface-variant flex items-center" aria-hidden="true">
+              <span class="material-symbols-outlined text-title-md">search</span>
+            </span>
+            <input type="search" placeholder="Search customers, meters, invoices..." class="w-full rounded-md border border-outline-variant bg-surface-container-low pl-10 pr-gutter-md py-2 font-body text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </label>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm sm:gap-gutter-md shrink-0">
+          <button type="button" aria-label="View notifications" class="relative inline-flex items-center justify-center rounded-DEFAULT border border-outline-variant bg-surface p-2 text-on-surface-variant transition-colors duration-state-change hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-lg" aria-hidden="true">notifications</span>
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          </button>
+
+          <!-- COMPONENT: button-primary -->
+          <button data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+            <span class="material-symbols-outlined text-title-md" aria-hidden="true">add</span>
+            <span class="font-label text-label-lg" data-design-text-token="label-lg">Quick Add</span>
+          </button>
+
+          <div class="flex items-center gap-gutter-sm pl-gutter-xs border-l border-outline-variant/70">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-container font-label text-label-md text-primary">EN</span>
+            <div class="hidden sm:flex flex-col">
+              <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Elias Nkosi</span>
+              <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Operations Lead</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 p-gutter-md lg:p-gutter-xl flex flex-col gap-gutter-lg max-w-full">
+
+        <!-- Breadcrumb & Page Heading -->
+        <div class="flex flex-col gap-gutter-sm">
+          <div>
+            <a href="UmbaneReportsDashboard.html" class="inline-flex items-center gap-1 font-label text-label-md text-primary hover:underline">
+              <span class="material-symbols-outlined text-title-md" aria-hidden="true">arrow_back</span>
+              <span data-design-text-token="label-md">Back to Reports Dashboard</span>
+            </a>
+          </div>
+
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-gutter-md">
+            <div>
+              <h1 class="font-headline text-headline-lg-mobile lg:text-headline-lg text-on-surface" data-design-text-token="headline-lg">Electricity Consumption Reports</h1>
+              <p class="mt-1 font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+                Kilowatt-hour usage analytics across properties, smart meters, and historical readings.
+              </p>
+            </div>
+
+            <!-- Export Actions -->
+            <div class="flex flex-wrap items-center gap-gutter-sm shrink-0">
+              <button type="button" class="inline-flex items-center gap-gutter-xs rounded-md border border-outline-variant bg-surface px-gutter-md py-2 font-label text-label-md text-on-surface transition-colors duration-state-change hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">download</span>
+                <span data-design-text-token="label-md">CSV</span>
+              </button>
+
+              <button type="button" class="inline-flex items-center gap-gutter-xs rounded-md bg-primary px-gutter-md py-2 font-label text-label-lg text-on-primary shadow-sm transition-colors duration-state-change hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">picture_as_pdf</span>
+                <span data-design-text-token="label-lg">Export PDF</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Bar: Property Filter, Meter Filter & Date Range Selectors -->
+        <section class="bg-surface rounded-lg border border-outline-variant p-gutter-md shadow-sm flex flex-wrap items-center justify-between gap-gutter-md" aria-label="Consumption Report Filters">
+          <div class="flex flex-wrap items-center gap-gutter-sm">
+            <select aria-label="Filter by property" class="rounded-md border border-outline-variant bg-surface-container-low pl-3 pr-8 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              <option value="all">All Properties</option>
+              <option value="sandton">Sandton City Towers</option>
+              <option value="menlyn">Menlyn Maine Mall</option>
+              <option value="atlantic">Atlantic Seaboard HOA</option>
+              <option value="umhlanga">Umhlanga Ridge Suites</option>
+              <option value="karoo">Karoo Solar Depot</option>
+            </select>
+
+            <select aria-label="Filter by meter" class="rounded-md border border-outline-variant bg-surface-container-low pl-3 pr-8 py-2 font-label text-label-md text-on-surface focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+              <option value="all">All Meters</option>
+              <option value="ct">Three-Phase CT Meters</option>
+              <option value="smart">Commercial Smart Meters</option>
+              <option value="prepaid">Residential Prepaid</option>
+              <option value="solar">Solar Net-Meters</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-gutter-sm">
+            <input type="date" aria-label="Start date" value="2026-06-01" class="rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-mono-sm text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+            <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">to</span>
+            <input type="date" aria-label="End date" value="2026-11-23" class="rounded-md border border-outline-variant bg-surface-container-low px-3 py-2 font-mono text-mono-sm text-on-surface tabular-nums focus:border-secondary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-secondary/20">
+          </div>
+        </section>
+
+        <!-- 4 Consumption KPI Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-md" aria-label="Electricity Consumption KPI Summary">
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant truncate" data-design-text-token="label-md">Total Consumption</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-container text-primary">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">bolt</span>
+              </span>
+            </div>
+            <p class="font-headline text-headline-md text-on-surface tabular-nums truncate" data-design-text-token="headline-md">1,842,640 kWh</p>
+            <p class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">+6.8% vs prior 6 months</p>
+          </div>
+
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant truncate" data-design-text-token="label-md">Average Monthly</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary-container text-on-secondary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">show_chart</span>
+              </span>
+            </div>
+            <p class="font-headline text-headline-md text-on-surface tabular-nums truncate" data-design-text-token="headline-md">307,107 kWh</p>
+            <p class="font-label text-label-sm text-primary" data-design-text-token="label-sm">Jun – Nov 2026 average</p>
+          </div>
+
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant truncate" data-design-text-token="label-md">Highest Property</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-tertiary-container text-on-tertiary-container">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">trending_up</span>
+              </span>
+            </div>
+            <p class="font-title text-title-lg text-on-surface truncate" data-design-text-token="title-lg">Sandton City Towers</p>
+            <p class="font-label text-label-sm text-on-surface-variant tabular-nums" data-design-text-token="label-sm">418,920 kWh (22.7% share)</p>
+          </div>
+
+          <div class="bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-xs min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-label text-label-md text-on-surface-variant truncate" data-design-text-token="label-md">Lowest Property</span>
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-container text-success">
+                <span class="material-symbols-outlined text-title-md" aria-hidden="true">eco</span>
+              </span>
+            </div>
+            <p class="font-title text-title-lg text-on-surface truncate" data-design-text-token="title-lg">Karoo Solar Depot</p>
+            <p class="font-label text-label-sm text-success tabular-nums" data-design-text-token="label-sm">14,380 kWh (solar offset)</p>
+          </div>
+        </section>
+
+        <!-- Row 1: Monthly Consumption Line Chart & Consumption Comparison -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
+
+          <!-- Monthly Consumption Line Chart -->
+          <section class="lg:col-span-7 bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-md min-w-0">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Monthly Consumption Trend</h2>
+                <p class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">Total grid draw in kWh (Jun – Nov 2026)</p>
+              </div>
+              <span class="rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container whitespace-nowrap tabular-nums" data-design-text-token="label-sm">Peak: 334,200 kWh</span>
+            </div>
+
+            <div class="w-full pt-gutter-xs">
+              <svg viewBox="0 0 600 220" class="w-full h-56" role="img" aria-label="Monthly electricity consumption line chart from June to November 2026">
+                <defs>
+                  <linearGradient id="kwhLineGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#174EA6" stop-opacity="0.18"></stop>
+                    <stop offset="100%" stop-color="#174EA6" stop-opacity="0.01"></stop>
+                  </linearGradient>
+                </defs>
+
+                <line x1="56" y1="25" x2="585" y2="25" stroke="#D5DCEB" stroke-dasharray="3 3"></line>
+                <line x1="56" y1="75" x2="585" y2="75" stroke="#D5DCEB" stroke-dasharray="3 3"></line>
+                <line x1="56" y1="125" x2="585" y2="125" stroke="#D5DCEB" stroke-dasharray="3 3"></line>
+                <line x1="56" y1="175" x2="585" y2="175" stroke="#D5DCEB"></line>
+
+                <text x="48" y="29" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">350k</text>
+                <text x="48" y="79" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">310k</text>
+                <text x="48" y="129" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">270k</text>
+                <text x="48" y="179" text-anchor="end" fill="#434752" font-size="11" font-family="JetBrains Mono, monospace">230k</text>
+
+                <polygon points="88,108 182,76 276,45 370,118 464,96 558,68 558,175 88,175" fill="url(#kwhLineGrad)"></polygon>
+                <polyline points="88,108 182,76 276,45 370,118 464,96 558,68" fill="none" stroke="#174EA6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+
+                <circle cx="88" cy="108" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <text x="88" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Jun</text>
+
+                <circle cx="182" cy="76" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <text x="182" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Jul</text>
+
+                <circle cx="276" cy="45" r="5.5" fill="#F5B700" stroke="#174EA6" stroke-width="2.5"></circle>
+                <text x="276" y="198" text-anchor="middle" fill="#1A1B21" font-weight="600" font-size="12" font-family="Inter, sans-serif">Aug</text>
+
+                <circle cx="370" cy="118" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <text x="370" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Sep</text>
+
+                <circle cx="464" cy="96" r="4.5" fill="#FFFFFF" stroke="#174EA6" stroke-width="2.5"></circle>
+                <text x="464" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Oct</text>
+
+                <circle cx="558" cy="68" r="4.5" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5"></circle>
+                <text x="558" y="198" text-anchor="middle" fill="#434752" font-size="12" font-family="Inter, sans-serif">Nov</text>
+              </svg>
+            </div>
+          </section>
+
+          <!-- Consumption Comparison (Current vs Prior Period) -->
+          <section class="lg:col-span-5 bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-md min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Consumption Comparison</h2>
+              <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary whitespace-nowrap" data-design-text-token="label-sm">YoY Period</span>
+            </div>
+
+            <div class="flex items-center gap-gutter-md">
+              <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface" data-design-text-token="label-sm">
+                <span class="h-2.5 w-2.5 rounded-sm bg-primary" aria-hidden="true"></span>
+                Current (2026)
+              </span>
+              <span class="inline-flex items-center gap-1.5 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">
+                <span class="h-2.5 w-2.5 rounded-sm bg-outline-variant" aria-hidden="true"></span>
+                Prior (2025)
+              </span>
+            </div>
+
+            <div class="flex flex-col gap-gutter-md pt-gutter-xs">
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Peak Tariff Hours</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">812,400 vs 768,100 kWh</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                    <div class="h-full rounded-full bg-primary" style="width: 82%;"></div>
+                  </div>
+                  <div class="h-2 w-full rounded-full bg-surface-container overflow-hidden">
+                    <div class="h-full rounded-full bg-outline-variant" style="width: 76%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Standard Tariff Hours</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">648,920 vs 612,450 kWh</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                    <div class="h-full rounded-full bg-secondary" style="width: 66%;"></div>
+                  </div>
+                  <div class="h-2 w-full rounded-full bg-surface-container overflow-hidden">
+                    <div class="h-full rounded-full bg-outline-variant" style="width: 61%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface" data-design-text-token="label-md">Off-Peak Hours</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums" data-design-text-token="mono-sm">381,320 vs 344,760 kWh</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="h-2.5 w-full rounded-full bg-surface-container overflow-hidden">
+                    <div class="h-full rounded-full bg-tertiary" style="width: 42%;"></div>
+                  </div>
+                  <div class="h-2 w-full rounded-full bg-surface-container overflow-hidden">
+                    <div class="h-full rounded-full bg-outline-variant" style="width: 37%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Row 2: Consumption by Property & Consumption by Meter -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg">
+
+          <!-- Consumption by Property -->
+          <section class="lg:col-span-6 bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-md min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h2 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Consumption by Property</h2>
+                <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Top properties by cumulative kWh</p>
+              </div>
+              <span class="rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-on-surface-variant whitespace-nowrap" data-design-text-token="label-sm">Top 5 Sites</span>
+            </div>
+
+            <div class="flex flex-col gap-gutter-md pt-gutter-xs">
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Sandton City Towers</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums shrink-0" data-design-text-token="mono-sm">418,920 kWh (22.7%)</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-primary" style="width: 78%;"></div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Menlyn Maine Mall</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums shrink-0" data-design-text-token="mono-sm">364,150 kWh (19.8%)</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-secondary" style="width: 68%;"></div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Atlantic Seaboard HOA</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums shrink-0" data-design-text-token="mono-sm">291,480 kWh (15.8%)</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-tertiary" style="width: 54%;"></div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Umhlanga Ridge Suites</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums shrink-0" data-design-text-token="mono-sm">224,890 kWh (12.2%)</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-success" style="width: 42%;"></div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Karoo Solar Depot</span>
+                  <span class="font-mono text-mono-sm text-on-surface tabular-nums shrink-0" data-design-text-token="mono-sm">14,380 kWh (0.8%)</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-surface-container overflow-hidden">
+                  <div class="h-full rounded-full bg-on-surface-variant" style="width: 5%;"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Consumption by Meter -->
+          <section class="lg:col-span-6 bg-surface rounded-lg border border-outline-variant p-gutter-lg shadow-sm flex flex-col gap-gutter-md min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h2 class="font-title text-title-md text-on-surface" data-design-text-token="title-md">Consumption by Meter</h2>
+                <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Highest-draw meters and meter classes</p>
+              </div>
+              <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary whitespace-nowrap" data-design-text-token="label-sm">4 Meter Classes</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+              <div class="rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">MTR-9041</span>
+                  <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">48.4%</span>
+                </div>
+                <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Three-Phase CT</p>
+                <p class="font-headline text-title-lg text-on-surface tabular-nums" data-design-text-token="title-lg">891,840 kWh</p>
+              </div>
+
+              <div class="rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">MTR-8824</span>
+                  <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">29.1%</span>
+                </div>
+                <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Commercial Smart</p>
+                <p class="font-headline text-title-lg text-on-surface tabular-nums" data-design-text-token="title-lg">536,210 kWh</p>
+              </div>
+
+              <div class="rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">MTR-7712</span>
+                  <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">18.3%</span>
+                </div>
+                <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Residential Prepaid</p>
+                <p class="font-headline text-title-lg text-on-surface tabular-nums" data-design-text-token="title-lg">337,200 kWh</p>
+              </div>
+
+              <div class="rounded-md border border-outline-variant bg-surface-container-low p-gutter-md flex flex-col gap-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-mono-sm text-primary" data-design-text-token="mono-sm">MTR-6105</span>
+                  <span class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">4.2%</span>
+                </div>
+                <p class="font-label text-label-md text-on-surface truncate" data-design-text-token="label-md">Solar Net-Meter</p>
+                <p class="font-headline text-title-lg text-on-surface tabular-nums" data-design-text-token="title-lg">77,390 kWh</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Historical Readings Table -->
+        <section class="bg-surface rounded-lg border border-outline-variant shadow-sm overflow-hidden" aria-label="Historical Readings Table">
+          <div class="px-gutter-lg py-gutter-md border-b border-outline-variant flex flex-wrap items-center justify-between gap-gutter-sm">
+            <div>
+              <h2 class="font-title text-title-lg text-on-surface" data-design-text-token="title-lg">Historical Readings</h2>
+              <p class="font-body text-body-md text-on-surface-variant" data-design-text-token="body-md">Recent verified meter interval snapshots</p>
+            </div>
+            <span class="rounded-full bg-primary-container px-2.5 py-0.5 font-label text-label-sm text-primary tabular-nums" data-design-text-token="label-sm">5 Readings</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant bg-surface-container-low">
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Reading Date</th>
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Meter ID</th>
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Property</th>
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Previous</th>
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Current</th>
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">Usage</th>
+                  <th scope="col" class="px-gutter-lg py-3 font-label text-label-sm text-on-surface-variant text-right" data-design-text-token="label-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/70">
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">23 Nov 2026</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MTR-9041</td>
+                  <td class="px-gutter-lg py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Sandton City Towers</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">348,210 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">418,920 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface font-semibold tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">70,710 kWh</td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Verified</span>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">22 Nov 2026</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MTR-8824</td>
+                  <td class="px-gutter-lg py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Menlyn Maine Mall</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">302,840 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">364,150 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface font-semibold tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">61,310 kWh</td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-tertiary-container px-2.5 py-0.5 font-label text-label-sm text-on-tertiary-container" data-design-text-token="label-sm">Peak Alert</span>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">21 Nov 2026</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MTR-7712</td>
+                  <td class="px-gutter-lg py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Atlantic Seaboard HOA</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">243,190 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">291,480 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface font-semibold tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">48,290 kWh</td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Verified</span>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">20 Nov 2026</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MTR-8410</td>
+                  <td class="px-gutter-lg py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Umhlanga Ridge Suites</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">186,420 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">224,890 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface font-semibold tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">38,470 kWh</td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Verified</span>
+                  </td>
+                </tr>
+
+                <tr class="hover:bg-surface-container-low/60 transition-colors duration-state-change">
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">19 Nov 2026</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-primary whitespace-nowrap" data-design-text-token="mono-sm">MTR-6105</td>
+                  <td class="px-gutter-lg py-3.5 font-label text-label-md text-on-surface whitespace-nowrap" data-design-text-token="label-md">Karoo Solar Depot</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface-variant tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">11,940 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">14,380 kWh</td>
+                  <td class="px-gutter-lg py-3.5 font-mono text-mono-sm text-on-surface font-semibold tabular-nums whitespace-nowrap" data-design-text-token="mono-sm">2,440 kWh</td>
+                  <td class="px-gutter-lg py-3.5 text-right whitespace-nowrap">
+                    <span class="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 font-label text-label-sm text-success" data-design-text-token="label-sm">Verified</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      const openBtn = document.getElementById('open-sidebar-btn');
+      const closeBtn = document.getElementById('close-sidebar-btn');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+    })();
+  </script>
+
+
+</body></html>
