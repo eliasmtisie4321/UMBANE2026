@@ -75,39 +75,39 @@ Every phase is complete only when its acceptance criteria are met, tests and bui
 - [x] Add a CI status badge to the README when the workflow is stable.
 
 ### 0.4 Supabase and environment configuration
-- [ ] Create the Supabase project.
+- [x] Create the Supabase project.
 - [ ] Configure local, preview and production environment variables.
-- [ ] Add only public client configuration to frontend environment variables.
-- [ ] Keep privileged keys, including the Supabase service-role key, server-side only.
-- [ ] Create a version-controlled database migration structure.
-- [ ] Document how developers configure their `.env` files.
+- [x] Add only public client configuration to frontend environment variables.
+- [x] Keep privileged keys, including the Supabase service-role key, server-side only.
+- [x] Create a version-controlled database migration structure.
+- [x] Document how developers configure their `.env` files.
 
 ### 0.5 Vercel deployment
-- [ ] Connect the GitHub repository to Vercel.
-- [ ] Configure the correct project root and build settings.
+- [x] Connect the GitHub repository to Vercel.
+- [x] Configure the correct project root and build settings.
 - [ ] Add required production environment variables.
-- [ ] Deploy the initial application.
-- [ ] Confirm the live URL loads successfully.
-- [ ] Confirm preview deployments work for branches or PRs.
-- [ ] Check that secrets are not exposed in client bundles or logs.
+- [x] Deploy the initial application.
+- [x] Confirm the live URL loads successfully.
+- [x] Confirm preview deployments work for branches or PRs.
+- [x] Check that secrets are not exposed in client bundles or logs.
 
 ### 0.6 Design system foundation
-- [ ] Store approved Stitch references in `docs/designs/`.
-- [ ] Extract design tokens for colours, typography, spacing, borders, radii and shadows.
-- [ ] Build shared UI primitives: button, input, textarea, select, card, badge/chip, modal, table, dropdown and loading indicator.
-- [ ] Build shared page layout, sidebar, top navigation and responsive navigation.
-- [ ] Define responsive breakpoints and mobile behaviour.
+- [x] Store approved Stitch references in `docs/designs/`.
+- [x] Extract design tokens for colours, typography, spacing, borders, radii and shadows.
+- [x] Build shared UI primitives: button, input, textarea, select, card, badge/chip, modal, table, dropdown and loading indicator.
+- [x] Build shared page layout, sidebar, top navigation and responsive navigation.
+- [x] Define responsive breakpoints and mobile behaviour.
 - [ ] Check keyboard focus, readable contrast and accessible labels.
 - [ ] Reuse shared components across screens.
 
 **Phase 0 is done when:**
-- [ ] The live Umbane URL loads.
-- [ ] Local setup is documented.
-- [ ] A PR triggers GitHub Actions.
-- [ ] CI passes lint, typecheck, tests and build.
+- [x] The live Umbane URL loads.
+- [x] Local setup is documented.
+- [x] A PR triggers GitHub Actions.
+- [x] CI passes lint, typecheck, tests and build.
 - [ ] Supabase and Vercel configuration is documented and secure.
-- [ ] The initial design system and shared layout are in place.
-- [ ] `main` is protected by the agreed PR and CI rules.
+- [x] The initial design system and shared layout are in place.
+- [x] `main` is protected by the agreed PR and CI rules.
 
 **Deliverable:** A deployed application foundation ready for feature development.
 
