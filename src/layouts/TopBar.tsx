@@ -1,5 +1,5 @@
-import { Bell, LogOut, Menu, Search, User } from 'lucide-react'
-import { Dropdown } from '@/components/ui'
+import { Bell, LogOut, Menu, Plus, Search, User } from 'lucide-react'
+import { Button, Dropdown } from '@/components/ui'
 
 interface TopBarProps {
   onOpenMenu: () => void
@@ -29,7 +29,10 @@ export function TopBar({ onOpenMenu }: TopBarProps) {
           className="w-full rounded-md border border-outline-variant bg-surface-container-low py-2 pl-9 pr-3 text-body-md placeholder:text-outline"
         />
       </div>
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-2">
+        <Button className="hidden sm:inline-flex">
+          <Plus size={16} aria-hidden="true" /> Quick Add
+        </Button>
         <button
           type="button"
           aria-label="Notifications"

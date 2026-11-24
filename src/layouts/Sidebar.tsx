@@ -69,6 +69,12 @@ export function Sidebar({ currentPath, open, onClose, onNavigate }: SidebarProps
               >
                 <Icon size={18} aria-hidden="true" />
                 {label}
+                {active && (
+                  <span
+                    className="ml-auto h-1.5 w-1.5 rounded-full bg-tertiary"
+                    aria-hidden="true"
+                  />
+                )}
               </a>
             )
           })}
