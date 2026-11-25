@@ -4,6 +4,16 @@ export function formatNumber(value: number): string {
   return value.toLocaleString('en-US')
 }
 
+/** Energy with up to three decimals (register precision): 14,850.5 kWh. */
+export function formatKwh(value: number): string {
+  return `${value.toLocaleString('en-US', { maximumFractionDigits: 3 })} kWh`
+}
+
+/** "96.3%" of a total, or undefined when there is no total to compare with. */
+export function percentOf(part: number, whole: number): string | undefined {
+  return whole > 0 ? `${Math.round((part / whole) * 1000) / 10}%` : undefined
+}
+
 /** South African rand, whole rands by default: R 1,482,950. */
 export function formatRand(value: number, options: { cents?: boolean } = {}): string {
   const digits = options.cents ? 2 : 0
@@ -15,6 +25,14 @@ export function formatRand(value: number, options: { cents?: boolean } = {}): st
 }
 
 const trimZero = (n: number) => n.toFixed(1).replace(/\.0$/, '')
+
+/** Axis-friendly plain number: 0, 0.5, 900, 1.5K, 2M. */
+export function formatCompact(value: number): string {
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) return `${trimZero(value / 1_000_000)}M`
+  if (abs >= 1_000) return `${trimZero(value / 1_000)}K`
+  return String(Math.round(value * 100) / 100)
+}
 
 /** Axis-friendly: R0, R900, R1.5K, R2M. */
 export function formatRandCompact(value: number): string {

@@ -24,6 +24,8 @@ export function canAccess(role: UserRole, path: string): boolean {
   if (role === 'staff') return !STAFF_BLOCKED.some((p) => matches(p, path))
   // Clients may view their own records but never open a create or edit page.
   if (/\/(new|edit)(\/|$)/.test(path)) return false
+  // Maintenance notes and technician names are internal.
+  if (matches('/electricity-meters/maintenance', path)) return false
   return CLIENT_ALLOWED.some((p) => matches(p, path))
 }
 

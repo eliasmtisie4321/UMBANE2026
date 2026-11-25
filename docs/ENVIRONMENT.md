@@ -70,3 +70,8 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   Managers and administrators can read and update requests in the `access_requests` table (Table Editor
   for now; there is no review screen yet). To approve one, invite the person from Authentication → Users
   and set their profile role. A request for an email that already has a pending one is ignored.
+
+- `20261125000006_meter_management.sql`: meter fields, reading rules, maintenance, the functions that
+  register and retire a meter, and the consumption views (see `docs/METERS.md`). It also ties the
+  property, meter and reading links to one business, and fails if existing rows link across businesses.
+  Run it before using the Electricity & Meters screens against a real project.

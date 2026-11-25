@@ -3,8 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import { renderAt, signedInAs } from '@/auth/authTestUtils'
+import * as maintenance from '@/services/maintenance'
 import * as svc from '@/services/properties'
-import { propertyFixture, propertyRow } from '@/test/fixtures'
+import { maintenanceFixture, propertyFixture, propertyRow } from '@/test/fixtures'
 import { err, ok } from '@/utils/result'
 
 vi.mock('@/services/properties', () => ({
@@ -18,7 +19,10 @@ vi.mock('@/services/properties', () => ({
   getCustomerOption: vi.fn(),
 }))
 
+vi.mock('@/services/maintenance', () => ({ getPropertyMaintenance: vi.fn() }))
+
 const s = vi.mocked(svc)
+const getMaintenance = vi.mocked(maintenance.getPropertyMaintenance)
 const CUSTOMER = '11111111-1111-1111-1111-111111111111'
 const cleo = { id: 'c1', name: 'Cleo Client', companyName: null, email: 'client1@umbane.test' }
 const kagiso = {
@@ -54,6 +58,7 @@ beforeEach(() => {
   s.getProperty.mockResolvedValue(ok(propertyFixture()))
   s.getPropertyMeters.mockResolvedValue(ok([]))
   s.getPropertyReadings.mockResolvedValue(ok([]))
+  getMaintenance.mockResolvedValue(ok([]))
   s.searchCustomerOptions.mockResolvedValue(ok([cleo, kagiso]))
   s.getCustomerOption.mockResolvedValue(ok(cleo))
 })
@@ -307,7 +312,7 @@ describe('property details', () => {
     )
   })
 
-  it('lists linked meters and the latest readings as service history', async () => {
+  it('lists linked meters and the latest readings', async () => {
     s.getPropertyMeters.mockResolvedValue(
       ok([{ id: 'm1', serialNumber: 'MTR-0001', status: 'active', installedOn: '2025-01-15' }]),
     )
@@ -326,10 +331,28 @@ describe('property details', () => {
     const meters = await screen.findByRole('region', { name: 'Linked electricity meters' })
     expect(await within(meters).findByText('MTR-0001')).toBeInTheDocument()
     expect(within(meters).getByText('15 Jan 2025')).toBeInTheDocument()
-    const history = screen.getByRole('region', { name: 'Service history' })
+    const history = screen.getByRole('region', { name: 'Latest meter readings' })
     expect(await within(history).findByText('1,385.25')).toBeInTheDocument()
     expect(within(history).getByText('Estimate')).toBeInTheDocument()
-    expect(within(history).getByText(/Maintenance records will appear here/)).toBeInTheDocument()
+    expect(within(meters).getByRole('link', { name: /Add meter/ })).toHaveAttribute(
+      'href',
+      '/electricity-meters/new?property=p1',
+    )
+  })
+
+  it('shows maintenance to staff, and neither it nor "Add meter" to clients', async () => {
+    getMaintenance.mockResolvedValue(ok([maintenanceFixture({ outcome: 'Seal replaced' })]))
+    const { unmount } = open('/properties/p1')
+    const panel = await screen.findByRole('region', { name: 'Service history' })
+    expect(await within(panel).findByText(/Tamper seal.*Seal replaced/)).toBeInTheDocument()
+    unmount()
+
+    getMaintenance.mockClear()
+    open('/properties/p1', 'client')
+    expect(await screen.findByRole('region', { name: 'Owner' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Service history' })).toBeNull()
+    expect(screen.queryByRole('link', { name: /Add meter/ })).toBeNull()
+    expect(getMaintenance).not.toHaveBeenCalled()
   })
 
   it('shows empty messages and keeps working when the meters panel fails', async () => {

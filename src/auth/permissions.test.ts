@@ -37,6 +37,9 @@ describe('canAccess', () => {
     expect(canAccess('client', '/properties/new')).toBe(false)
     expect(canAccess('client', '/properties/abc/edit')).toBe(false)
     expect(canAccess('client', '/support-tickets/new')).toBe(false)
+    expect(canAccess('client', '/electricity-meters/abc')).toBe(true)
+    expect(canAccess('client', '/electricity-meters/maintenance')).toBe(false)
+    expect(canAccess('staff', '/electricity-meters/maintenance')).toBe(true)
     // "new" must be a whole path segment, not just the start of one.
     expect(canAccess('client', '/support-tickets/newsletter')).toBe(true)
   })

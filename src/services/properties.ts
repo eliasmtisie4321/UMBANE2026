@@ -168,7 +168,7 @@ export const getPropertyMeters = (propertyId: string, client?: DbClient) =>
     )
   })
 
-/** Latest readings across all of a property's meters: its service history until Phase 4 adds more. */
+/** Latest readings across all of a property's meters. */
 export const getPropertyReadings = (propertyId: string, client?: DbClient) =>
   guarded<ReadingSummary[]>('Meter readings', client, async (c) => {
     const { data, error } = await c

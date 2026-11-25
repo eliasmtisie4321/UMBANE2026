@@ -213,7 +213,7 @@ Create version-controlled migrations for the proposed tables:
 - [x] Link properties to customers.
 - [x] Store addresses and property details.
 - [x] Search and filter properties.
-- [x] Display meters and service history for each property. _(Meters and latest readings. Maintenance records arrive with Phase 4.)_
+- [x] Display meters and service history for each property. _(Meters and latest readings. Maintenance added in Phase 4.)_
 - [x] Handle duplicate or incomplete records appropriately.
 
 **Done when:** Staff can create a customer, add a property and view the relationship between them.
@@ -224,17 +224,17 @@ Create version-controlled migrations for the proposed tables:
 
 **Goal:** Staff can register meters, record readings and review usage.
 
-- [ ] Build electricity management screens.
-- [ ] Register electricity meters and serial numbers.
-- [ ] Link meters to properties.
-- [ ] Track installation dates and meter status.
-- [ ] Record meter readings with dates.
-- [ ] Validate readings and flag unusual values.
-- [ ] Calculate consumption from consecutive readings where applicable.
-- [ ] Label estimates clearly and document calculation assumptions.
-- [ ] Display meter reading history.
-- [ ] Track maintenance, replacement and decommissioning.
-- [ ] Test consumption calculations and invalid readings.
+- [x] Build electricity management screens. _(Not built: photo upload (needs file storage), live telemetry, rand estimates (no tariff).)_
+- [x] Register electricity meters and serial numbers.
+- [x] Link meters to properties.
+- [x] Track installation dates and meter status.
+- [x] Record meter readings with dates.
+- [x] Validate readings and flag unusual values. _(Enforced in the database.)_
+- [x] Calculate consumption from consecutive readings where applicable.
+- [x] Label estimates clearly and document calculation assumptions. _(docs/METERS.md)_
+- [x] Display meter reading history.
+- [x] Track maintenance, replacement and decommissioning.
+- [x] Test consumption calculations and invalid readings.
 
 **Done when:** Staff can register a meter, record readings and view its history and calculated consumption.
 

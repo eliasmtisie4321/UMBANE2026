@@ -4,7 +4,7 @@ import { err } from '@/utils/result'
 import { getSupabase } from './supabase'
 
 /** The slice of the Supabase client the data services use; tests pass a fake. */
-export type DbClient = Pick<SupabaseClient, 'from'>
+export type DbClient = Pick<SupabaseClient, 'from' | 'rpc'>
 
 export interface DbError {
   code?: string
@@ -52,9 +52,66 @@ const UNIQUE_VIOLATIONS: Record<string, { field: string; message: string }> = {
     field: 'reference',
     message: 'A property with this reference already exists.',
   },
+  meters_business_serial_ci_uniq: {
+    field: 'serialNumber',
+    message: 'A meter with this serial number already exists.',
+  },
+  electricity_meters_business_id_serial_number_key: {
+    field: 'serialNumber',
+    message: 'A meter with this serial number already exists.',
+  },
+  meter_readings_meter_id_reading_date_key: {
+    field: 'readingDate',
+    message: 'This meter already has a reading on this date.',
+  },
   properties_customer_address_uniq: {
     field: 'address',
     message: 'This customer already has a property at this address.',
+  },
+}
+
+/** Rules raised by database triggers (migration 0006), as text a person can act on. */
+const RULES: Record<string, { field?: string; message: string }> = {
+  reading_below_previous: {
+    field: 'readingValue',
+    message: 'This is below the previous reading. Check the value and the date.',
+  },
+  reading_above_next: {
+    field: 'readingValue',
+    message: 'This is above a later reading. Check the value and the date.',
+  },
+  reading_in_future: { field: 'readingDate', message: 'A reading cannot be in the future.' },
+  reading_before_install: {
+    field: 'readingDate',
+    message: 'This is before the meter was installed.',
+  },
+  reading_after_retirement: {
+    field: 'readingDate',
+    message: 'This is after the meter was taken out of service.',
+  },
+  meter_installed_in_future: {
+    field: 'installedOn',
+    message: 'The installation date cannot be in the future.',
+  },
+  meter_installed_after_reading: {
+    field: 'installedOn',
+    message: 'This meter already has readings before that date.',
+  },
+  meter_retired_in_future: { field: 'retiredOn', message: 'The date cannot be in the future.' },
+  meter_retired_before_reading: {
+    field: 'retiredOn',
+    message: 'This meter has a reading after that date.',
+  },
+  meters_retired_after_install: {
+    field: 'retiredOn',
+    message: 'This is before the meter was installed.',
+  },
+  meter_retired: {
+    message: 'This meter has already been taken out of service. Refresh the page.',
+  },
+  maintenance_assignee_not_staff: {
+    field: 'assignedTo',
+    message: 'Choose a current team member.',
   },
 }
 
@@ -66,6 +123,13 @@ export function mapWriteError(e: DbError, what: string): AppError {
     return known
       ? { code: 'conflict', message: known[1].message, field: known[1].field }
       : { code: 'conflict', message: `This ${what} already exists.` }
+  }
+  if (e.code === '23514') {
+    // Longest name first: "meter_retired" is also the start of other rule names.
+    const rule = Object.keys(RULES)
+      .sort((a, b) => b.length - a.length)
+      .find((name) => text.includes(name))
+    if (rule) return { code: 'validation', ...RULES[rule] }
   }
   if (e.code === '23514' || e.code === '22P02' || e.code === '23502') {
     return {
