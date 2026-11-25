@@ -55,7 +55,11 @@ export function Sidebar({
         </div>
         <nav className="flex flex-col gap-1 overflow-y-auto p-2">
           {navItems.map(({ to, label, icon: Icon }) => {
-            const active = to === currentPath
+            // Highlight a section while anywhere inside it (/customers/123/edit keeps Customers lit).
+            const active =
+              to === '/'
+                ? currentPath === '/'
+                : currentPath === to || currentPath.startsWith(`${to}/`)
             return (
               <a
                 key={to}

@@ -4,6 +4,8 @@ export type ErrorCode =
 export interface AppError {
   code: ErrorCode
   message: string
+  /** Form field the message belongs to (e.g. a duplicate email), so a form can show it in place. */
+  field?: string
 }
 
 /** Every service function returns a Result instead of throwing. */

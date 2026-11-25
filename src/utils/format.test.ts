@@ -4,6 +4,7 @@ import {
   formatDate,
   formatDelta,
   formatNumber,
+  humanize,
   formatRand,
   formatRandCompact,
   monthLabel,
@@ -112,5 +113,14 @@ describe('dates', () => {
       'Dec',
     ])
     expect(formatDate('2026-09-05T08:00:00+00:00')).toBe('5 Sep 2026')
+  })
+})
+
+describe('humanize', () => {
+  it('turns stored codes into words', () => {
+    expect(humanize('partially_paid')).toBe('Partially paid')
+    expect(humanize('open')).toBe('Open')
+    expect(humanize('in_progress')).toBe('In progress')
+    expect(humanize('')).toBe('')
   })
 })

@@ -48,3 +48,14 @@ Notes:
 and runs `supabase/tests/rls.test.sql`, acting as each role. It runs in CI on every PR. PGlite uses a
 stand-in for Supabase's `auth` schema, so also run `supabase/tests/rls.test.sql` once in the SQL editor
 of a **development** Supabase project after applying migrations.
+
+## Customers and properties (Phase 3)
+
+- Staff, managers and administrators can create and edit customers and properties. Clients can only view
+  their own records and cannot open the create or edit pages.
+- Customers are deactivated, not deleted, so invoices, tickets and history stay intact. Hard deletion
+  remains a manager/administrator database permission with no screen yet.
+- The ID number is stored in full but shown masked (`880514•••••84`) on the profile. It is personal
+  information under POPIA: decide who may see it and how long it is kept before going live.
+- Duplicates are refused by the database (same email, ID number, company registration number, property
+  ID, or the same customer registering the same address twice) and shown as a message on the field.

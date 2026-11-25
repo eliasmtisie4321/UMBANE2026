@@ -57,3 +57,16 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   database update is applied" and the rest of the dashboard keeps working.
 
 `inventory_transactions.quantity` is signed: positive adds stock, negative removes it. Stock on hand is the sum.
+
+- `20261125000004_customer_property_fields.sql`: the customer and property fields from the designs
+  (customer type and segment, ID and registration numbers, address, Pending status, property reference,
+  units, status), duplicate protection (unique email, ID number, registration number, property reference,
+  and one property per customer and address) and a `business_id` default so the app never sends it.
+  Run it before using the Customers and Properties screens against a real project.
+
+- `20261125000005_access_requests.sql`: the "Create Account" button on the login page. It does **not**
+  open public sign-up (keep **Allow new users to sign up** off). Visitors call the `request_access()`
+  function, which stores a pending request for the first business; anonymous users have no table access.
+  Managers and administrators can read and update requests in the `access_requests` table (Table Editor
+  for now; there is no review screen yet). To approve one, invite the person from Authentication → Users
+  and set their profile role. A request for an email that already has a pending one is ignored.

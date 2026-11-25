@@ -47,6 +47,21 @@ insert into public.properties (id, business_id, customer_id, name, address, city
   ('d1000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'Sunrise Apartments', '12 Long Street', 'Cape Town'),
   ('d1000000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', 'Karoo Office', '4 Main Road', 'Beaufort West');
 
+-- Fields added in Phase 3 (customer type, ID/registration numbers, province, property reference...).
+update public.customers set customer_type = 'individual', segment = 'residential',
+  id_number = '8805145028084', province = 'Western Cape', city = 'Cape Town', status = 'active'
+  where id = 'c1000000-0000-0000-0000-000000000001';
+update public.customers set customer_type = 'business', segment = 'commercial',
+  company_name = 'Karoo Trading (Pty) Ltd', registration_number = '2019/482190/07',
+  province = 'Western Cape', city = 'Beaufort West', status = 'pending'
+  where id = 'c1000000-0000-0000-0000-000000000002';
+update public.properties set property_type = 'residential', province = 'Western Cape', suburb = 'City Bowl',
+  postal_code = '8001', units = 24, reference = 'PROP-1001'
+  where id = 'd1000000-0000-0000-0000-000000000001';
+update public.properties set property_type = 'commercial', province = 'Western Cape',
+  postal_code = '6970', units = 1, reference = 'PROP-1002', status = 'maintenance'
+  where id = 'd1000000-0000-0000-0000-000000000002';
+
 insert into public.electricity_meters (id, business_id, property_id, serial_number, installed_on) values
   ('e1000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000001', 'MTR-0001', '2025-01-15'),
   ('e1000000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002', 'MTR-0002', '2025-03-01');

@@ -94,6 +94,48 @@ select pg_temp.expect_error($$set local role anon; select * from public.invoice_
 select pg_temp.expect_error($$set local role anon; select * from public.monthly_revenue$$, 'anonymous cannot read monthly revenue');
 select pg_temp.expect_error($$set local role anon; select * from public.product_stock$$, 'anonymous cannot read stock levels');
 
+-- Customer and property rules (Phase 3) ----------------------------------------------------------
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into public.customers (business_id, name, customer_type, segment, id_number, province, postal_code, status)
+  values ('11111111-0000-0000-0000-000000000001', 'Phase 3 Customer', 'individual', 'residential', '9001015800088', 'Gauteng', '2196', 'pending');
+select pg_temp.expect((select count(*) from public.customers where name = 'Phase 3 Customer' and status = 'pending') = 1, 'staff can create a customer with the new fields and a pending status');
+insert into public.customers (name) values ('Default business customer');
+select pg_temp.expect((select business_id from public.customers where name = 'Default business customer') = '11111111-0000-0000-0000-000000000001', 'business_id defaults to the caller business');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, email) values ('11111111-0000-0000-0000-000000000001', 'Dup', 'CLIENT1@umbane.test')$$, 'duplicate email is refused, ignoring case');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, id_number) values ('11111111-0000-0000-0000-000000000001', 'Dup', '9001015800088')$$, 'duplicate ID number is refused');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, customer_type, company_name, registration_number) values ('11111111-0000-0000-0000-000000000001', 'Dup', 'business', 'Other Co', '2019/482190/07')$$, 'duplicate company registration number is refused');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, id_number) values ('11111111-0000-0000-0000-000000000001', 'Bad', '12345')$$, 'ID number must be 13 digits');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, segment) values ('11111111-0000-0000-0000-000000000001', 'Bad', 'galactic')$$, 'unknown customer segment is refused');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, status) values ('11111111-0000-0000-0000-000000000001', 'Bad', 'deleted')$$, 'unknown customer status is refused');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, province) values ('11111111-0000-0000-0000-000000000001', 'Bad', 'Narnia')$$, 'unknown province is refused');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, customer_type) values ('11111111-0000-0000-0000-000000000001', 'Bad', 'business')$$, 'a business customer must name the company');
+select pg_temp.expect_error($$insert into public.customers (business_id, name, postal_code) values ('11111111-0000-0000-0000-000000000001', 'Bad', '21')$$, 'postal code must be four digits');
+select pg_temp.expect_error($$update public.customers set business_id = '11111111-0000-0000-0000-000000000002' where name = 'Phase 3 Customer'$$, 'staff cannot move a customer to another business');
+
+insert into public.properties (business_id, customer_id, name, address, suburb, city, province, property_type, units, reference)
+  values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'Second block', '99 Bree Street', 'City Bowl', 'Cape Town', 'Western Cape', 'mixed_use', 8, 'PROP-2001');
+select pg_temp.expect((select count(*) from public.properties where reference = 'PROP-2001') = 1, 'staff can register a property');
+select pg_temp.expect_error($$insert into public.properties (business_id, customer_id, address, suburb, city) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', '99 BREE STREET', 'city bowl', 'cape town')$$, 'the same customer cannot register the same address twice, ignoring case');
+insert into public.properties (business_id, customer_id, address, suburb, city)
+  values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', '99 Bree Street', 'City Bowl', 'Cape Town');
+select pg_temp.expect((select count(*) from public.properties where address = '99 Bree Street') = 2, 'different customers may share a building address');
+select pg_temp.expect_error($$insert into public.properties (business_id, customer_id, address, reference) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', '1 Other Road', 'prop-2001')$$, 'duplicate property reference is refused, ignoring case');
+select pg_temp.expect_error($$insert into public.properties (business_id, customer_id, address, property_type) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', '2 Other Road', 'castle')$$, 'unknown property type is refused');
+select pg_temp.expect_error($$insert into public.properties (business_id, customer_id, address, units) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', '3 Other Road', 0)$$, 'a property needs at least one unit');
+select pg_temp.expect_error($$insert into public.properties (business_id, customer_id, address, status) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', '4 Other Road', 'haunted')$$, 'unknown property status is refused');
+
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+update public.customers set name = 'Hacked' where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select name from public.customers where id = 'c1000000-0000-0000-0000-000000000001') = 'Cleo Client', 'a client cannot edit their own customer record');
+select pg_temp.expect_error($$insert into public.properties (business_id, customer_id, address) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'Client-made')$$, 'a client cannot register a property');
+update public.properties set status = 'offline' where id = 'd1000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select status from public.properties where id = 'd1000000-0000-0000-0000-000000000001') = 'active', 'a client cannot change a property');
+
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+update public.customers set name = 'Cross-business edit' where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select count(*) from public.customers where name = 'Cross-business edit') = 0, 'another business cannot edit our customers');
+select pg_temp.expect((select count(*) from public.properties) = 0, 'another business cannot see our properties');
+
 -- Staff capabilities and limits -----------------------------------------------------------------
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
 select pg_temp.expect((select count(*) from public.ticket_messages) = 2,'staff sees internal and public ticket messages');
@@ -110,6 +152,7 @@ select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';
 select pg_temp.expect((select count(*) from public.customers where name = 'Staff-created customer') = 0, 'manager can delete');
 select pg_temp.expect((select count(*) from public.audit_logs) >= 1, 'manager can read audit logs');
+select pg_temp.expect((select count(*) from public.audit_logs where table_name = 'properties' and action = 'INSERT') >= 2, 'property changes are in the audit trail');
 update public.profiles set role = 'administrator' where id = 'a3000000-0000-0000-0000-000000000001';
 select pg_temp.expect((select role from public.profiles where id = 'a3000000-0000-0000-0000-000000000001') = 'staff', 'manager cannot change roles (update matched no rows)');
 
@@ -129,5 +172,31 @@ select pg_temp.expect((select count(*) from public.customers) = 0, 'deactivated 
 select pg_temp.as_owner();
 select pg_temp.expect_error($$set local role anon; select * from public.customers$$, 'anonymous role has no access to customers');
 reset role;
+
+-- Access requests (public "Create account" button) ------------------------------------------
+select pg_temp.as_owner();
+set local role anon;
+select public.request_access('  Lerato Khumalo ', 'Lerato@Example.co.za ', '+27821234567', 'Please add me');
+select public.request_access('Lerato Again', 'lerato@example.co.za');
+reset role;
+select pg_temp.expect((select count(*) from public.access_requests where email = 'lerato@example.co.za') = 1, 'anonymous request is stored once; a repeat for the same email is ignored');
+select pg_temp.expect((select full_name from public.access_requests where email = 'lerato@example.co.za') = 'Lerato Khumalo', 'request input is trimmed and the email lower-cased');
+select pg_temp.expect((select business_id from public.access_requests where email = 'lerato@example.co.za') = '11111111-0000-0000-0000-000000000001', 'request goes to the first business');
+select pg_temp.expect_error($$set local role anon; select public.request_access('X', 'not-an-email')$$, 'invalid email is rejected');
+select pg_temp.expect_error($$set local role anon; select public.request_access('Valid Name', 'ok@example.co.za', '0821234567')$$, 'phone must be +27 format');
+select pg_temp.expect_error($$set local role anon; select * from public.access_requests$$, 'anonymous cannot read requests');
+select pg_temp.expect_error($$set local role anon; insert into public.access_requests (business_id, full_name, email) values ('11111111-0000-0000-0000-000000000001', 'Direct Insert', 'direct@example.co.za')$$, 'anonymous cannot insert directly');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect((select count(*) from public.access_requests) = 0, 'clients cannot see access requests');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.access_requests) = 0, 'another business cannot see the request');
+-- The manager was deactivated above; reactivate them to test the manager path.
+select pg_temp.as_owner();
+update public.profiles set is_active = true where id = 'a2000000-0000-0000-0000-000000000001';
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select count(*) from public.access_requests) = 1, 'manager sees their business requests');
+update public.access_requests set status = 'approved' where email = 'lerato@example.co.za';
+select pg_temp.expect((select status from public.access_requests where email = 'lerato@example.co.za') = 'approved', 'manager can approve a request');
+select pg_temp.expect_error($$insert into public.access_requests (business_id, full_name, email) values ('11111111-0000-0000-0000-000000000001', 'Manager Insert', 'm@example.co.za')$$, 'nobody can insert requests directly, even managers');
 
 rollback;

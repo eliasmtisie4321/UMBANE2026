@@ -201,20 +201,20 @@ Create version-controlled migrations for the proposed tables:
 **Goal:** Staff can manage customer records and linked properties.
 
 ### Customers
-- [ ] Create, view and edit customer records.
-- [ ] Store customer contact information.
-- [ ] Search, sort and filter customers.
-- [ ] Validate required fields and contact details.
-- [ ] Display related properties, invoices, orders and tickets.
-- [ ] Prevent unauthorized access to customer records.
+- [x] Create, view and edit customer records. _(Deactivate and reactivate instead of delete, so history is kept. Document upload from the design is not built; it needs file storage.)_
+- [x] Store customer contact information.
+- [x] Search, sort and filter customers.
+- [x] Validate required fields and contact details.
+- [x] Display related properties, invoices, orders and tickets.
+- [x] Prevent unauthorized access to customer records.
 
 ### Properties
-- [ ] Register and edit properties.
-- [ ] Link properties to customers.
-- [ ] Store addresses and property details.
-- [ ] Search and filter properties.
-- [ ] Display meters and service history for each property.
-- [ ] Handle duplicate or incomplete records appropriately.
+- [x] Register and edit properties.
+- [x] Link properties to customers.
+- [x] Store addresses and property details.
+- [x] Search and filter properties.
+- [x] Display meters and service history for each property. _(Meters and latest readings. Maintenance records arrive with Phase 4.)_
+- [x] Handle duplicate or incomplete records appropriately.
 
 **Done when:** Staff can create a customer, add a property and view the relationship between them.
 

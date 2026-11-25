@@ -44,6 +44,13 @@ describe('route protection', () => {
     expect(screen.queryByRole('link', { name: 'Settings' })).toBeNull()
   })
 
+  it('keeps a section highlighted on every page inside it', () => {
+    renderAt(<App />, signedInAs('manager'), '/customers/c1/edit')
+    expect(screen.getByRole('link', { name: 'Customers' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Overview' })).not.toHaveAttribute('aria-current')
+    expect(screen.getByRole('link', { name: 'Properties' })).not.toHaveAttribute('aria-current')
+  })
+
   it('navigates within the app without a page reload', async () => {
     renderAt(<App />, signedInAs('manager'), '/')
     await userEvent.click(screen.getByRole('link', { name: 'Customers' }))

@@ -136,6 +136,17 @@ export default function LoginScreen() {
         <Button type="submit" loading={submitting} disabled={!!auth.configError} className="w-full">
           Sign In
         </Button>
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <span className="h-px flex-1 bg-outline-variant" />
+          <span className="text-label-sm text-on-surface-variant">New to Umbane?</span>
+          <span className="h-px flex-1 bg-outline-variant" />
+        </div>
+        <Link
+          to="/create-account"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-outline bg-surface px-4 text-label-md font-medium text-primary hover:bg-surface-container"
+        >
+          Create Account
+        </Link>
       </form>
     </AuthLayout>
   )
