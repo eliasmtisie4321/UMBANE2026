@@ -1,20 +1,34 @@
 import { useState, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import type { NavItem } from './navItems'
 
 interface AppLayoutProps {
   currentPath?: string
   onNavigate?: (to: string) => void
+  navItems?: NavItem[]
+  onSignOut?: () => void
+  userName?: string
+  roleLabel?: string
   children: ReactNode
 }
 
 /** Authenticated page shell: sidebar (drawer on mobile), top bar, max-w-7xl content. */
-export function AppLayout({ currentPath = '/', onNavigate, children }: AppLayoutProps) {
+export function AppLayout({
+  currentPath = '/',
+  onNavigate,
+  navItems,
+  onSignOut,
+  userName,
+  roleLabel,
+  children,
+}: AppLayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
     <div className="flex min-h-screen bg-surface-container-low">
       <Sidebar
         currentPath={currentPath}
+        navItems={navItems}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onNavigate={(to) => {
@@ -23,7 +37,12 @@ export function AppLayout({ currentPath = '/', onNavigate, children }: AppLayout
         }}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar onOpenMenu={() => setMenuOpen(true)} />
+        <TopBar
+          onOpenMenu={() => setMenuOpen(true)}
+          onSignOut={onSignOut}
+          userName={userName}
+          roleLabel={roleLabel}
+        />
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 lg:p-8">{children}</main>
       </div>
     </div>

@@ -3,9 +3,12 @@ import { Button, Dropdown } from '@/components/ui'
 
 interface TopBarProps {
   onOpenMenu: () => void
+  onSignOut?: () => void
+  userName?: string
+  roleLabel?: string
 }
 
-export function TopBar({ onOpenMenu }: TopBarProps) {
+export function TopBar({ onOpenMenu, onSignOut, userName, roleLabel }: TopBarProps) {
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-outline-variant bg-surface px-4 lg:px-8">
       <button
@@ -40,9 +43,16 @@ export function TopBar({ onOpenMenu }: TopBarProps) {
         >
           <Bell size={20} aria-hidden="true" />
         </button>
+        {userName && (
+          <div className="hidden text-right leading-tight md:block">
+            <p className="text-label-md font-semibold text-on-surface">{userName}</p>
+            {roleLabel && <p className="text-label-sm text-on-surface-variant">{roleLabel}</p>}
+          </div>
+        )}
         <Dropdown label="Account menu" trigger={<User size={20} aria-hidden="true" />}>
           <button
             type="button"
+            onClick={onSignOut}
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-label-md hover:bg-surface-container"
           >
             <LogOut size={16} aria-hidden="true" /> Sign out
