@@ -109,6 +109,24 @@ const RULES: Record<string, { field?: string; message: string }> = {
   meter_retired: {
     message: 'This meter has already been taken out of service. Refresh the page.',
   },
+  assignee_not_staff: { field: 'assignedTo', message: 'Choose a current team member.' },
+  lead_transition: { message: 'A lead cannot start as converted or lost.' },
+  lead_converted: { message: 'This lead has already been converted. Refresh the page.' },
+  lead_not_approved: {
+    message: 'Move the lead to Qualified, Proposal or Negotiation before converting it.',
+  },
+  lead_customer_exists: {
+    message: 'A matching customer already exists. Link the lead to that customer instead.',
+  },
+  order_transition: {
+    message: 'The order’s status has changed, so this step is not possible. Refresh the page.',
+  },
+  order_locked: { message: 'Only a pending order can be edited. Refresh the page.' },
+  order_empty: { message: 'Add at least one product or service first.' },
+  order_too_many_items: { message: 'An order can have at most 100 lines.' },
+  order_date_future: { field: 'orderDate', message: 'The order date cannot be in the future.' },
+  order_property_mismatch: { message: 'The property does not belong to this customer.' },
+  order_lead_mismatch: { message: 'The lead was not converted into this customer.' },
   maintenance_assignee_not_staff: {
     field: 'assignedTo',
     message: 'Choose a current team member.',
@@ -131,7 +149,7 @@ export function mapWriteError(e: DbError, what: string): AppError {
       .find((name) => text.includes(name))
     if (rule) return { code: 'validation', ...RULES[rule] }
   }
-  if (e.code === '23514' || e.code === '22P02' || e.code === '23502') {
+  if (['23514', '22P02', '23502', '22003'].includes(e.code ?? '')) {
     return {
       code: 'validation',
       message: 'Some of the details are not valid. Check the form and try again.',

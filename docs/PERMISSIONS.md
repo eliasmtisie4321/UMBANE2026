@@ -70,3 +70,13 @@ of a **development** Supabase project after applying migrations.
   staff only.
 - Links between customers, properties, meters, readings and maintenance include the business in the
   foreign key, so a record cannot point at another business's record even if its ID is known.
+
+## Leads, sales and orders (Phase 5)
+
+- Staff and above manage leads, orders and activities. Clients see their own orders, read-only, including
+  order notes; never leads, activities, history or sales.
+- Staff may delete the **lines** of a pending order, because editing an order replaces its lines. They still
+  cannot delete orders.
+- A sale that belongs to an order is written by the database only. This narrows the matrix above: staff can
+  no longer add or change those sales directly.
+- Status history is written by the database and cannot be edited or erased by anyone signed in.

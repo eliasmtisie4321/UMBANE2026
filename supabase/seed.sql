@@ -72,7 +72,7 @@ insert into public.meter_readings (business_id, meter_id, reading_date, reading_
   ('11111111-0000-0000-0000-000000000001', 'e1000000-0000-0000-0000-000000000002', '2026-10-01', 640.000);
 
 insert into public.leads (business_id, name, email, source, status, assigned_to) values
-  ('11111111-0000-0000-0000-000000000001', 'Naledi Dlamini', 'naledi@example.test', 'website', 'new', 'a3000000-0000-0000-0000-000000000001');
+  ('11111111-0000-0000-0000-000000000001', 'Naledi Dlamini', 'naledi@example.test', 'web', 'new', 'a3000000-0000-0000-0000-000000000001');
 
 insert into public.products (id, business_id, sku, name, unit_price, low_stock_threshold) values
   ('f1000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'MTR-PREPAID', 'Prepaid meter', 850.00, 5);

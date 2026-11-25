@@ -75,3 +75,7 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   register and retire a meter, and the consumption views (see `docs/METERS.md`). It also ties the
   property, meter and reading links to one business, and fails if existing rows link across businesses.
   Run it before using the Electricity & Meters screens against a real project.
+
+- `20261125000007_sales.sql`: lead and order fields, the rules for stages, conversion, order totals and
+  status, sales history and activities (see `docs/SALES.md`). **Run it after 0006.** It renames unknown
+  lead sources to "other". Run it before using the Leads and Sales & Orders screens.

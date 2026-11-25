@@ -1,5 +1,6 @@
 import type { Customer, CustomerListItem } from '@/types/customers'
 import type { MaintenanceItem, Meter, MeterListItem, Reading } from '@/types/meters'
+import type { Lead, Order, SalesActivity } from '@/types/sales'
 import type { Property, PropertyListItem } from '@/types/properties'
 
 export const customerFixture = (over: Partial<Customer> = {}): Customer => ({
@@ -146,5 +147,93 @@ export const maintenanceFixture = (over: Partial<MaintenanceItem> = {}): Mainten
   completedOn: null,
   createdAt: '2026-11-01T08:00:00Z',
   isOverdue: true,
+  ...over,
+})
+
+export const leadFixture = (over: Partial<Lead> = {}): Lead => ({
+  id: 'l1',
+  reference: 'LEAD-00109',
+  name: 'Gavin Petersen',
+  companyName: 'Melrose Arch Holdings',
+  email: 'gavin@melrose.test',
+  phone: '+27116842200',
+  source: 'referral',
+  serviceInterest: 'Three-phase CT metering',
+  status: 'qualified',
+  estimatedValue: 540000,
+  expectedClose: '2026-12-15',
+  followUpOn: '2026-11-20',
+  followUpOverdue: true,
+  assignedTo: 'u9',
+  assignedName: 'Thabo Mokoena',
+  notes: null,
+  lostReason: null,
+  closedOn: null,
+  customerId: null,
+  customerName: null,
+  createdAt: '2026-11-01T08:00:00Z',
+  isOpen: true,
+  ...over,
+})
+
+export const orderFixture = (over: Partial<Order> = {}): Order => ({
+  id: 'o1',
+  reference: 'ORD-00842',
+  customerId: 'c1',
+  customerName: 'Cleo Client',
+  orderDate: '2026-11-22',
+  status: 'pending',
+  total: 312455,
+  itemCount: 2,
+  firstItem: 'CT meter',
+  assignedName: 'Thabo Mokoena',
+  propertyId: null,
+  propertyName: null,
+  leadId: 'l1',
+  paymentMethod: 'eft',
+  discountPercent: 5,
+  vatRate: 15,
+  subtotal: 286000,
+  discount: 14300,
+  tax: 40755,
+  notes: null,
+  cancelReason: null,
+  assignedTo: 'u9',
+  createdAt: '2026-11-22T08:00:00Z',
+  items: [
+    {
+      id: 'i1',
+      productId: null,
+      sku: null,
+      description: 'CT meter',
+      quantity: 2,
+      unitPrice: 120000,
+    },
+    {
+      id: 'i2',
+      productId: 'f1',
+      sku: 'MTR-PREPAID',
+      description: 'Prepaid meter',
+      quantity: 1,
+      unitPrice: 46000,
+    },
+  ],
+  ...over,
+})
+
+export const activityFixture = (over: Partial<SalesActivity> = {}): SalesActivity => ({
+  id: 'a1',
+  leadId: 'l1',
+  orderId: null,
+  kind: 'call',
+  subject: 'Proposal review call',
+  dueOn: '2026-11-20',
+  assignedTo: 'u9',
+  assignedName: 'Thabo Mokoena',
+  outcome: null,
+  completedAt: null,
+  isOverdue: true,
+  subjectName: 'Melrose Arch Holdings',
+  subjectReference: 'LEAD-00109',
   ...over,
 })
