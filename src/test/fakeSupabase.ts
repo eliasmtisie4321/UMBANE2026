@@ -17,7 +17,13 @@ type ReplyFor = Reply | ((ops: string[]) => Reply)
 export function fake(replies: Record<string, ReplyFor>) {
   const log: Array<{ table: string; ops: string[] }> = []
   const client = {
-    from(table: string) {
+    /** Recorded as table "rpc:<name>" with the arguments as its first op. */
+    rpc(name: string, args?: unknown) {
+      const builder = client.from(`rpc:${name}`)
+      log.at(-1)!.ops.push(JSON.stringify(args))
+      return builder
+    },
+    from(table: string): unknown {
       const entry = { table, ops: [] as string[] }
       log.push(entry)
       const builder: unknown = new Proxy(
@@ -43,6 +49,6 @@ export function fake(replies: Record<string, ReplyFor>) {
       )
       return builder
     },
-  } as unknown as DbClient
-  return { client, log }
+  }
+  return { client: client as unknown as DbClient, log }
 }

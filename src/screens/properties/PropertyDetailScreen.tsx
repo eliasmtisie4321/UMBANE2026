@@ -1,14 +1,17 @@
-import { Pencil } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { canAccess } from '@/auth/permissions'
+import { useAuth } from '@/auth/useAuth'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
 import { DetailList } from '@/components/data/DetailList'
 import { PageHeader } from '@/components/data/PageHeader'
 import { StatusBadge } from '@/components/data/StatusBadge'
 import { Badge, Table, Td, Th } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
+import { getPropertyMaintenance } from '@/services/maintenance'
 import { getProperty, getPropertyMeters, getPropertyReadings } from '@/services/properties'
 import { PROPERTY_TYPES, type Property } from '@/types/properties'
-import { formatDate, formatNumber, humanize } from '@/utils/format'
+import { formatDate, formatNumber } from '@/utils/format'
 
 const linkButton =
   'inline-flex items-center justify-center gap-2 rounded-md border border-outline-variant bg-surface px-4 py-2.5 text-label-md font-semibold text-primary hover:bg-surface-container'
@@ -19,6 +22,8 @@ const fullAddress = (p: Property) =>
     .join(', ')
 
 function DetailBody({ property }: { property: Property }) {
+  const { profile } = useAuth()
+  const canWrite = profile !== null && canAccess(profile.role, '/electricity-meters/new')
   const meters = useResource(() => getPropertyMeters(property.id), `meters-${property.id}`)
   const readings = useResource(() => getPropertyReadings(property.id), `readings-${property.id}`)
 
@@ -76,7 +81,20 @@ function DetailBody({ property }: { property: Property }) {
           />
         </Panel>
 
-        <Panel title="Linked electricity meters" className="lg:col-span-2">
+        <Panel
+          title="Linked electricity meters"
+          className="lg:col-span-2"
+          action={
+            canWrite && (
+              <Link
+                to={`/electricity-meters/new?property=${property.id}`}
+                className="inline-flex items-center gap-1 text-label-md font-semibold text-secondary hover:text-primary"
+              >
+                <Plus size={16} aria-hidden="true" /> Add meter
+              </Link>
+            )
+          }
+        >
           <ResourceBoundary
             state={meters}
             isEmpty={(rows) => rows.length === 0}
@@ -95,11 +113,16 @@ function DetailBody({ property }: { property: Property }) {
                 <tbody>
                   {rows.map((m) => (
                     <tr key={m.id}>
-                      <Td className="font-mono text-label-md">{m.serialNumber}</Td>
                       <Td>
-                        <Badge tone={m.status === 'active' ? 'success' : 'warning'}>
-                          {humanize(m.status)}
-                        </Badge>
+                        <Link
+                          to={`/electricity-meters/${m.id}`}
+                          className="font-mono text-label-md font-medium text-primary hover:underline"
+                        >
+                          {m.serialNumber}
+                        </Link>
+                      </Td>
+                      <Td>
+                        <StatusBadge status={m.status} />
                       </Td>
                       <Td className="whitespace-nowrap">
                         {m.installedOn ? formatDate(m.installedOn) : '-'}
@@ -112,7 +135,7 @@ function DetailBody({ property }: { property: Property }) {
           </ResourceBoundary>
         </Panel>
 
-        <Panel title="Service history" subtitle="Latest meter readings" className="lg:col-span-2">
+        <Panel title="Latest meter readings" className="lg:col-span-2">
           <ResourceBoundary
             state={readings}
             isEmpty={(rows) => rows.length === 0}
@@ -144,12 +167,66 @@ function DetailBody({ property }: { property: Property }) {
               </Table>
             )}
           </ResourceBoundary>
-          <p className="mt-3 text-label-md text-on-surface-variant">
-            Maintenance records will appear here once meter management is added.
-          </p>
         </Panel>
+        {canWrite && <MaintenancePanel propertyId={property.id} />}
       </div>
     </>
+  )
+}
+
+function MaintenancePanel({ propertyId }: { propertyId: string }) {
+  const state = useResource(() => getPropertyMaintenance(propertyId), `maintenance-${propertyId}`)
+  return (
+    <Panel
+      title="Service history"
+      subtitle="Maintenance on this property's meters"
+      className="lg:col-span-2"
+    >
+      <ResourceBoundary
+        state={state}
+        isEmpty={(rows) => rows.length === 0}
+        empty="No maintenance has been recorded for this property's meters."
+      >
+        {(rows) => (
+          <Table>
+            <caption className="sr-only">Maintenance</caption>
+            <thead>
+              <tr>
+                <Th>Work order</Th>
+                <Th>Meter</Th>
+                <Th>Issue</Th>
+                <Th>Date</Th>
+                <Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((w) => (
+                <tr key={w.id}>
+                  <Td className="whitespace-nowrap font-mono text-label-md">{w.reference}</Td>
+                  <Td>
+                    <Link
+                      to={`/electricity-meters/${w.meterId}`}
+                      className="font-mono text-label-md text-secondary hover:underline"
+                    >
+                      {w.serialNumber}
+                    </Link>
+                  </Td>
+                  <Td>{w.outcome ? `${w.issue}: ${w.outcome}` : w.issue}</Td>
+                  <Td className="whitespace-nowrap">
+                    {w.completedOn || w.scheduledFor
+                      ? formatDate((w.completedOn ?? w.scheduledFor)!)
+                      : '-'}
+                  </Td>
+                  <Td>
+                    <StatusBadge status={w.status} />
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </ResourceBoundary>
+    </Panel>
   )
 }
 

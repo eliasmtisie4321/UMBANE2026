@@ -1,4 +1,5 @@
 import type { Customer, CustomerListItem } from '@/types/customers'
+import type { MaintenanceItem, Meter, MeterListItem, Reading } from '@/types/meters'
 import type { Property, PropertyListItem } from '@/types/properties'
 
 export const customerFixture = (over: Partial<Customer> = {}): Customer => ({
@@ -68,5 +69,82 @@ export const propertyRow = (over: Partial<PropertyListItem> = {}): PropertyListI
   status: 'active',
   ownerName: 'Cleo Client',
   meterCount: 3,
+  ...over,
+})
+
+export const meterFixture = (over: Partial<Meter> = {}): Meter => ({
+  id: 'm1',
+  serialNumber: 'MTR-0001',
+  meterType: 'smart_prepaid',
+  category: 'residential_sub',
+  status: 'active',
+  installedOn: '2025-01-15',
+  location: 'Basement board',
+  installerName: 'Sipho Dlamini',
+  notes: null,
+  retiredOn: null,
+  retiredReason: null,
+  replacedById: null,
+  propertyId: 'p1',
+  propertyName: 'Sunrise Apartments',
+  propertyAddress: '12 Long Street, Cape Town',
+  propertyReference: 'PROP-1001',
+  customerId: 'c1',
+  customerName: 'Cleo Client',
+  ...over,
+})
+
+export const meterRow = (over: Partial<MeterListItem> = {}): MeterListItem => ({
+  id: 'm1',
+  serialNumber: 'MTR-0001',
+  meterType: 'smart_prepaid',
+  status: 'active',
+  installedOn: '2025-01-15',
+  propertyId: 'p1',
+  propertyName: 'Sunrise Apartments',
+  customerName: 'Cleo Client',
+  latestDate: '2026-11-01',
+  latestValue: 14850.5,
+  latestIsEstimate: false,
+  latestFlag: null,
+  estimatedMonthly: 243.4,
+  ...over,
+})
+
+export const readingFixture = (over: Partial<Reading> = {}): Reading => ({
+  id: 'r1',
+  readingDate: '2026-11-01',
+  readingValue: 14850.5,
+  isEstimate: false,
+  method: 'manual',
+  notes: null,
+  flag: null,
+  recordedByName: 'Sam Staff',
+  previousDate: '2026-10-01',
+  previousValue: 14600,
+  consumption: 250.5,
+  days: 31,
+  consumptionIsEstimate: false,
+  ...over,
+})
+
+export const maintenanceFixture = (over: Partial<MaintenanceItem> = {}): MaintenanceItem => ({
+  id: 'w1',
+  reference: 'MNT-00007',
+  meterId: 'm1',
+  serialNumber: 'MTR-0001',
+  propertyName: 'Sunrise Apartments',
+  customerName: 'Cleo Client',
+  kind: 'inspection',
+  issue: 'Tamper seal inspection due',
+  priority: 'urgent',
+  status: 'scheduled',
+  scheduledFor: '2026-11-20',
+  assignedTo: 'u9',
+  assignedName: 'Thabo Mokoena',
+  outcome: null,
+  completedOn: null,
+  createdAt: '2026-11-01T08:00:00Z',
+  isOverdue: true,
   ...over,
 })

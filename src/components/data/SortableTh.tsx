@@ -21,7 +21,7 @@ export function SortableTh({ label, active, ascending, onSort, className }: Sort
       <button
         type="button"
         onClick={onSort}
-        className="inline-flex items-center gap-1.5 font-semibold uppercase tracking-wide hover:text-primary"
+        className="inline-flex items-center gap-1.5 text-left font-semibold uppercase tracking-wide hover:text-primary"
       >
         {label}
         <Icon size={14} aria-hidden="true" className={active ? 'text-primary' : 'opacity-50'} />

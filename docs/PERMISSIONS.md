@@ -59,3 +59,14 @@ of a **development** Supabase project after applying migrations.
   information under POPIA: decide who may see it and how long it is kept before going live.
 - Duplicates are refused by the database (same email, ID number, company registration number, property
   ID, or the same customer registering the same address twice) and shown as a message on the field.
+
+## Electricity and meters (Phase 4)
+
+- Staff and above register and edit meters, record readings, and schedule and update maintenance.
+- Readings are never edited. A manager or administrator removes a wrong one and it is recorded again;
+  the audit log keeps the removed value.
+- Only a manager or administrator can put a retired meter back into service (no screen yet).
+- Clients see their own meters, readings and consumption. Maintenance (work notes, technician names) is
+  staff only.
+- Links between customers, properties, meters, readings and maintenance include the business in the
+  foreign key, so a record cannot point at another business's record even if its ID is known.
