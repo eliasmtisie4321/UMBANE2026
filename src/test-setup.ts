@@ -1,9 +1,13 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
 
 // Vitest globals are off, so RTL's automatic cleanup is not registered.
 afterEach(cleanup)
+
+// Screens load data asynchronously and the full suite runs many jsdom workers at once, so the
+// default 1s wait for "findBy" and "waitFor" is too tight on slower machines.
+configure({ asyncUtilTimeout: 5000 })
 
 // Tests must never reach a real Supabase project, even when a developer has a local .env.
 // With these blank, getSupabase() throws and services return errors instead of making requests.

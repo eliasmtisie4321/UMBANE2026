@@ -30,6 +30,23 @@ describe('canAccess', () => {
     expect(canAccess('client', '/invoices-admin')).toBe(false)
     expect(canAccess('staff', '/settingsx')).toBe(true)
   })
+
+  it('lets clients view their records but never open a create or edit page', () => {
+    expect(canAccess('client', '/properties')).toBe(true)
+    expect(canAccess('client', '/properties/abc')).toBe(true)
+    expect(canAccess('client', '/properties/new')).toBe(false)
+    expect(canAccess('client', '/properties/abc/edit')).toBe(false)
+    expect(canAccess('client', '/support-tickets/new')).toBe(false)
+    // "new" must be a whole path segment, not just the start of one.
+    expect(canAccess('client', '/support-tickets/newsletter')).toBe(true)
+  })
+
+  it('lets staff and above create and edit', () => {
+    for (const role of ['staff', 'manager', 'administrator'] as const) {
+      expect(canAccess(role, '/customers/new')).toBe(true)
+      expect(canAccess(role, '/properties/abc/edit')).toBe(true)
+    }
+  })
 })
 
 describe('navFor', () => {

@@ -22,6 +22,8 @@ const matches = (prefix: string, path: string) =>
 export function canAccess(role: UserRole, path: string): boolean {
   if (role === 'administrator' || role === 'manager') return true
   if (role === 'staff') return !STAFF_BLOCKED.some((p) => matches(p, path))
+  // Clients may view their own records but never open a create or edit page.
+  if (/\/(new|edit)(\/|$)/.test(path)) return false
   return CLIENT_ALLOWED.some((p) => matches(p, path))
 }
 

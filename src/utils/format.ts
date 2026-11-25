@@ -99,3 +99,9 @@ export function formatDate(iso: string): string {
   const d = new Date(iso)
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()].slice(0, 3)} ${d.getUTCFullYear()}`
 }
+
+/** "partially_paid" becomes "Partially paid". For showing stored status codes as words. */
+export function humanize(code: string): string {
+  const spaced = code.replace(/_/g, ' ').trim()
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
