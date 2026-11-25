@@ -65,9 +65,38 @@ insert into public.support_tickets (business_id, customer_id, reference, subject
   values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'TKT-C1', 'Own ticket');
 select pg_temp.expect((select count(*) from public.support_tickets) = 2, 'client can open a ticket for themselves');
 
+-- Dashboard views (security_invoker: they must obey the caller's RLS) ---------------------------
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select count(*) from public.invoice_balances) = 1, 'client sees only their own non-draft invoice balances');
+select pg_temp.expect((select balance from public.invoice_balances) = 250.00, 'client invoice balance = total minus payments (1150 - 900)');
+select pg_temp.expect((select count(*) from public.product_stock) = 0, 'client cannot see stock levels through the view');
+select pg_temp.expect((select outstanding_amount from public.invoice_summary) = 250.00 and (select outstanding_count from public.invoice_summary) = 1 and (select overdue_count from public.invoice_summary) = 0, 'client summary covers only their own invoices');
+
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) from public.invoice_balances) = 3, 'staff sees every invoice balance in their business');
+select pg_temp.expect((select is_overdue from public.invoice_balances where invoice_number = 'INV-0003'), 'unpaid invoice past due date is overdue');
+select pg_temp.expect(not (select is_overdue from public.invoice_balances where invoice_number = 'INV-0001'), 'invoice not yet due is not overdue');
+select pg_temp.expect((select outstanding_amount from public.invoice_summary) = 550.00 and (select outstanding_count from public.invoice_summary) = 2 and (select overdue_count from public.invoice_summary) = 1, 'staff summary: 250 + 300 outstanding, 2 invoices, 1 overdue (drafts excluded)');
+select pg_temp.expect((select count(*) from public.monthly_revenue) = 3, 'staff sees three months of revenue');
+select pg_temp.expect((select sum(total) from public.monthly_revenue) = 900.00, 'monthly revenue totals the payments received');
+select pg_temp.expect((select stock_on_hand from public.product_stock where sku = 'MTR-PREPAID') = 3, 'stock on hand = sum of signed transactions');
+select pg_temp.expect((select is_low from public.product_stock where sku = 'MTR-PREPAID'), 'stock at or below threshold is flagged low');
+
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.invoice_balances) = 0, 'other business sees no invoice balances');
+select pg_temp.expect((select count(*) from public.invoice_summary) = 0, 'other business sees no invoice summary');
+select pg_temp.expect((select count(*) from public.monthly_revenue) = 0, 'other business sees no revenue');
+select pg_temp.expect((select count(*) from public.product_stock) = 0, 'other business sees no stock');
+
+select pg_temp.as_owner();
+select pg_temp.expect_error($$set local role anon; select * from public.invoice_balances$$, 'anonymous cannot read invoice balances');
+select pg_temp.expect_error($$set local role anon; select * from public.invoice_summary$$, 'anonymous cannot read the invoice summary');
+select pg_temp.expect_error($$set local role anon; select * from public.monthly_revenue$$, 'anonymous cannot read monthly revenue');
+select pg_temp.expect_error($$set local role anon; select * from public.product_stock$$, 'anonymous cannot read stock levels');
+
 -- Staff capabilities and limits -----------------------------------------------------------------
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
-select pg_temp.expect((select count(*) from public.ticket_messages) = 2, 'staff sees internal and public ticket messages');
+select pg_temp.expect((select count(*) from public.ticket_messages) = 2,'staff sees internal and public ticket messages');
 insert into public.customers (business_id, name) values ('11111111-0000-0000-0000-000000000001', 'Staff-created customer');
 select pg_temp.expect_error($$insert into public.customers (business_id, name) values ('11111111-0000-0000-0000-000000000002', 'cross-business')$$, 'staff cannot create records in another business');
 delete from public.customers where name = 'Staff-created customer';

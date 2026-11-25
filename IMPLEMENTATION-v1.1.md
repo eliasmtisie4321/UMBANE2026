@@ -180,17 +180,17 @@ Create version-controlled migrations for the proposed tables:
 
 **Goal:** Users see a useful overview of the business based on their permissions.
 
-- [ ] Build dashboard layout from Stitch designs.
-- [ ] Display customer, property and meter totals.
-- [ ] Display outstanding invoices and sales summaries.
-- [ ] Display inventory and low-stock summaries.
-- [ ] Display open and overdue support tickets.
-- [ ] Display recent business activity.
-- [ ] Add date filters where relevant.
-- [ ] Implement charts where they add value.
-- [ ] Add loading, empty and error states.
-- [ ] Use real database queries rather than hardcoded values.
-- [ ] Restrict dashboard data according to user permissions.
+- [ ] Build dashboard layout from Stitch designs. _(Partly done: tiles, revenue chart and lists are built; Customer Growth, Recent Customer Registrations, Outstanding Payments and Upcoming Maintenance panels are not.)_
+- [x] Display customer, property and meter totals.
+- [ ] Display outstanding invoices and sales summaries. _(Outstanding invoices done; sales and order summaries wait for Phase 5.)_
+- [x] Display inventory and low-stock summaries.
+- [x] Display open and overdue support tickets. _(Tickets have no due date yet, so "overdue" is shown as open for more than 7 days.)_
+- [x] Display recent business activity.
+- [x] Add date filters where relevant.
+- [x] Implement charts where they add value.
+- [x] Add loading, empty and error states.
+- [x] Use real database queries rather than hardcoded values.
+- [x] Restrict dashboard data according to user permissions.
 
 **Done when:** Authorized users see accurate dashboard information from the database on the live application.
 
