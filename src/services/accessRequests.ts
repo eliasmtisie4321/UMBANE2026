@@ -36,7 +36,11 @@ export async function requestAccess(
         message: 'Some of the details are not valid. Check the form and try again.',
       })
     }
-    if (error.code === 'PGRST202' || error.code === '42883') {
+    if (
+      error.code === 'PGRST202' ||
+      error.code === '42883' ||
+      /not configured/i.test(error.message ?? '')
+    ) {
       return err({
         code: 'unknown',
         message: 'Account requests are not available yet. Please contact an administrator.',
