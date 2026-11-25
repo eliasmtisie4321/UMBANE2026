@@ -173,4 +173,30 @@ select pg_temp.as_owner();
 select pg_temp.expect_error($$set local role anon; select * from public.customers$$, 'anonymous role has no access to customers');
 reset role;
 
+-- Access requests (public "Create account" button) ------------------------------------------
+select pg_temp.as_owner();
+set local role anon;
+select public.request_access('  Lerato Khumalo ', 'Lerato@Example.co.za ', '+27821234567', 'Please add me');
+select public.request_access('Lerato Again', 'lerato@example.co.za');
+reset role;
+select pg_temp.expect((select count(*) from public.access_requests where email = 'lerato@example.co.za') = 1, 'anonymous request is stored once; a repeat for the same email is ignored');
+select pg_temp.expect((select full_name from public.access_requests where email = 'lerato@example.co.za') = 'Lerato Khumalo', 'request input is trimmed and the email lower-cased');
+select pg_temp.expect((select business_id from public.access_requests where email = 'lerato@example.co.za') = '11111111-0000-0000-0000-000000000001', 'request goes to the first business');
+select pg_temp.expect_error($$set local role anon; select public.request_access('X', 'not-an-email')$$, 'invalid email is rejected');
+select pg_temp.expect_error($$set local role anon; select public.request_access('Valid Name', 'ok@example.co.za', '0821234567')$$, 'phone must be +27 format');
+select pg_temp.expect_error($$set local role anon; select * from public.access_requests$$, 'anonymous cannot read requests');
+select pg_temp.expect_error($$set local role anon; insert into public.access_requests (business_id, full_name, email) values ('11111111-0000-0000-0000-000000000001', 'Direct Insert', 'direct@example.co.za')$$, 'anonymous cannot insert directly');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect((select count(*) from public.access_requests) = 0, 'clients cannot see access requests');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.access_requests) = 0, 'another business cannot see the request');
+-- The manager was deactivated above; reactivate them to test the manager path.
+select pg_temp.as_owner();
+update public.profiles set is_active = true where id = 'a2000000-0000-0000-0000-000000000001';
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select count(*) from public.access_requests) = 1, 'manager sees their business requests');
+update public.access_requests set status = 'approved' where email = 'lerato@example.co.za';
+select pg_temp.expect((select status from public.access_requests where email = 'lerato@example.co.za') = 'approved', 'manager can approve a request');
+select pg_temp.expect_error($$insert into public.access_requests (business_id, full_name, email) values ('11111111-0000-0000-0000-000000000001', 'Manager Insert', 'm@example.co.za')$$, 'nobody can insert requests directly, even managers');
+
 rollback;
