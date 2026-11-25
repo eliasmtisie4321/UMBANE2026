@@ -18,6 +18,15 @@ const TONES: Record<string, { tone: Tone; label: string }> = {
   high: { tone: 'warning', label: 'High' },
   medium: { tone: 'info', label: 'Medium' },
   routine: { tone: 'neutral', label: 'Routine' },
+  new: { tone: 'info', label: 'New' },
+  contacted: { tone: 'info', label: 'Contacted' },
+  qualified: { tone: 'warning', label: 'Qualified' },
+  proposal: { tone: 'warning', label: 'Proposal' },
+  negotiation: { tone: 'warning', label: 'Negotiation' },
+  converted: { tone: 'success', label: 'Converted' },
+  lost: { tone: 'neutral', label: 'Lost' },
+  confirmed: { tone: 'info', label: 'Confirmed' },
+  fulfilled: { tone: 'success', label: 'Fulfilled' },
   offline: { tone: 'error', label: 'Offline' },
 }
 

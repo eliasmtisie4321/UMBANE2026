@@ -252,6 +252,137 @@ select pg_temp.expect_error_like($$set local role anon; select * from public.met
 select pg_temp.expect_error_like($$set local role anon; select * from public.meter_maintenance$$, 'permission denied', 'anonymous cannot read maintenance');
 select pg_temp.expect_error_like($$set local role anon; select public.retire_meter('e1000000-0000-0000-0000-000000000002', '2026-11-24', 'Anonymous')$$, 'permission denied for function', 'anonymous cannot call meter functions');
 
+-- Leads, sales and orders (Phase 5) ---------------------------------------------------------------
+-- References kept across steps in a temp table every role may use.
+select pg_temp.as_owner();
+create temp table ref (k text primary key, id uuid) on commit drop;
+grant all on ref to authenticated, anon;
+
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into public.leads (name, company_name, email, phone, source, estimated_value, assigned_to, follow_up_on)
+  values ('Gavin Petersen', 'Melrose Arch Holdings', 'gavin@melrose.test', '+27116842200', 'referral', 540000, 'a3000000-0000-0000-0000-000000000001', '2026-01-05');
+insert into ref select 'lead', id from public.leads where name = 'Gavin Petersen';
+select pg_temp.expect((select is_open and follow_up_overdue and assigned_name = 'Sam Staff' and reference ~ '^LEAD-\d{5}$' from public.lead_list where name = 'Gavin Petersen'), 'lead list: open, overdue follow-up, assignee, reference');
+select pg_temp.expect((select total_value = 540000 and lead_count = 2 from public.lead_summary where status = 'new'), 'lead summary counts and values by stage');
+select pg_temp.expect_error_like($$insert into public.leads (name, status, lost_reason) values ('X Y', 'lost', 'no budget')$$, 'lead_transition', 'a lead cannot start closed');
+select pg_temp.expect_error_like($$insert into public.leads (name, source) values ('X Y', 'billboard')$$, 'leads_source_check', 'unknown source is refused');
+select pg_temp.expect_error_like($$insert into public.leads (name, assigned_to) values ('X Y', 'a4000000-0000-0000-0000-000000000001')$$, 'assignee_not_staff', 'a lead cannot be assigned to a client');
+select pg_temp.expect_error_like($$insert into public.leads (name, assigned_to) values ('X Y', 'b1000000-0000-0000-0000-000000000001')$$, 'assignee_not_staff', 'a lead cannot be assigned to another business');
+select pg_temp.expect_error_like($$insert into public.leads (name, estimated_value) values ('X Y', -1)$$, 'estimated_value_check', 'a negative value is refused');
+select pg_temp.expect_error_like($$update public.leads set status = 'lost' where name = 'Gavin Petersen'$$, 'leads_lost_has_reason', 'losing a lead needs a reason');
+update public.leads set status = 'lost', lost_reason = 'No budget' where name = 'Gavin Petersen';
+select pg_temp.expect((select closed_on = public.business_today() from public.leads where name = 'Gavin Petersen'), 'closing a lead records the date');
+update public.leads set status = 'contacted' where name = 'Gavin Petersen';
+select pg_temp.expect((select closed_on is null and lost_reason is null from public.leads where name = 'Gavin Petersen'), 'reopening clears the closing date and reason');
+
+-- Conversion
+select pg_temp.expect_error_like($$select public.convert_lead((select id from ref where k = 'lead'))$$, 'lead_not_approved', 'only an approved lead can be converted');
+select pg_temp.expect_error_like($$update public.leads set status = 'converted', converted_customer_id = 'c1000000-0000-0000-0000-000000000001' where name = 'Gavin Petersen'$$, 'lead_not_approved', 'nor by editing it directly');
+update public.leads set status = 'qualified' where name = 'Gavin Petersen';
+insert into ref select 'cust', public.convert_lead((select id from ref where k = 'lead'));
+select pg_temp.expect((select name = 'Gavin Petersen' and customer_type = 'business' and company_name = 'Melrose Arch Holdings' and email = 'gavin@melrose.test' and business_id = '11111111-0000-0000-0000-000000000001' from public.customers where id = (select id from ref where k = 'cust')), 'conversion creates the customer from the lead');
+select pg_temp.expect((select status = 'converted' and converted_customer_id = (select id from ref where k = 'cust') and closed_on is not null from public.leads where name = 'Gavin Petersen'), 'and links it');
+select pg_temp.expect_error_like($$select public.convert_lead((select id from ref where k = 'lead'))$$, 'lead_converted', 'a lead cannot be converted twice');
+select pg_temp.expect_error_like($$update public.leads set status = 'qualified', converted_customer_id = null where name = 'Gavin Petersen'$$, 'lead_converted', 'a conversion cannot be undone by editing');
+insert into public.leads (name, email, status) values ('G Petersen', ' GAVIN@melrose.test ', 'qualified');
+select pg_temp.expect((select matched_on = 'email' from public.lead_matches((select id from public.leads where name = 'G Petersen'))), 'matches an existing customer by email, ignoring case and spaces');
+select pg_temp.expect_error_like($$select public.convert_lead((select id from public.leads where name = 'G Petersen'), null, true)$$, 'lead_customer_exists', 'a duplicate email never creates a second customer');
+select pg_temp.expect(public.convert_lead((select id from public.leads where name = 'G Petersen'), (select id from ref where k = 'cust')) = (select id from ref where k = 'cust') and (select count(*) from public.customers where name like '%Petersen') = 1, 'it can be linked to the existing customer instead');
+insert into public.leads (name, phone, status) values ('Front Desk', '011 684 2200', 'proposal');
+select pg_temp.expect((select matched_on = 'phone' from public.lead_matches((select id from public.leads where name = 'Front Desk'))), 'matches a phone typed in another format');
+select pg_temp.expect_error_like($$select public.convert_lead((select id from public.leads where name = 'Front Desk'))$$, 'lead_customer_exists', 'a shared phone is refused by default');
+select pg_temp.expect(public.convert_lead((select id from public.leads where name = 'Front Desk'), null, true) is not null, 'and allowed when confirmed');
+insert into public.leads (name, phone, status) values ('No Contact', '123', 'qualified');
+select pg_temp.expect(not exists (select 1 from public.lead_matches((select id from public.leads where name = 'No Contact'))), 'a short phone number or missing email matches nobody');
+select pg_temp.expect_error_like($$select public.convert_lead((select id from public.leads where name = 'No Contact'), 'c2000000-0000-0000-0000-000000000001')$$, 'leads_converted_customer_id_fkey', 'a lead cannot be linked to another business''s customer');
+select pg_temp.expect((select array_agg(to_status order by created_at, to_status) @> array['new', 'lost', 'contacted', 'qualified', 'converted'] and bool_and(actor_name = 'Sam Staff') from public.sales_timeline where lead_id = (select id from ref where k = 'lead')), 'every stage change is in the lead history with who made it');
+
+-- Order totals
+insert into ref select 'order', public.save_order(null, (select id from ref where k = 'cust'),
+  '[{"description":" CT meter ","quantity":"2","unit_price":"120000.00"},{"product_id":"f1000000-0000-0000-0000-000000000001","description":"Prepaid meter","quantity":"1","unit_price":"46000"}]'::jsonb,
+  p_lead_id => (select id from ref where k = 'lead'), p_assigned_to => 'a3000000-0000-0000-0000-000000000001', p_discount_percent => 5);
+select pg_temp.expect((select subtotal = 286000 and discount = 14300 and tax = 40755 and total = 312455 and status = 'pending' and created_by = 'a3000000-0000-0000-0000-000000000001' from public.orders where id = (select id from ref where k = 'order')), 'totals: 286000 less 5% plus 15% VAT = 312455');
+select pg_temp.expect((select item_count = 2 and first_item = 'CT meter' and reference ~ '^ORD-\d{5}$' and customer_name = 'Gavin Petersen' from public.order_list where id = (select id from ref where k = 'order')), 'order list shows its lines in order');
+update public.orders set total = 1, subtotal = 1, tax = 0 where id = (select id from ref where k = 'order');
+select pg_temp.expect((select total = 312455 from public.orders where id = (select id from ref where k = 'order')), 'a total sent by the caller is ignored');
+insert into ref select 'o2', public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Odd cents","quantity":3,"unit_price":0.35}]'::jsonb, p_discount_percent => 33.33);
+select pg_temp.expect((select subtotal = 1.05 and discount = 0.35 and tax = 0.11 and total = 0.81 from public.orders where id = (select id from ref where k = 'o2')), 'cents round half up: 1.05 - 0.35 + 0.11 = 0.81 (0.105 rounds to 0.11)');
+select public.save_order((select id from ref where k = 'o2'), (select id from ref where k = 'cust'), '[{"description":"Replaced line","quantity":4,"unit_price":25}]'::jsonb, p_vat_rate => 0);
+select pg_temp.expect((select total = 100 and tax = 0 and discount = 0 from public.orders where id = (select id from ref where k = 'o2')) and (select count(*) from public.order_items where order_id = (select id from ref where k = 'o2')) = 1, 'staff editing an order replaces its lines rather than adding to them');
+
+-- Invalid orders
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[]'::jsonb)$$, 'order_empty', 'an order needs a line');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":0,"unit_price":1}]'::jsonb)$$, 'order_items_quantity_check', 'zero quantity is refused');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":1.5,"unit_price":1}]'::jsonb)$$, 'invalid input syntax', 'fractional quantity is refused');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":1,"unit_price":-1}]'::jsonb)$$, 'order_items_unit_price_check', 'negative price is refused');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":" ","quantity":1,"unit_price":1}]'::jsonb)$$, 'order_items_description_check', 'a line needs a description');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb, p_discount_percent => 101)$$, 'discount_percent_check', 'discount over 100% is refused');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb, p_vat_rate => 10)$$, 'vat_rate_check', 'an unknown VAT rate is refused');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb, p_order_date => public.business_today() + 1)$$, 'order_date_future', 'a future order date is refused');
+select pg_temp.expect_error_like($$select public.save_order(null, (select id from ref where k = 'cust'), '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb, p_property_id => 'd1000000-0000-0000-0000-000000000001')$$, 'order_property_mismatch', 'the property must belong to the customer');
+select pg_temp.expect_error_like($$select public.save_order(null, 'c1000000-0000-0000-0000-000000000001', '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb, p_lead_id => (select id from ref where k = 'lead'))$$, 'order_lead_mismatch', 'the lead must have become this customer');
+select pg_temp.expect_error_like($$insert into public.orders (customer_id, status) values ('c1000000-0000-0000-0000-000000000001', 'fulfilled')$$, 'order_transition', 'an order cannot start fulfilled');
+select pg_temp.expect((select count(*) from public.orders) = 2, 'failed saves leave nothing behind');
+
+-- Workflow
+select pg_temp.expect_error_like($$update public.orders set status = 'fulfilled' where id = (select id from ref where k = 'order')$$, 'order_transition', 'cannot skip confirmation');
+insert into public.orders (customer_id) values ('c1000000-0000-0000-0000-000000000001');
+select pg_temp.expect_error_like($$update public.orders set status = 'confirmed' where customer_id = 'c1000000-0000-0000-0000-000000000001'$$, 'order_empty', 'an empty order cannot be confirmed');
+update public.orders set status = 'confirmed' where id = (select id from ref where k = 'order');
+select pg_temp.expect_error_like($$select public.save_order((select id from ref where k = 'order'), (select id from ref where k = 'cust'), '[{"description":"Cheaper","quantity":1,"unit_price":1}]'::jsonb)$$, 'order_locked', 'a confirmed order cannot be edited');
+select pg_temp.expect_error_like($$update public.orders set discount_percent = 90 where id = (select id from ref where k = 'order')$$, 'order_locked', 'nor its discount changed');
+select pg_temp.expect_error_like($$update public.order_items set unit_price = 1 where order_id = (select id from ref where k = 'order')$$, 'order_locked', 'nor its lines');
+select pg_temp.expect_error_like($$insert into public.order_items (order_id, description, quantity, unit_price) values ((select id from ref where k = 'order'), 'Extra', 1, 1)$$, 'order_locked', 'nor lines added');
+delete from public.order_items where order_id = (select id from ref where k = 'order');
+select pg_temp.expect((select count(*) from public.order_items where order_id = (select id from ref where k = 'order')) = 2, 'nor lines removed');
+select pg_temp.expect((select count(*) from public.sales) = 0, 'no sale before fulfilment');
+select pg_temp.expect_error_like($$insert into public.sales (customer_id, order_id, amount) values ((select id from ref where k = 'cust'), (select id from ref where k = 'order'), 9999999)$$, 'row-level security', 'a sale for an order cannot be invented');
+update public.orders set status = 'fulfilled' where id = (select id from ref where k = 'order');
+select pg_temp.expect((select amount = 271700 and lead_id = (select id from ref where k = 'lead') and sold_by = 'a3000000-0000-0000-0000-000000000001' from public.sales where order_id = (select id from ref where k = 'order')), 'fulfilment records the sale without VAT, linked to its lead');
+update public.sales set amount = 1 where order_id = (select id from ref where k = 'order');
+select pg_temp.expect((select amount = 271700 from public.sales where order_id = (select id from ref where k = 'order')), 'and its amount cannot be changed');
+select pg_temp.expect_error_like($$update public.orders set status = 'cancelled', cancel_reason = 'Changed mind' where id = (select id from ref where k = 'order')$$, 'order_transition', 'a fulfilled order is final');
+select pg_temp.expect_error_like($$update public.orders set status = 'cancelled' where id = (select id from ref where k = 'o2')$$, 'orders_cancelled_has_reason', 'cancelling needs a reason');
+update public.orders set status = 'cancelled', cancel_reason = 'Changed mind' where id = (select id from ref where k = 'o2');
+select pg_temp.expect((select pending_count = 1 and confirmed_count = 0 and fulfilled_count = 1 and cancelled_count = 1 from public.sales_summary), 'sales summary counts by status');
+select pg_temp.expect((select total = 271700 and sale_count = 1 and month = date_trunc('month', public.business_today())::date from public.monthly_sales), 'monthly sales excludes VAT and unfulfilled orders');
+select pg_temp.expect((select count(*) = 3 from public.sales_timeline where order_id = (select id from ref where k = 'order')) and (select note = 'Changed mind' from public.sales_timeline where order_id = (select id from ref where k = 'o2') and to_status = 'cancelled'), 'order history records each step and the cancellation reason');
+select pg_temp.expect_error_like($$insert into public.sales_events (business_id, lead_id, to_status) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'lead'), 'won')$$, 'permission denied', 'history cannot be forged');
+select pg_temp.expect_error_like($$delete from public.sales_events$$, 'permission denied', 'or erased');
+
+-- Activities
+insert into public.sales_activities (lead_id, kind, subject, due_on, assigned_to) values ((select id from ref where k = 'lead'), 'call', 'Proposal review', '2026-01-05', 'a3000000-0000-0000-0000-000000000001');
+insert into public.sales_activities (order_id, kind, subject, completed_at) values ((select id from ref where k = 'order'), 'meeting', 'Site handover', '2000-01-01');
+select pg_temp.expect((select is_open and is_overdue and assigned_name = 'Sam Staff' and subject_name = 'Melrose Arch Holdings' from public.sales_activity_list where kind = 'call'), 'activity list: overdue, assignee and what it is about');
+select pg_temp.expect((select completed_at = now() and not is_open from public.sales_activity_list where kind = 'meeting'), 'when an activity was done is set by the database');
+select pg_temp.expect_error_like($$insert into public.sales_activities (kind, subject) values ('call', 'About nothing')$$, 'sales_activities_one_subject', 'an activity needs a lead or an order');
+select pg_temp.expect_error_like($$insert into public.sales_activities (lead_id, kind, subject, assigned_to) values ((select id from ref where k = 'lead'), 'call', 'For a client', 'a4000000-0000-0000-0000-000000000001')$$, 'assignee_not_staff', 'activities are assigned to staff only');
+
+-- Isolation
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1 owns customer c1 and its empty order
+select pg_temp.expect((select count(*) from public.order_list) = 1, 'client sees only their own orders');
+select pg_temp.expect((select count(*) from public.lead_list) + (select count(*) from public.sales_timeline) + (select count(*) from public.sales_activity_list) + (select count(*) from public.monthly_sales) + (select count(*) from public.lead_summary) = 0, 'client sees no leads, history, activities or sales');
+select pg_temp.expect_error_like($$select public.save_order(null, 'c1000000-0000-0000-0000-000000000001', '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb)$$, 'permission denied', 'client cannot create an order');
+update public.orders set status = 'confirmed';
+select pg_temp.expect((select status = 'pending' from public.orders), 'client cannot change an order');
+select pg_temp.expect_error_like($$select public.convert_lead((select id from ref where k = 'lead'))$$, 'lead_not_found', 'client cannot convert a lead');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.lead_list) + (select count(*) from public.order_list) + (select count(*) from public.sales_summary) + (select count(*) from public.monthly_sales) + (select count(*) from public.sales_timeline) + (select count(*) from public.sales_activity_list) = 0, 'another business sees nothing through any view');
+select pg_temp.expect(not exists (select 1 from public.lead_matches((select id from ref where k = 'lead'))), 'nor through lead matching');
+select pg_temp.expect_error_like($$select public.save_order(null, 'c1000000-0000-0000-0000-000000000001', '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb)$$, 'orders_customer_id_fkey', 'an order cannot use another business''s customer');
+select pg_temp.expect_error_like($$select public.save_order(null, 'c2000000-0000-0000-0000-000000000001', '[{"product_id":"f1000000-0000-0000-0000-000000000001","description":"Thing","quantity":1,"unit_price":1}]'::jsonb)$$, 'order_items_product_id_fkey', 'or its product');
+select pg_temp.expect_error_like($$select public.save_order((select id from ref where k = 'order'), 'c2000000-0000-0000-0000-000000000001', '[{"description":"Thing","quantity":1,"unit_price":1}]'::jsonb)$$, 'order_not_found', 'or edit its order');
+select pg_temp.expect_error_like($$insert into public.order_items (order_id, description, quantity, unit_price) values ((select id from ref where k = 'order'), 'Extra', 1, 1)$$, 'order_items_order_id_fkey', 'or add lines to it');
+select pg_temp.expect_error_like($$insert into public.order_items (business_id, order_id, description, quantity, unit_price) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'order'), 'Extra', 1, 1)$$, 'permission denied', 'claiming the other business reveals nothing');
+select pg_temp.expect_error_like($$insert into public.sales_activities (lead_id, kind, subject) values ((select id from ref where k = 'lead'), 'call', 'Not ours')$$, 'sales_activities_lead_fkey', 'or add activities to its leads');
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$set local role anon; select * from public.order_list$$, 'permission denied', 'anonymous cannot read orders');
+select pg_temp.expect_error_like($$set local role anon; select * from public.sales_activities$$, 'permission denied', 'anonymous cannot read activities');
+select pg_temp.expect_error_like($$set local role anon; select public.convert_lead(gen_random_uuid())$$, 'permission denied for function', 'anonymous cannot call sales functions');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+delete from public.orders where id = (select id from ref where k = 'o2');
+select pg_temp.expect(not exists (select 1 from public.order_items where order_id = (select id from ref where k = 'o2')), 'a manager can delete an order and its lines go with it');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

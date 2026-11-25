@@ -244,16 +244,16 @@ Create version-controlled migrations for the proposed tables:
 
 **Goal:** Staff can track prospective customers and manage sales.
 
-- [ ] Create and edit leads.
-- [ ] Track lead source, status and assigned staff member.
-- [ ] Search and filter leads.
-- [ ] Convert an approved lead into a customer without duplicating records.
-- [ ] Create sales records and customer orders.
-- [ ] Add products or services to orders.
-- [ ] Track order status and history.
-- [ ] Assign sales activities to staff.
-- [ ] Validate quantities, prices and totals.
-- [ ] Test lead conversion and order calculations.
+- [x] Create and edit leads.
+- [x] Track lead source, status and assigned staff member.
+- [x] Search and filter leads.
+- [x] Convert an approved lead into a customer without duplicating records.
+- [x] Create sales records and customer orders. _(A sale is recorded when an order is fulfilled; docs/SALES.md)_
+- [x] Add products or services to orders.
+- [x] Track order status and history.
+- [x] Assign sales activities to staff.
+- [x] Validate quantities, prices and totals.
+- [x] Test lead conversion and order calculations.
 
 **Done when:** A lead can be managed, converted into a customer and linked to an order.
 

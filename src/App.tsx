@@ -11,6 +11,12 @@ import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
 import CustomerProfileScreen from '@/screens/customers/CustomerProfileScreen'
 import { EditCustomerScreen, NewCustomerScreen } from '@/screens/customers/CustomerFormScreen'
 import CustomersScreen from '@/screens/customers/CustomersScreen'
+import LeadDetailScreen from '@/screens/leads/LeadDetailScreen'
+import { EditLeadScreen, NewLeadScreen } from '@/screens/leads/LeadFormScreen'
+import LeadsScreen from '@/screens/leads/LeadsScreen'
+import OrderDetailScreen from '@/screens/orders/OrderDetailScreen'
+import { EditOrderScreen, NewOrderScreen } from '@/screens/orders/OrderFormScreen'
+import OrdersScreen from '@/screens/orders/OrdersScreen'
 import MaintenanceScreen from '@/screens/meters/MaintenanceScreen'
 import MeterDetailScreen from '@/screens/meters/MeterDetailScreen'
 import { EditMeterScreen, NewMeterScreen } from '@/screens/meters/MeterFormScreen'
@@ -21,7 +27,7 @@ import PropertyDetailScreen from '@/screens/properties/PropertyDetailScreen'
 import { EditPropertyScreen, NewPropertyScreen } from '@/screens/properties/PropertyFormScreen'
 
 // Sections that have real screens; every other nav item still shows the placeholder.
-const BUILT = ['/customers', '/properties', '/electricity-meters']
+const BUILT = ['/customers', '/properties', '/electricity-meters', '/leads', '/sales-orders']
 
 export default function App() {
   return (
@@ -46,6 +52,14 @@ export default function App() {
         <Route path="/electricity-meters/readings/new" element={<RecordReadingScreen />} />
         <Route path="/electricity-meters/:id" element={<MeterDetailScreen />} />
         <Route path="/electricity-meters/:id/edit" element={<EditMeterScreen />} />
+        <Route path="/leads" element={<LeadsScreen />} />
+        <Route path="/leads/new" element={<NewLeadScreen />} />
+        <Route path="/leads/:id" element={<LeadDetailScreen />} />
+        <Route path="/leads/:id/edit" element={<EditLeadScreen />} />
+        <Route path="/sales-orders" element={<OrdersScreen />} />
+        <Route path="/sales-orders/new" element={<NewOrderScreen />} />
+        <Route path="/sales-orders/:id" element={<OrderDetailScreen />} />
+        <Route path="/sales-orders/:id/edit" element={<EditOrderScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route
             key={item.to}

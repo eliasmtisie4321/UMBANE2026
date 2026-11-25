@@ -4,6 +4,14 @@ const VERB: Record<string, string> = { INSERT: 'created', UPDATE: 'updated', DEL
 
 const OBJECT: Record<string, string> = {
   customers: 'a customer',
+  properties: 'a property',
+  electricity_meters: 'a meter',
+  meter_readings: 'a meter reading',
+  meter_maintenance: 'a maintenance work order',
+  leads: 'a lead',
+  orders: 'an order',
+  sales: 'a sale',
+  access_requests: 'an account request',
   profiles: 'a user',
   invoices: 'an invoice',
   payments: 'a payment',

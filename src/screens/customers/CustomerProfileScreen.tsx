@@ -233,7 +233,18 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
           </ResourceBoundary>
         </Panel>
 
-        <Panel title="Orders" subtitle="Most recent first">
+        <Panel
+          title="Orders"
+          subtitle="Most recent first"
+          action={
+            <Link
+              to={`/sales-orders/new?customer=${customer.id}`}
+              className="text-label-md font-semibold text-secondary hover:text-primary"
+            >
+              Create order
+            </Link>
+          }
+        >
           <ResourceBoundary
             state={orders}
             isEmpty={(rows) => rows.length === 0}
@@ -252,7 +263,14 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
                 <tbody>
                   {rows.map((o) => (
                     <tr key={o.id}>
-                      <Td className="whitespace-nowrap">{formatDate(o.createdAt)}</Td>
+                      <Td className="whitespace-nowrap">
+                        <Link
+                          to={`/sales-orders/${o.id}`}
+                          className="font-medium text-secondary hover:underline"
+                        >
+                          {formatDate(o.createdAt)}
+                        </Link>
+                      </Td>
                       <Td>
                         <Badge>{humanize(o.status)}</Badge>
                       </Td>

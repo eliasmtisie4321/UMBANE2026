@@ -118,6 +118,12 @@ export function formatDate(iso: string): string {
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()].slice(0, 3)} ${d.getUTCFullYear()}`
 }
 
+/** Date and time in South Africa (UTC+2): "22 Nov 2026, 10:05". */
+export function formatDateTime(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + 2 * 3_600_000)
+  return `${formatDate(d.toISOString())}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`
+}
+
 /** "partially_paid" becomes "Partially paid". For showing stored status codes as words. */
 export function humanize(code: string): string {
   const spaced = code.replace(/_/g, ' ').trim()
