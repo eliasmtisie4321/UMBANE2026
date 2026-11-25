@@ -44,3 +44,16 @@ under Authentication → Providers → Email.
 
 Run dev and tests from a shell whose path starts with an uppercase drive letter (`C:\...`). A lowercase
 `c:\...` path can make tools load files twice. The `@/` alias is root-relative to avoid this in Vite.
+
+## Applying database migrations
+
+Migrations in `supabase/migrations/` are applied in filename order. Until a deployment pipeline exists,
+apply new ones by pasting the file into the Supabase SQL editor (or with the Supabase CLI).
+
+- `20261125000001_core_schema.sql`, `20261125000002_rls_policies.sql`: schema and security (Phase 1).
+- `20261125000003_dashboard_views.sql`: read-only views for the dashboard (invoice balances and summary,
+  monthly revenue, stock on hand). They run with the caller's permissions, so existing Row Level Security
+  still applies. Until it is applied, dashboard cards that need it show "unavailable until the latest
+  database update is applied" and the rest of the dashboard keeps working.
+
+`inventory_transactions.quantity` is signed: positive adds stock, negative removes it. Stock on hand is the sum.
