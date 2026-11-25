@@ -1,15 +1,22 @@
 import { X, Zap } from 'lucide-react'
 import { cn } from '@/components/ui/cn'
-import { NAV_ITEMS } from './navItems'
+import { NAV_ITEMS, type NavItem } from './navItems'
 
 interface SidebarProps {
   currentPath: string
   open: boolean
   onClose: () => void
   onNavigate?: (to: string) => void
+  navItems?: NavItem[]
 }
 
-export function Sidebar({ currentPath, open, onClose, onNavigate }: SidebarProps) {
+export function Sidebar({
+  currentPath,
+  open,
+  onClose,
+  onNavigate,
+  navItems = NAV_ITEMS,
+}: SidebarProps) {
   return (
     <>
       {open && (
@@ -47,7 +54,7 @@ export function Sidebar({ currentPath, open, onClose, onNavigate }: SidebarProps
           </button>
         </div>
         <nav className="flex flex-col gap-1 overflow-y-auto p-2">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => {
+          {navItems.map(({ to, label, icon: Icon }) => {
             const active = to === currentPath
             return (
               <a

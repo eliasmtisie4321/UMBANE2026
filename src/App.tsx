@@ -1,15 +1,30 @@
-import { Card } from '@/components/ui'
-import { AppLayout } from '@/layouts/AppLayout'
+import { Route, Routes } from 'react-router-dom'
+import { ProtectedShell } from '@/layouts/ProtectedShell'
+import { NAV_ITEMS } from '@/layouts/navItems'
+import ComingSoonScreen from '@/screens/ComingSoonScreen'
+import ForgotPasswordScreen from '@/screens/ForgotPasswordScreen'
+import LoginScreen from '@/screens/LoginScreen'
+import NotFoundScreen from '@/screens/NotFoundScreen'
+import OverviewScreen from '@/screens/OverviewScreen'
+import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
 
 export default function App() {
   return (
-    <AppLayout>
-      <h1 className="mb-6 text-headline-md font-semibold text-on-surface">Umbane CRM</h1>
-      <Card>
-        <p className="text-on-surface-variant">
-          The foundation is in place. Features arrive phase by phase.
-        </p>
-      </Card>
-    </AppLayout>
+    <Routes>
+      <Route path="/login" element={<LoginScreen />} />
+      <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+      <Route path="/reset-password" element={<ResetPasswordScreen />} />
+      <Route element={<ProtectedShell />}>
+        <Route index element={<OverviewScreen />} />
+        {NAV_ITEMS.filter((i) => i.to !== '/').map((item) => (
+          <Route
+            key={item.to}
+            path={`${item.to}/*`}
+            element={<ComingSoonScreen title={item.label} />}
+          />
+        ))}
+        <Route path="*" element={<NotFoundScreen />} />
+      </Route>
+    </Routes>
   )
 }

@@ -27,3 +27,20 @@ Anything prefixed `VITE_` is bundled into the client, so only put public values 
   client-side routes work on refresh and deep links.
 - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for Production and Preview in
   Vercel → Project Settings → Environment Variables. Never add the service-role key.
+
+## Supabase Auth settings (required for sign-in and password reset)
+
+In Supabase → Authentication → URL Configuration:
+
+- **Site URL:** `https://umbane2026.vercel.app`
+- **Redirect URLs:** add `https://umbane2026.vercel.app/reset-password`, `http://localhost:5173/reset-password`,
+  and the Vercel preview pattern if you want reset links to work on previews.
+
+Password reset emails link to `/reset-password`; without these entries Supabase refuses the redirect.
+Users are created by an administrator (no public sign-up), so also turn off **Allow new users to sign up**
+under Authentication → Providers → Email.
+
+## Windows note
+
+Run dev and tests from a shell whose path starts with an uppercase drive letter (`C:\...`). A lowercase
+`c:\...` path can make tools load files twice. The `@/` alias is root-relative to avoid this in Vite.
