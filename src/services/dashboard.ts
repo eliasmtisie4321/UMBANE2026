@@ -1,5 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { AppError, Result } from '@/types/api'
+import type { Result } from '@/types/api'
 import type {
   ActivityEntry,
   InvoiceSummary,
@@ -13,61 +12,21 @@ import type {
 } from '@/types/dashboard'
 import { fillMonths, monthRange, previousMonthRange } from '@/utils/format'
 import { err, ok } from '@/utils/result'
-import { getSupabase } from './supabase'
+import { guarded, mapReadError, num, one, type DbClient } from './db'
 
 /**
  * Dashboard queries. Every function returns a Result and loads one card's data, so one failing
  * query never blanks the whole dashboard. All reads go through Row Level Security, so each role
  * only ever receives what it is allowed to see; nothing here filters by role itself.
  */
-export type DashboardClient = Pick<SupabaseClient, 'from'>
+export type DashboardClient = DbClient
 
-interface QueryError {
-  code?: string
-  message?: string
-}
-
-const resolve = (client?: DashboardClient): DashboardClient => client ?? getSupabase()
-
-function mapQueryError(e: QueryError, what: string): AppError {
-  if (e.code === '42501') {
-    return { code: 'forbidden', message: 'You do not have access to this information.' }
-  }
-  if (e.code === 'PGRST205' || e.code === '42P01') {
-    return {
-      code: 'unknown',
-      message: `${what} is unavailable until the latest database update is applied.`,
-    }
-  }
-  if (/failed to fetch|network/i.test(e.message ?? '')) {
-    return {
-      code: 'network',
-      message: 'Cannot reach the server. Check your connection and try again.',
-    }
-  }
-  return { code: 'unknown', message: `Could not load ${what}. Please try again.` }
-}
-
-async function guard<T>(
+const guard = <T>(
   what: string,
   client: DashboardClient | undefined,
   fn: (c: DashboardClient) => Promise<Result<T>>,
-): Promise<Result<T>> {
-  try {
-    return await fn(resolve(client))
-  } catch (e) {
-    return err(mapQueryError(e as QueryError, what))
-  }
-}
-
-const num = (v: unknown): number => {
-  const n = Number(v)
-  return Number.isFinite(n) ? n : 0
-}
-
-/** PostgREST returns a joined many-to-one row as an object, but tolerate an array too. */
-const one = <T>(v: T | T[] | null | undefined): T | null =>
-  Array.isArray(v) ? (v[0] ?? null) : (v ?? null)
+) => guarded(what, client, fn)
+const mapQueryError = mapReadError
 
 const OPEN_TICKET_STATUSES = ['open', 'assigned', 'in_progress']
 

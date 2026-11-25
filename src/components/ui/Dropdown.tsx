@@ -41,6 +41,8 @@ export function Dropdown({ label, trigger, children }: DropdownProps) {
       {open && (
         <div
           id={menuId}
+          // Choosing an item closes the menu, so it never lingers behind a dialog or new page.
+          onClick={() => setOpen(false)}
           className="absolute right-0 z-20 mt-2 min-w-48 rounded-md border border-outline-variant bg-surface p-1 shadow-card"
         >
           {children}

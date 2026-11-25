@@ -7,51 +7,8 @@ import {
   getRevenue,
   getTicketSummary,
   getTotals,
-  type DashboardClient,
 } from './dashboard'
-
-interface Reply {
-  data?: unknown
-  count?: number | null
-  error?: unknown
-}
-
-/**
- * Fake client: every query-builder method records itself and returns the builder, and awaiting
- * it yields the reply configured for the table. A reply can depend on the recorded calls.
- */
-function fake(replies: Record<string, Reply | ((ops: string[]) => Reply)>) {
-  const log: Array<{ table: string; ops: string[] }> = []
-  const client = {
-    from(table: string) {
-      const entry = { table, ops: [] as string[] }
-      log.push(entry)
-      const builder: unknown = new Proxy(
-        {},
-        {
-          get(_t, prop) {
-            if (prop === 'then') {
-              const r = replies[table]
-              const reply = typeof r === 'function' ? r(entry.ops) : (r ?? {})
-              const value = {
-                data: reply.data ?? null,
-                count: reply.count ?? null,
-                error: reply.error ?? null,
-              }
-              return (resolve: (v: unknown) => unknown) => Promise.resolve(value).then(resolve)
-            }
-            return (...args: unknown[]) => {
-              entry.ops.push(`${String(prop)}(${args.map((a) => JSON.stringify(a)).join(',')})`)
-              return builder
-            }
-          },
-        },
-      )
-      return builder
-    },
-  } as unknown as DashboardClient
-  return { client, log }
-}
+import { fake } from '@/test/fakeSupabase'
 
 const NOW = new Date('2026-11-25T12:00:00Z')
 

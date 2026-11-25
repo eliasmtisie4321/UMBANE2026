@@ -3,7 +3,10 @@ import { cn } from './cn'
 
 export function Table({ className, ...rest }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-outline-variant bg-surface">
+    // `relative` matters: absolutely positioned children (the sr-only caption and header labels)
+    // are only clipped by a scroll container that is itself positioned. Without it they sit at the
+    // far end of a wide table and stretch the whole page sideways on phones.
+    <div className="relative overflow-x-auto rounded-lg border border-outline-variant bg-surface">
       <table className={cn('w-full text-left text-body-md', className)} {...rest} />
     </div>
   )
