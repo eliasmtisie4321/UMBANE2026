@@ -27,6 +27,10 @@ const TONES: Record<string, { tone: Tone; label: string }> = {
   lost: { tone: 'neutral', label: 'Lost' },
   confirmed: { tone: 'info', label: 'Confirmed' },
   fulfilled: { tone: 'success', label: 'Fulfilled' },
+  in: { tone: 'success', label: 'In stock' },
+  low: { tone: 'warning', label: 'Low stock' },
+  out: { tone: 'error', label: 'Out of stock' },
+  service: { tone: 'neutral', label: 'Service' },
   offline: { tone: 'error', label: 'Offline' },
 }
 

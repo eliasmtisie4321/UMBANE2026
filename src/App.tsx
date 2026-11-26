@@ -16,6 +16,10 @@ import InvoiceDetailScreen from '@/screens/invoices/InvoiceDetailScreen'
 import InvoicesScreen from '@/screens/invoices/InvoicesScreen'
 import PaymentsScreen from '@/screens/invoices/PaymentsScreen'
 import InvoiceSettingsScreen from '@/screens/settings/InvoiceSettingsScreen'
+import InventoryHistoryScreen from '@/screens/inventory/InventoryHistoryScreen'
+import InventoryScreen from '@/screens/inventory/InventoryScreen'
+import ProductDetailScreen from '@/screens/inventory/ProductDetailScreen'
+import { EditProductScreen, NewProductScreen } from '@/screens/inventory/ProductFormScreen'
 import LeadDetailScreen from '@/screens/leads/LeadDetailScreen'
 import { EditLeadScreen, NewLeadScreen } from '@/screens/leads/LeadFormScreen'
 import LeadsScreen from '@/screens/leads/LeadsScreen'
@@ -39,6 +43,7 @@ const BUILT = [
   '/leads',
   '/sales-orders',
   '/invoices',
+  '/inventory',
 ]
 
 export default function App() {
@@ -77,6 +82,11 @@ export default function App() {
         <Route path="/invoices/payments" element={<PaymentsScreen />} />
         <Route path="/invoices/:id" element={<InvoiceDetailScreen />} />
         <Route path="/invoices/:id/edit" element={<EditInvoiceScreen />} />
+        <Route path="/inventory" element={<InventoryScreen />} />
+        <Route path="/inventory/new" element={<NewProductScreen />} />
+        <Route path="/inventory/history" element={<InventoryHistoryScreen />} />
+        <Route path="/inventory/:id" element={<ProductDetailScreen />} />
+        <Route path="/inventory/:id/edit" element={<EditProductScreen />} />
         <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

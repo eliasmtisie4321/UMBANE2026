@@ -84,3 +84,7 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   business and the invoice views (see `docs/INVOICES.md`). **Run it after 0007.** Existing invoices with the
   status "overdue" become "sent" (overdue is now worked out from the due date). After running it, an
   administrator should fill in Invoices → Settings (VAT number, bank details) before issuing invoices.
+
+- `20261126000009_inventory.sql`: product fields, the stock ledger rules, stock taken by fulfilled orders,
+  and the inventory views (see `docs/INVENTORY.md`). **Run it after 0008.** It works out each product's
+  stock from the movements already recorded.

@@ -31,7 +31,7 @@ const STEPS = {
   },
   fulfilled: {
     title: 'Mark this order as fulfilled?',
-    body: 'The sale is recorded now. A fulfilled order is final and cannot be cancelled.',
+    body: 'The sale is recorded and stocked products are taken out of stock now. A fulfilled order is final and cannot be cancelled.',
     label: 'Mark as fulfilled',
     notice: 'Order fulfilled and sale recorded.',
   },

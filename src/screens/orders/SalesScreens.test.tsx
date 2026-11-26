@@ -58,7 +58,16 @@ beforeEach(() => {
     ok([{ id: 'p1', name: 'Sunrise Apartments', detail: 'PROP-1001' }]),
   )
   o.searchProducts.mockResolvedValue(
-    ok([{ id: 'f1', sku: 'MTR-PREPAID', name: 'Prepaid meter', unitPrice: 850 }]),
+    ok([
+      {
+        id: 'f1',
+        sku: 'MTR-PREPAID',
+        name: 'Prepaid meter',
+        unitPrice: 850,
+        trackStock: true,
+        stockOnHand: 12,
+      },
+    ]),
   )
   a.getActivities.mockResolvedValue(ok([]))
   a.getOpenActivities.mockResolvedValue(ok([]))

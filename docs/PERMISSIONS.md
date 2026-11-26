@@ -91,3 +91,11 @@ of a **development** Supabase project after applying migrations.
   drafts, including drafts that were cancelled.
 - Every signed-in user can read their own business's billing details (name, VAT number, bank details), so
   clients can see where to pay. Only administrators can change them.
+
+## Inventory (Phase 7)
+
+- Staff and above add and edit products and record stock received, returned and adjusted. Sales come only
+  from fulfilled orders.
+- Stock movements cannot be edited or deleted by anyone. This narrows the matrix above, which let managers
+  delete stock transactions.
+- Products are deactivated rather than deleted. Clients see no products or stock.

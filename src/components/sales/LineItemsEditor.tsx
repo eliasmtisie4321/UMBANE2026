@@ -123,7 +123,13 @@ export function LineItemsEditor({ lines, errors, onChange, onEdited }: LineItems
             selected={null}
             search={(text) => searchProducts(text)}
             title={(p) => p.name}
-            detail={(p) => `${p.sku} · ${formatRand(p.unitPrice, { cents: true })}`}
+            detail={(p) =>
+              [
+                p.sku,
+                formatRand(p.unitPrice, { cents: true }),
+                p.trackStock ? `${p.stockOnHand.toLocaleString('en-US')} in stock` : 'service',
+              ].join(' · ')
+            }
             onSelect={chooseProduct}
           />
         </div>

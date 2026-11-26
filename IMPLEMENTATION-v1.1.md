@@ -284,16 +284,16 @@ Create version-controlled migrations for the proposed tables:
 
 **Goal:** Staff can manage products and keep stock quantities accurate.
 
-- [ ] Register and edit products.
-- [ ] Store product names, descriptions, SKU codes and prices.
-- [ ] Track current stock quantities.
-- [ ] Record stock received, sold, adjusted or returned.
-- [ ] Maintain inventory transaction history.
-- [ ] Configure low-stock thresholds and alerts.
-- [ ] Connect orders and sales to inventory movements.
-- [ ] Prevent invalid stock changes.
-- [ ] Define whether negative stock is allowed.
-- [ ] Test stock calculations and concurrent updates.
+- [x] Register and edit products.
+- [x] Store product names, descriptions, SKU codes and prices.
+- [x] Track current stock quantities.
+- [x] Record stock received, sold, adjusted or returned.
+- [x] Maintain inventory transaction history.
+- [x] Configure low-stock thresholds and alerts.
+- [x] Connect orders and sales to inventory movements.
+- [x] Prevent invalid stock changes.
+- [x] Define whether negative stock is allowed. _(Not allowed; docs/INVENTORY.md)_
+- [x] Test stock calculations and concurrent updates. _(Calculations tested; concurrency is handled by a row lock but cannot be tested on the single-connection test database.)_
 
 **Done when:** Product quantities update correctly when authorized stock transactions occur.
 
