@@ -119,3 +119,12 @@ of a **development** Supabase project after applying migrations.
   name and phone number.
 - Staff move their own tasks along (start, pause, complete) and post updates and photos, but cannot
   change, cancel or reopen a task. Deleting tasks, updates or files is for managers and is audited.
+
+## Communications (Phase 10)
+
+- Staff and above send email to customers (through the queue only), log calls and notes, and change a
+  customer's email preferences. Managers and administrators edit templates. Clients see no messages.
+- Sending, recording results and delivery reports are done only by the server (`api/` functions with
+  the service-role key). Nobody signed in can mark an email sent or delivered, write delivery history, or
+  suppress an address.
+- Messages cannot be edited or deleted by anyone signed in; the history is kept.

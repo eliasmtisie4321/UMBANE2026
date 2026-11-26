@@ -9,6 +9,9 @@ import NotFoundScreen from '@/screens/NotFoundScreen'
 import NotificationsScreen from '@/screens/NotificationsScreen'
 import OverviewScreen from '@/screens/OverviewScreen'
 import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
+import CommunicationsScreen from '@/screens/communications/CommunicationsScreen'
+import MessageDetailScreen from '@/screens/communications/MessageDetailScreen'
+import TemplatesScreen from '@/screens/communications/TemplatesScreen'
 import CustomerProfileScreen from '@/screens/customers/CustomerProfileScreen'
 import { EditCustomerScreen, NewCustomerScreen } from '@/screens/customers/CustomerFormScreen'
 import CustomersScreen from '@/screens/customers/CustomersScreen'
@@ -58,6 +61,7 @@ const BUILT = [
   '/notifications',
   '/team',
   '/tasks',
+  '/communications',
 ]
 
 export default function App() {
@@ -114,6 +118,9 @@ export default function App() {
         <Route path="/tasks/new" element={<NewTaskScreen />} />
         <Route path="/tasks/:id" element={<TaskDetailScreen />} />
         <Route path="/tasks/:id/edit" element={<EditTaskScreen />} />
+        <Route path="/communications" element={<CommunicationsScreen />} />
+        <Route path="/communications/templates" element={<TemplatesScreen />} />
+        <Route path="/communications/:id" element={<MessageDetailScreen />} />
         <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

@@ -354,15 +354,15 @@ Ticket statuses:
 
 **Goal:** Improve communication with customers through supported channels.
 
-- [ ] Store communication history.
-- [ ] Integrate an email provider for notifications and invoices.
-- [ ] Investigate and configure WhatsApp Business Platform integration.
-- [ ] Select an SMS provider if SMS is required.
-- [ ] Create reusable message templates.
-- [ ] Record delivery status and provider responses where available.
-- [ ] Handle failed messages and retries safely.
-- [ ] Store API credentials securely on the server.
-- [ ] Obtain required customer consent and respect communication preferences.
+- [x] Store communication history.
+- [x] Integrate an email provider for notifications and invoices.
+- [x] Investigate and configure WhatsApp Business Platform integration. (Investigated and documented in docs/COMMUNICATIONS.md; not configured, by decision: email first.)
+- [x] Select an SMS provider if SMS is required. (Not required for now; options documented.)
+- [x] Create reusable message templates.
+- [x] Record delivery status and provider responses where available.
+- [x] Handle failed messages and retries safely.
+- [x] Store API credentials securely on the server.
+- [x] Obtain required customer consent and respect communication preferences.
 - [ ] Test integrations in provider sandbox/test environments before production.
 
 **Done when:** The selected communication channel works in the deployed environment, with failures handled and logged.

@@ -29,20 +29,38 @@ import { businessToday } from '@/utils/consumption'
 import { formatDate, formatNumber, formatRand } from '@/utils/format'
 import { isRealDate } from '@/utils/meterForm'
 import { formatPhone } from '@/utils/phone'
-import { ok } from '@/utils/result'
+import { err, ok } from '@/utils/result'
+import type { Result } from '@/types/api'
+import { ComposeEmailDialog } from '@/components/messages/ComposeEmailDialog'
 
 const money = (n: number) => formatRand(n, { cents: true })
 
-/** A pre-filled email in the person's own mail program. The PDF is attached by hand. */
-function mailtoFor(i: Invoice) {
-  const subject = `Invoice ${i.invoiceNumber}`
-  const body = [
-    `Good day ${i.billTo.name},`,
-    '',
-    `Please find attached invoice ${i.invoiceNumber} for ${money(i.total)}, due ${i.dueDate ? formatDate(i.dueDate) : 'on receipt'}.`,
-    `Balance due: ${money(i.balance)}. Please use ${i.invoiceNumber} as your payment reference.`,
-  ].join('\n')
-  return `mailto:${encodeURIComponent(i.customerEmail ?? '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+/** The values an invoice email's placeholders are filled with. */
+const emailValues = (i: Invoice) => ({
+  invoice_number: i.invoiceNumber,
+  invoice_total: money(i.total),
+  balance_due: money(i.balance),
+  due_date: i.dueDate ? formatDate(i.dueDate) : 'on receipt',
+})
+
+/** Builds the same PDF people download, to attach to the email. */
+async function invoiceAttachment(
+  inv: Invoice,
+): Promise<Result<{ bytes: Uint8Array; name: string }>> {
+  const [supplier, payments] = await Promise.all([getBillingProfile(), getInvoicePayments(inv.id)])
+  if (!supplier.ok) return supplier
+  if (!payments.ok) return payments
+  try {
+    const { buildInvoicePdf } = await import('@/utils/invoicePdf')
+    const bytes = await buildInvoicePdf({
+      invoice: inv,
+      payments: payments.data,
+      supplier: supplier.data,
+    })
+    return ok({ bytes, name: `${inv.invoiceNumber ?? 'invoice'}.pdf` })
+  } catch {
+    return err({ code: 'unknown', message: 'The PDF could not be made. Please try again.' })
+  }
 }
 
 function InvoiceBody({
@@ -59,7 +77,7 @@ function InvoiceBody({
   const canWrite = canAccess(role, '/invoices/new')
   const isManager = role === 'administrator' || role === 'manager'
   const payments = useResource(() => getInvoicePayments(inv.id), `payments-${inv.id}-${version}`)
-  const [dialog, setDialog] = useState<'issue' | 'pay' | 'cancel' | null>(null)
+  const [dialog, setDialog] = useState<'issue' | 'pay' | 'cancel' | 'email' | null>(null)
   const [removing, setRemoving] = useState<Payment | null>(null)
   const [issueDate, setIssueDate] = useState(businessToday)
   const [busy, setBusy] = useState(false)
@@ -157,10 +175,10 @@ function InvoiceBody({
                 <Download size={16} aria-hidden="true" /> Download PDF
               </Button>
             )}
-            {canWrite && inv.invoiceNumber && inv.customerEmail && inv.status !== 'cancelled' && (
-              <a href={mailtoFor(inv)} className={secondaryLink}>
-                <Mail size={16} aria-hidden="true" /> Email Customer
-              </a>
+            {canWrite && inv.invoiceNumber && inv.status !== 'cancelled' && (
+              <Button variant="secondary" onClick={() => setDialog('email')}>
+                <Mail size={16} aria-hidden="true" /> Email Invoice
+              </Button>
             )}
             {canWrite && payable && (
               <Button onClick={() => setDialog('pay')}>
@@ -370,6 +388,24 @@ function InvoiceBody({
             onChange={(e) => setIssueDate(e.target.value)}
           />
         </ConfirmDialog>
+      )}
+      {dialog === 'email' && (
+        <ComposeEmailDialog
+          customerId={inv.customerId}
+          customerName={inv.billTo.name}
+          templateKey={inv.isOverdue ? 'payment_reminder' : 'invoice_issued'}
+          values={emailValues(inv)}
+          invoiceId={inv.id}
+          attachment={{
+            label: `the invoice PDF (${inv.invoiceNumber}.pdf)`,
+            build: () => invoiceAttachment(inv),
+          }}
+          onClose={() => setDialog(null)}
+          onDone={(notice) => {
+            setDialog(null)
+            onChanged(notice)
+          }}
+        />
       )}
       {dialog === 'pay' && (
         <PaymentDialog

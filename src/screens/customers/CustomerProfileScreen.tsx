@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
 import { ConfirmDialog } from '@/components/data/ConfirmDialog'
+import { Notice } from '@/components/data/ListPanel'
+import { CustomerCommunications } from '@/components/messages/CustomerCommunications'
 import { DetailList } from '@/components/data/DetailList'
 import { PageHeader } from '@/components/data/PageHeader'
 import { StatusBadge } from '@/components/data/StatusBadge'
@@ -38,6 +40,7 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [commsNotice, setCommsNotice] = useState<string | null>(null)
   const inactive = customer.status === 'inactive'
 
   async function toggle() {
@@ -363,6 +366,15 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
             )}
           </ResourceBoundary>
         </Panel>
+
+        <div className="flex flex-col gap-3 lg:col-span-2">
+          {commsNotice && <Notice>{commsNotice}</Notice>}
+          <CustomerCommunications
+            customerId={customer.id}
+            customerName={customer.name}
+            onNotice={setCommsNotice}
+          />
+        </div>
       </div>
 
       <ConfirmDialog

@@ -875,6 +875,161 @@ select pg_temp.expect_error_like($$set local role anon; select * from public.tas
 select pg_temp.expect_error_like($$set local role anon; select * from public.team_list$$, 'permission denied', 'anonymous cannot read the team');
 select pg_temp.expect_error_like($$set local role anon; select public.invite_staff('x@umbane.test', 'Anon', 'staff')$$, 'permission denied', 'anonymous cannot invite');
 
+-- Communications (Phase 10) ------------------------------------------------------------------------
+select pg_temp.as_owner();
+-- Acts as the Vercel function: the service role, with nobody signed in.
+create function pg_temp.as_service() returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+  execute 'set local role service_role';
+end $$;
+grant execute on function pg_temp.as_service() to authenticated, service_role;
+grant all on ref to service_role;
+
+-- Templates
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select array_agg(key order by key) = array['general', 'invoice_issued', 'payment_reminder', 'ticket_update'] from public.message_templates), 'every business starts with four templates');
+update public.message_templates set subject = 'Changed by staff' where key = 'general';
+select pg_temp.expect((select subject = 'A message from {{business_name}}' from public.message_templates where key = 'general'), 'staff cannot change templates');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.message_templates set subject = 'News from {{business_name}}', updated_by = 'a1000000-0000-0000-0000-000000000001' where key = 'general';
+select pg_temp.expect((select subject = 'News from {{business_name}}' and updated_by = 'a2000000-0000-0000-0000-000000000001' from public.message_templates where key = 'general'), 'a manager edits a template, and is recorded as the editor');
+select pg_temp.expect_error_like($$update public.message_templates set key = 'renamed' where key = 'general'$$, 'template_key_fixed', 'a template key never changes');
+select pg_temp.expect_error_like($$insert into public.message_templates (key, name, subject, body) values ('Bad Key', 'Bad', 'x', 'x')$$, 'message_templates_key_check', 'template keys are lower case words');
+insert into public.message_templates (key, name, purpose, subject, body) values ('winter_tips', 'Winter tips', 'marketing', 'Save electricity this winter', 'Hello {{customer_name}}');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) = 4 and bool_and(business_id = '11111111-0000-0000-0000-000000000002') from public.message_templates), 'another business has its own templates only');
+select pg_temp.as_owner();
+insert into public.businesses (id, name) values ('11111111-0000-0000-0000-000000000009', 'New Business');
+select pg_temp.expect((select count(*) = 4 from public.message_templates where business_id = '11111111-0000-0000-0000-000000000009'), 'a new business gets the templates');
+
+-- Preferences
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.customers set email_opt_out = true where id = 'c1000000-0000-0000-0000-000000000002';
+select pg_temp.expect((select email_opt_out and consent_updated_by = 'a3000000-0000-0000-0000-000000000001' and consent_updated_at is not null from public.customers where id = 'c1000000-0000-0000-0000-000000000002'), 'changing a preference records who and when');
+update public.customers set email_suppressed_at = now(), email_suppressed_reason = 'bounced', consent_updated_at = '2001-01-01' where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select email_suppressed_at is null and consent_updated_at is null from public.customers where id = 'c1000000-0000-0000-0000-000000000001'), 'people cannot suppress an address or backdate consent');
+
+-- Logged contacts
+insert into public.communication_logs (customer_id, channel, direction, body, status, created_by, sent_at, recipient) values ('c1000000-0000-0000-0000-000000000001', 'call', 'inbound', 'Called about the meter display.', 'delivered', 'a1000000-0000-0000-0000-000000000001', now(), 'x@y.z');
+select pg_temp.expect((select status = 'logged' and created_by = 'a3000000-0000-0000-0000-000000000001' and sent_at is null and recipient is null from public.communication_logs where body = 'Called about the meter display.'), 'a logged call is a record by the person signed in, never something sent');
+select pg_temp.expect_error_like($$insert into public.communication_logs (customer_id, channel, direction, subject, body, recipient) values ('c1000000-0000-0000-0000-000000000001', 'email', 'outbound', 'Hi', 'Sneaky', 'a@b.co')$$, 'row-level security', 'outgoing email can only be queued, not written directly');
+select pg_temp.expect_error_like($$insert into public.communication_logs (customer_id, channel, direction, body) values ('c1000000-0000-0000-0000-000000000001', 'note', 'outbound', '  ')$$, 'contact_note_required', 'a logged contact needs a note');
+select pg_temp.expect_error_like($$insert into public.communication_logs (customer_id, channel, direction, body) values ('c2000000-0000-0000-0000-000000000001', 'call', 'outbound', 'Other business')$$, 'permission denied', 'nor for another business''s customer');
+
+-- Queueing
+insert into ref select 'msg', public.queue_email('c1000000-0000-0000-0000-000000000001', ' Invoice INV-0001 ', 'Please find attached invoice INV-0001.', 'invoice_issued', 'transactional', 'a0100000-0000-0000-0000-000000000001');
+select pg_temp.expect((select status = 'queued' and recipient = 'client1@umbane.test' and created_by = 'a3000000-0000-0000-0000-000000000001' and attempts = 0 and subject = 'Invoice INV-0001' and invoice_number = 'INV-0001' from public.message_list where id = (select id from ref where k = 'msg')), 'staff queue an email to the customer''s own address, linked to the invoice');
+select pg_temp.expect((select count(*) = 1 from public.message_events where event = 'queued' and message_id = (select id from ref where k = 'msg')), 'and the queueing is in its history');
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x', p_invoice_id => 'a0100000-0000-0000-0000-000000000003')$$, 'message_link_mismatch', 'an email cannot link another customer''s invoice');
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x', p_ticket_id => 'a0200000-0000-0000-0000-000000000002')$$, 'message_link_mismatch', 'or ticket');
+select pg_temp.expect_error_like($$select public.queue_email('c2000000-0000-0000-0000-000000000001', 'x', 'x')$$, 'message_customer_not_found', 'nor go to another business''s customer');
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000001', 'Winter tips', 'x', p_purpose => 'marketing')$$, 'message_no_consent', 'marketing needs recorded consent');
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000002', 'x', 'x')$$, 'message_opted_out', 'a customer who opted out gets no email');
+insert into public.customers (name) values ('No Email Customer');
+select pg_temp.expect_error_like($$select public.queue_email((select id from public.customers where name = 'No Email Customer'), 'x', 'x')$$, 'message_no_email', 'a customer needs an email address');
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x', p_attachment_path => '11111111-0000-0000-0000-000000000001/m1/ghost.pdf')$$, 'attachment_not_uploaded', 'an attachment must really be uploaded');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) values ('message-attachments', '11111111-0000-0000-0000-000000000002/m1/x.pdf')$$, 'row-level security', 'attachments are uploaded under the person''s own business');
+insert into storage.objects (bucket_id, name, metadata) values ('message-attachments', '11111111-0000-0000-0000-000000000001/m1/INV-0001.pdf', '{"size": 1200, "mimetype": "application/pdf"}');
+select pg_temp.expect(public.queue_email('c1000000-0000-0000-0000-000000000001', 'With PDF', 'Attached.', p_attachment_path => '11111111-0000-0000-0000-000000000001/m1/INV-0001.pdf', p_attachment_name => 'INV-0001.pdf') is not null, 'an uploaded PDF can be attached');
+update public.communication_logs set status = 'sent', sent_at = now() where id = (select id from ref where k = 'msg');
+select pg_temp.expect((select status = 'queued' from public.communication_logs where id = (select id from ref where k = 'msg')), 'staff cannot mark an email as sent');
+select pg_temp.expect_error_like($$select * from public.claim_message((select id from ref where k = 'msg'))$$, 'permission denied', 'only the server claims emails for sending');
+select pg_temp.expect_error_like($$select public.record_message_result((select id from ref where k = 'msg'), true, 'fake', null, false)$$, 'permission denied', 'or records results');
+select pg_temp.expect_error_like($$insert into public.message_events (business_id, message_id, event) select '11111111-0000-0000-0000-000000000001', id, 'delivered' from ref where k = 'msg'$$, 'permission denied', 'nobody writes delivery history directly');
+
+-- The server sends: a temporary failure, then success, then delivery reports
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 1 and bool_and(status = 'sending' and attempts = 1) from public.claim_message((select id from ref where k = 'msg'))), 'the server claims a queued email');
+select pg_temp.expect((select count(*) = 0 from public.claim_message((select id from ref where k = 'msg'))), 'an email being sent cannot be claimed twice');
+select public.record_message_result((select id from ref where k = 'msg'), false, null, 'Resend 503: service unavailable', true);
+select pg_temp.expect((select status = 'failed' and error like 'Resend 503%' and next_attempt_at > now() and next_attempt_at <= now() + interval '1 minute' from public.communication_logs where id = (select id from ref where k = 'msg')), 'a temporary failure is tried again a minute later');
+select pg_temp.expect((select count(*) = 0 from public.claim_message((select id from ref where k = 'msg'))), 'but not before then');
+select pg_temp.as_owner();
+update public.communication_logs set next_attempt_at = now() - interval '1 second' where id = (select id from ref where k = 'msg');
+select pg_temp.as_service();
+select pg_temp.expect((select (select id from ref where k = 'msg') in (select public.due_messages(10))), 'once due it is listed for sending');
+select pg_temp.expect((select attempts = 2 from public.claim_message((select id from ref where k = 'msg'))), 'and claimed again, counting the attempt');
+select public.record_message_result((select id from ref where k = 'msg'), true, 'resend-1', null, false);
+select pg_temp.expect((select status = 'sent' and sent_at is not null and provider_message_id = 'resend-1' and error is null and next_attempt_at is null from public.communication_logs where id = (select id from ref where k = 'msg')), 'success records the provider''s id');
+select pg_temp.expect(public.record_provider_event('resend-1', 'email.delivery_delayed', 'evt-1', '{"type": "email.delivery_delayed"}', now()), 'a delivery report is accepted');
+select pg_temp.expect((select status = 'delayed' from public.communication_logs where id = (select id from ref where k = 'msg')), 'and shows a delay');
+select public.record_provider_event('resend-1', 'email.delivered', 'evt-2', '{}', now());
+select public.record_provider_event('resend-1', 'email.delivered', 'evt-2', '{}', now());
+select public.record_provider_event('resend-1', 'email.delivery_delayed', 'evt-3', '{}', now());
+select pg_temp.expect((select status = 'delivered' and delivered_at is not null from public.communication_logs where id = (select id from ref where k = 'msg')), 'delivered stays delivered whatever arrives later');
+select pg_temp.expect((select count(*) = 1 from public.message_events where provider_event_id = 'evt-2'), 'a repeated report is recorded once');
+select pg_temp.expect(not public.record_provider_event('nobody-knows', 'email.delivered', 'evt-x', '{}', now()), 'a report for an unknown email is ignored');
+
+-- A bounce stops further email to that address until it changes
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into ref select 'msg2', public.queue_email('c1000000-0000-0000-0000-000000000001', 'Second', 'Body');
+select pg_temp.as_service();
+select count(*) from public.claim_message((select id from ref where k = 'msg2'));
+select public.record_message_result((select id from ref where k = 'msg2'), true, 'resend-2', null, false);
+select public.record_provider_event('resend-2', 'email.bounced', 'evt-4', '{"bounce": {"type": "Permanent"}}', now());
+select pg_temp.expect((select status = 'bounced' from public.communication_logs where id = (select id from ref where k = 'msg2')) and (select email_suppressed_reason = 'bounced' and email_suppressed_at is not null and not email_opt_out from public.customers where id = 'c1000000-0000-0000-0000-000000000001'), 'a bounce marks the email and suppresses the address');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x')$$, 'message_recipient_suppressed', 'nothing more goes to a bounced address');
+update public.customers set email = ' ' || upper(email) || ' ' where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select email_suppressed_reason = 'bounced' from public.customers where id = 'c1000000-0000-0000-0000-000000000001'), 'saving the same address again, in capitals or with spaces, keeps the bounce');
+update public.customers set email = 'cleo.new@umbane.test' where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select email_suppressed_at is null from public.customers where id = 'c1000000-0000-0000-0000-000000000001'), 'a new address clears the bounce');
+
+-- A permanent failure waits for a person, who retries to the current address
+insert into ref select 'msg3', public.queue_email('c1000000-0000-0000-0000-000000000001', 'Third', 'Body');
+select pg_temp.as_service();
+select count(*) from public.claim_message((select id from ref where k = 'msg3'));
+select public.record_message_result((select id from ref where k = 'msg3'), false, null, 'Resend 422: invalid from address', false);
+select pg_temp.expect((select status = 'failed' and next_attempt_at is null and not (select will_retry from public.message_list where id = (select id from ref where k = 'msg3')) from public.communication_logs where id = (select id from ref where k = 'msg3')), 'a permanent failure is not retried by itself');
+select pg_temp.expect((select count(*) = 0 from public.claim_message((select id from ref where k = 'msg3'))), 'nor claimed');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect_error_like($$select public.cancel_message((select id from ref where k = 'msg'))$$, 'message_not_cancellable', 'a sent email cannot be cancelled');
+select pg_temp.expect_error_like($$select public.retry_message((select id from ref where k = 'msg'))$$, 'message_not_retryable', 'only a failed email is retried');
+update public.customers set email = ' Cleo.Latest@Umbane.test ' where id = 'c1000000-0000-0000-0000-000000000001';
+select public.retry_message((select id from ref where k = 'msg3'));
+select pg_temp.expect((select status = 'queued' and attempts = 0 and recipient = 'cleo.latest@umbane.test' and error is null from public.communication_logs where id = (select id from ref where k = 'msg3')), 'retrying queues it again to the current address');
+select pg_temp.as_owner();
+update public.communication_logs set attempts = 5 where id = (select id from ref where k = 'msg3');
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 0 from public.claim_message((select id from ref where k = 'msg3'))) and not ((select id from ref where k = 'msg3') in (select public.due_messages(50))), 'after five attempts the server stops trying');
+
+-- Preferences are checked again at send time; a stuck send is picked up again
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into ref select 'msg4', public.queue_email('c1000000-0000-0000-0000-000000000001', 'Fourth', 'Body');
+insert into ref select 'msg5', public.queue_email('c1000000-0000-0000-0000-000000000001', 'Fifth', 'Body');
+update public.customers set email_opt_out = true where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 0 from public.claim_message((select id from ref where k = 'msg4'))), 'an email to someone who opted out since it was queued is not sent');
+select pg_temp.expect((select status = 'cancelled' and error like '%message_opted_out%' from public.communication_logs where id = (select id from ref where k = 'msg4')), 'it is cancelled, with the reason');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.customers set email_opt_out = false where id = 'c1000000-0000-0000-0000-000000000001';
+select pg_temp.as_service();
+select count(*) from public.claim_message((select id from ref where k = 'msg5'));
+select pg_temp.as_owner();
+update public.communication_logs set last_event_at = now() - interval '11 minutes' where id = (select id from ref where k = 'msg5');
+select pg_temp.as_service();
+select pg_temp.expect((select attempts = 2 from public.claim_message((select id from ref where k = 'msg5'))), 'a send that never finished is picked up again after ten minutes');
+select public.record_message_result((select id from ref where k = 'msg5'), true, 'resend-5', null, false);
+select public.record_provider_event('resend-5', 'email.complained', 'evt-5', '{}', now());
+select pg_temp.expect((select email_opt_out and not marketing_consent and email_suppressed_reason = 'complained' from public.customers where id = 'c1000000-0000-0000-0000-000000000001'), 'a spam complaint opts the customer out and suppresses the address');
+
+-- Summary and isolation
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select sent_this_month = 3 and delivered_this_month = 1 and bounced_this_month = 2 and failed = 0 from public.message_summary), 'the summary counts sent, delivered, bounced and failed email');
+select pg_temp.expect_error_like($$select public.cancel_message((select id from ref where k = 'msg4'))$$, 'message_not_cancellable', 'a cancelled email stays cancelled');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select count(*) from public.message_list) + (select count(*) from public.message_events) + (select count(*) from public.message_templates) = 0, 'clients see no messages or templates');
+select pg_temp.expect_error_like($$select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x')$$, 'permission denied', 'and cannot send email');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.message_list) + (select count(*) from public.message_events) + (select waiting + failed from public.message_summary) = 0, 'another business sees none of our messages');
+select pg_temp.expect_error_like($$select public.retry_message((select id from ref where k = 'msg3'))$$, 'permission denied', 'nor retries them');
+select pg_temp.expect_error_like($$select public.cancel_message((select id from ref where k = 'msg5'))$$, 'permission denied', 'nor cancels them');
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$set local role anon; select * from public.message_list$$, 'permission denied', 'anonymous cannot read messages');
+select pg_temp.expect_error_like($$set local role anon; select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x')$$, 'permission denied', 'anonymous cannot send email');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

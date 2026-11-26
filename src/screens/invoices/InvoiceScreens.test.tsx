@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import { renderAt, signedInAs } from '@/auth/authTestUtils'
 import * as invoiceService from '@/services/invoices'
+import * as messageService from '@/services/messages'
 import * as orderService from '@/services/orders'
 import * as propertyService from '@/services/properties'
 import * as activityService from '@/services/salesActivities'
@@ -17,8 +18,10 @@ vi.mock('@/services/orders')
 vi.mock('@/services/properties')
 vi.mock('@/services/salesActivities')
 vi.mock('@/services/maintenance')
+vi.mock('@/services/messages')
 const download = vi.hoisted(() => vi.fn())
-vi.mock('@/utils/invoicePdf', () => ({ downloadInvoicePdf: download }))
+const build = vi.hoisted(() => vi.fn())
+vi.mock('@/utils/invoicePdf', () => ({ downloadInvoicePdf: download, buildInvoicePdf: build }))
 
 const i = vi.mocked(invoiceService)
 const o = vi.mocked(orderService)
@@ -345,12 +348,55 @@ describe('invoice details', () => {
     expect(await screen.findByText(/PDF could not be made/)).toBeInTheDocument()
   })
 
-  it('prepares an email to the customer', async () => {
-    open('/invoices/inv1')
-    const link = await screen.findByRole('link', { name: /Email Customer/ })
-    expect(link.getAttribute('href')).toMatch(
-      /^mailto:client1%40umbane\.test\?subject=Invoice%20INV-2026-00007/,
+  it('emails the invoice with its PDF attached', async () => {
+    const m = vi.mocked(messageService)
+    m.listTemplates.mockResolvedValue(
+      ok([
+        {
+          id: 't1',
+          key: 'invoice_issued',
+          name: 'Invoice issued',
+          purpose: 'transactional',
+          subject: 'Invoice {{invoice_number}} from {{business_name}}',
+          body: 'Good day {{customer_name}}, invoice {{invoice_number}} for {{invoice_total}}.',
+          isActive: true,
+          updatedAt: 'x',
+        },
+      ]),
     )
+    m.getCustomerPreferences.mockResolvedValue(
+      ok({
+        email: 'client1@umbane.test',
+        emailOptOut: false,
+        marketingConsent: false,
+        consentUpdatedAt: null,
+        suppressedAt: null,
+        suppressedReason: null,
+      }),
+    )
+    m.getBusinessName.mockResolvedValue(ok('Umbane'))
+    m.uploadEmailAttachment.mockResolvedValue(
+      ok({ path: 'b1/k/INV-2026-00007.pdf', name: 'INV-2026-00007.pdf' }),
+    )
+    m.queueEmail.mockResolvedValue(ok({ id: 'msg1' }))
+    m.sendNow.mockResolvedValue({ state: 'sent' })
+    build.mockResolvedValue(new Uint8Array([37, 80, 68, 70]))
+    open('/invoices/inv1')
+    await userEvent.click(await screen.findByRole('button', { name: /Email Invoice/ }))
+    const dialog = screen.getByRole('dialog')
+    expect(await within(dialog).findByLabelText('Subject')).toHaveValue(
+      'Invoice INV-2026-00007 from Umbane',
+    )
+    expect(within(dialog).getByLabelText(/Attach the invoice PDF/)).toBeChecked()
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Send Email' }))
+    expect(await screen.findByText('Email sent to client1@umbane.test.')).toBeInTheDocument()
+    expect(m.queueEmail.mock.calls[0][0]).toMatchObject({
+      customerId: 'c1',
+      invoiceId: 'inv1',
+      templateKey: 'invoice_issued',
+      attachment: { path: 'b1/k/INV-2026-00007.pdf', name: 'INV-2026-00007.pdf' },
+    })
+    expect(m.sendNow).toHaveBeenCalledWith('msg1')
   })
 })
 
