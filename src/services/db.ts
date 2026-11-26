@@ -186,6 +186,39 @@ const RULES: Record<string, { field?: string; message: string }> = {
     field: 'sku',
     message: 'Use 2 to 40 letters, numbers, dots, dashes or slashes, e.g. UMB-CT-400.',
   },
+  ticket_description_required: { field: 'description', message: 'Describe the problem.' },
+  ticket_property_mismatch: {
+    field: 'propertyId',
+    message: 'The property does not belong to this customer.',
+  },
+  ticket_meter_mismatch: {
+    field: 'meterId',
+    message: 'The meter is not at this customer’s property.',
+  },
+  ticket_needs_assignee: { message: 'Assign the ticket to someone first.' },
+  ticket_open_assigned: { message: 'Remove the assignee to put the ticket back to Open.' },
+  ticket_resolution_required: {
+    field: 'resolution',
+    message: 'Say what was done, or why the ticket is closed.',
+  },
+  ticket_closed: {
+    message: 'This ticket is closed, so it can no longer change. Open a new ticket instead.',
+  },
+  ticket_fixed_fields: { message: 'The customer and reference of a ticket cannot change.' },
+  ticket_attachment_limit: { message: 'A ticket can have at most 20 files.' },
+  ticket_attachments_type_check: {
+    message: 'Only photos (JPG, PNG, WebP), PDF, CSV and text files can be attached.',
+  },
+  ticket_attachments_size_check: { message: 'Files can be at most 10 MB.' },
+  attachment_not_uploaded: { message: 'The file did not finish uploading. Please try again.' },
+  attachment_path_mismatch: { message: 'The file could not be attached. Please try again.' },
+  tickets_subject_length: { field: 'subject', message: 'Keep the title to 150 characters.' },
+  tickets_description_length: {
+    field: 'description',
+    message: 'Keep the description to 5000 characters.',
+  },
+  tickets_resolution_length: { field: 'resolution', message: 'Keep this to 2000 characters.' },
+  ticket_messages_body_length: { field: 'body', message: 'Keep the message to 5000 characters.' },
   maintenance_assignee_not_staff: {
     field: 'assignedTo',
     message: 'Choose a current team member.',

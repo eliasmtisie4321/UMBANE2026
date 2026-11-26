@@ -31,12 +31,19 @@ describe('canAccess', () => {
     expect(canAccess('staff', '/settingsx')).toBe(true)
   })
 
+  it('lets clients open support tickets for themselves, but not edit them', () => {
+    expect(canAccess('client', '/support-tickets')).toBe(true)
+    expect(canAccess('client', '/support-tickets/new')).toBe(true)
+    expect(canAccess('client', '/support-tickets/abc')).toBe(true)
+    expect(canAccess('client', '/support-tickets/abc/edit')).toBe(false)
+    expect(canAccess('client', '/support-tickets/new/edit')).toBe(false)
+  })
+
   it('lets clients view their records but never open a create or edit page', () => {
     expect(canAccess('client', '/properties')).toBe(true)
     expect(canAccess('client', '/properties/abc')).toBe(true)
     expect(canAccess('client', '/properties/new')).toBe(false)
     expect(canAccess('client', '/properties/abc/edit')).toBe(false)
-    expect(canAccess('client', '/support-tickets/new')).toBe(false)
     expect(canAccess('client', '/electricity-meters/abc')).toBe(true)
     expect(canAccess('client', '/electricity-meters/maintenance')).toBe(false)
     expect(canAccess('staff', '/electricity-meters/maintenance')).toBe(true)

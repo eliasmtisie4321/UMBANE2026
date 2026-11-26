@@ -76,8 +76,8 @@ select pg_temp.expect((select count(*) from public.audit_logs) = 0, 'client cann
 select pg_temp.expect_error($$insert into public.leads (business_id, name) values ('11111111-0000-0000-0000-000000000001', 'x')$$, 'client cannot create leads');
 select pg_temp.expect_error($$insert into public.support_tickets (business_id, customer_id, reference, subject) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', 'TKT-X', 'for someone else')$$, 'client cannot open a ticket for another customer');
 select pg_temp.expect_error($$insert into public.ticket_messages (business_id, ticket_id, author_id, body, is_internal) values ('11111111-0000-0000-0000-000000000001', 'a0200000-0000-0000-0000-000000000001', 'a4000000-0000-0000-0000-000000000001', 'sneaky', true)$$, 'client cannot write internal notes');
-insert into public.support_tickets (business_id, customer_id, reference, subject)
-  values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'TKT-C1', 'Own ticket');
+insert into public.support_tickets (business_id, customer_id, reference, subject, description)
+  values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'TKT-C1', 'Own ticket', 'Details');
 select pg_temp.expect((select count(*) from public.support_tickets) = 2, 'client can open a ticket for themselves');
 
 -- Dashboard views (security_invoker: they must obey the caller's RLS) ---------------------------
@@ -554,6 +554,155 @@ select pg_temp.expect(public.create_product('CT-400', 'Their own CT set', 10) is
 select pg_temp.as_owner();
 select pg_temp.expect_error_like($$set local role anon; select * from public.product_list$$, 'permission denied', 'anonymous cannot read products');
 select pg_temp.expect_error_like($$set local role anon; select public.create_product('X1', 'X', 1)$$, 'permission denied', 'anonymous cannot create products');
+
+-- Support tickets (Phase 8) ------------------------------------------------------------------------
+-- Opening: a client describes the problem; the team sets priority and assignment.
+select pg_temp.as_owner();
+-- A file on the other customer's ticket, which client 1 must never see.
+insert into storage.objects (bucket_id, name, metadata) values ('ticket-attachments', '11111111-0000-0000-0000-000000000001/a0200000-0000-0000-0000-000000000002/1-invoice.pdf', '{"size": 10, "mimetype": "application/pdf"}');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+with t as (
+  insert into public.support_tickets (subject, description, category, meter_id, priority, assigned_to, status, resolution)
+  values ('No power in unit 4', 'The meter shows E-04 since this morning.', 'meter_fault', 'e1000000-0000-0000-0000-000000000001', 'urgent', 'a3000000-0000-0000-0000-000000000001', 'closed', 'Fixed')
+  returning id)
+insert into ref select 'tk', id from t;
+select pg_temp.expect((select customer_id = 'c1000000-0000-0000-0000-000000000001' and business_id = '11111111-0000-0000-0000-000000000001' and created_by = 'a4000000-0000-0000-0000-000000000001' and status = 'open' and priority = 'normal' and assigned_to is null and resolution is null from public.support_tickets where id = (select id from ref where k = 'tk')), 'a client''s ticket is their own, open, normal priority and unassigned whatever they send');
+select pg_temp.expect((select property_id = 'd1000000-0000-0000-0000-000000000001' from public.support_tickets where id = (select id from ref where k = 'tk')), 'choosing a meter fills in its property');
+select pg_temp.expect((select reference ~ '^TKT-[0-9]{4}-[0-9]{5}$' and reference like '%-' || lpad(number::text, 5, '0') from public.support_tickets where id = (select id from ref where k = 'tk')), 'tickets get a TKT-YYYY-NNNNN reference');
+select pg_temp.expect((select number from public.support_tickets where id = (select id from ref where k = 'tk')) = (select number from public.support_tickets where subject = 'Own ticket') + 1, 'references count up per business, ignoring the one sent');
+select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description) values ('No details', '   ')$$, 'ticket_description_required', 'a ticket needs a description');
+select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, property_id) values ('Not mine', 'x', 'd1000000-0000-0000-0000-000000000002')$$, 'ticket_property_mismatch', 'a client cannot link another customer''s property');
+select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, meter_id) values ('Not mine', 'x', 'e1000000-0000-0000-0000-000000000002')$$, 'ticket_meter_mismatch', 'or another customer''s meter');
+select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, category) values ('Odd', 'x', 'gossip')$$, 'tickets_category_check', 'unknown categories are refused');
+select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description) values (repeat('x', 151), 'x')$$, 'tickets_subject_length', 'a subject is at most 150 characters');
+select pg_temp.expect_error_like($$insert into public.support_tickets (business_id, customer_id, subject, description) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', 'Theirs', 'x')$$, 'permission denied', 'a client cannot open a ticket for another customer');
+update public.support_tickets set status = 'closed', resolution = 'Sorted it myself' where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select status = 'open' from public.support_tickets where id = (select id from ref where k = 'tk')), 'a client cannot change a ticket');
+
+-- The client's message and a photo
+insert into public.ticket_messages (ticket_id, body, author_id) values ((select id from ref where k = 'tk'), 'Photo of the meter attached.', 'a3000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select author_id = 'a4000000-0000-0000-0000-000000000001' and author_name = 'Cleo Client' and not from_staff from public.ticket_messages where body = 'Photo of the meter attached.'), 'a message is always from the person signed in, with their name kept');
+insert into storage.objects (bucket_id, name, metadata) select 'ticket-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/1-meter.jpg', '{"size": 2048, "mimetype": "image/jpeg"}' from ref where k = 'tk';
+insert into public.ticket_attachments (ticket_id, uploaded_by, storage_path, file_name, content_type, size_bytes) select id, 'a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001/' || id || '/1-meter.jpg', 'meter.jpg', 'image/png', 99 from ref where k = 'tk';
+select pg_temp.expect((select uploaded_by = 'a4000000-0000-0000-0000-000000000001' and uploader_name = 'Cleo Client' and size_bytes = 2048 and content_type = 'image/jpeg' from public.ticket_attachments where file_name = 'meter.jpg'), 'an attachment records its uploader and the stored size and type, not what was sent');
+select pg_temp.expect_error_like(format($$insert into public.ticket_attachments (ticket_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'ghost.pdf', 'application/pdf', 10)$$, (select id from ref where k = 'tk'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'tk') || '/2-ghost.pdf'), 'attachment_not_uploaded', 'an attachment must be a real upload');
+select pg_temp.expect_error_like(format($$insert into public.ticket_attachments (ticket_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'x.jpg', 'image/jpeg', 10)$$, (select id from ref where k = 'tk'), '11111111-0000-0000-0000-000000000001/a0200000-0000-0000-0000-000000000001/1-meter.jpg'), 'attachment_path_mismatch', 'an attachment must be stored under its own ticket');
+insert into storage.objects (bucket_id, name, metadata) select 'ticket-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/3-tool.exe', '{"size": 100, "mimetype": "application/x-msdownload"}' from ref where k = 'tk';
+select pg_temp.expect_error_like(format($$insert into public.ticket_attachments (ticket_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'tool.pdf', 'application/pdf', 100)$$, (select id from ref where k = 'tk'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'tk') || '/3-tool.exe'), 'ticket_attachments_type_check', 'only photos, PDFs, CSV and text files are accepted, judged by the stored type');
+insert into storage.objects (bucket_id, name, metadata) select 'ticket-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/4-big.pdf', '{"size": 10485761, "mimetype": "application/pdf"}' from ref where k = 'tk';
+select pg_temp.expect_error_like(format($$insert into public.ticket_attachments (ticket_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'big.pdf', 'application/pdf', 100)$$, (select id from ref where k = 'tk'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'tk') || '/4-big.pdf'), 'ticket_attachments_size_check', 'files are at most 10 MB');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) values ('ticket-attachments', '11111111-0000-0000-0000-000000000001/a0200000-0000-0000-0000-000000000002/x.jpg')$$, 'row-level security', 'a client cannot upload to another customer''s ticket');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) values ('ticket-attachments', '11111111-0000-0000-0000-000000000001/x.jpg')$$, 'row-level security', 'files must sit under a ticket');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) values ('ticket-attachments', '11111111-0000-0000-0000-000000000002/a0200000-0000-0000-0000-000000000001/x.jpg')$$, 'row-level security', 'or under the right business');
+
+-- Staff work the ticket
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.support_tickets set assigned_to = 'a3000000-0000-0000-0000-000000000001', priority = 'urgent' where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select status = 'assigned' and assigned_at is not null and priority = 'urgent' from public.support_tickets where id = (select id from ref where k = 'tk')), 'assigning moves an open ticket to Assigned');
+select pg_temp.expect((select count(*) = 1 from public.notifications where title = 'New support ticket' and link = '/support-tickets/' || (select id from ref where k = 'tk')), 'managers hear about a new ticket from a client');
+select pg_temp.expect((select count(*) = 1 from public.notifications where title like 'Customer replied on %' and link = '/support-tickets/' || (select id from ref where k = 'tk')), 'and about a reply while nobody is assigned');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) = 1 from public.notifications where title = 'Ticket assigned to you' and link = '/support-tickets/' || (select id from ref where k = 'tk')), 'the assignee hears about the assignment');
+select pg_temp.expect_error_like($$update public.support_tickets set status = 'open' where id = (select id from ref where k = 'tk')$$, 'ticket_open_assigned', 'an assigned ticket cannot be set back to Open without unassigning it');
+select pg_temp.expect_error_like($$update public.support_tickets set assigned_to = 'a4000000-0000-0000-0000-000000000001' where id = (select id from ref where k = 'tk')$$, 'assignee_not_staff', 'only team members can be assigned');
+select pg_temp.expect_error_like($$update public.support_tickets set assigned_to = 'b1000000-0000-0000-0000-000000000001' where id = (select id from ref where k = 'tk')$$, 'assignee_not_staff', 'not even another business''s administrator');
+select pg_temp.expect_error_like($$update public.support_tickets set status = 'resolved' where id = (select id from ref where k = 'tk')$$, 'ticket_resolution_required', 'resolving needs a resolution note');
+select pg_temp.expect_error_like($$update public.support_tickets set customer_id = 'c1000000-0000-0000-0000-000000000002' where id = (select id from ref where k = 'tk')$$, 'ticket_fixed_fields', 'a ticket cannot move to another customer');
+select pg_temp.expect_error_like($$update public.support_tickets set reference = 'TKT-1' where id = (select id from ref where k = 'tk')$$, 'ticket_fixed_fields', 'or change its reference');
+select pg_temp.expect_error_like($$update public.support_tickets set property_id = 'd1000000-0000-0000-0000-000000000002', meter_id = null where id = (select id from ref where k = 'tk')$$, 'ticket_property_mismatch', 'staff cannot link another customer''s property either');
+update public.support_tickets set status = 'in_progress' where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select active_tickets = 1 and urgent_tickets = 1 from public.ticket_workload where id = 'a3000000-0000-0000-0000-000000000001'), 'workload counts the assignee''s active tickets');
+insert into public.ticket_messages (ticket_id, body) values ((select id from ref where k = 'tk'), 'A technician is on the way.');
+select pg_temp.expect((select first_response_at is not null from public.support_tickets where id = (select id from ref where k = 'tk')), 'the first staff reply is timed');
+insert into public.ticket_messages (ticket_id, body, is_internal) values ((select id from ref where k = 'tk'), 'Check the CT lugs on phase B.', true);
+update public.support_tickets set first_response_at = null, resolved_at = '2001-01-01', assigned_at = null, last_activity_at = '2001-01-01' where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select first_response_at is not null and resolved_at is null and assigned_at is not null and last_activity_at > '2020-01-01' from public.support_tickets where id = (select id from ref where k = 'tk')), 'timestamps are the database''s to set');
+update public.support_tickets set status = 'resolved', resolution = 'Re-terminated the loose CT lug on phase B.' where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select status = 'resolved' and resolved_at is not null from public.support_tickets where id = (select id from ref where k = 'tk')), 'a ticket is resolved with a note');
+
+-- The customer follows progress and replies
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select count(*) = 2 and bool_and(not is_internal) from public.ticket_messages where ticket_id = (select id from ref where k = 'tk')), 'the customer sees the conversation without internal notes');
+select pg_temp.expect((select assignee_name is null and message_count = 2 and attachment_count = 1 and resolution like 'Re-terminated%' and meter_serial = 'MTR-0001' from public.ticket_list where id = (select id from ref where k = 'tk')), 'the list shows a client their ticket without staff profiles or internal counts');
+select pg_temp.expect((select count(*) filter (where kind = 'status') = 3 and count(*) filter (where kind in ('assigned', 'priority')) = 0 from public.ticket_events where ticket_id = (select id from ref where k = 'tk')), 'the customer sees status history but not assignment or priority changes');
+select pg_temp.expect((select count(*) filter (where title like '% is now %') = 3 and count(*) filter (where title like 'New reply on %') = 1 from public.notifications where link = '/support-tickets/' || (select id from ref where k = 'tk')), 'the customer is told about status changes and replies, never internal notes');
+select pg_temp.expect((select count(*) = 1 from storage.objects where name like '%/1-meter.jpg') and (select count(*) = 0 from storage.objects where name like '%/a0200000-0000-0000-0000-000000000002/%'), 'a client can read files only on their own tickets');
+insert into public.ticket_messages (ticket_id, body) values ((select id from ref where k = 'tk'), 'It tripped again tonight.');
+select pg_temp.expect((select status = 'in_progress' and resolved_at is null from public.support_tickets where id = (select id from ref where k = 'tk')), 'a customer reply reopens a resolved ticket');
+
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) = 1 from public.notifications where title like 'Customer replied on %' and link = '/support-tickets/' || (select id from ref where k = 'tk')), 'the assignee hears about a customer reply');
+select pg_temp.expect((select count(*) = 0 from public.notifications where title like 'Internal note%'), 'nobody is notified about their own note');
+update public.support_tickets set assigned_to = null where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select status = 'open' and assigned_at is null from public.support_tickets where id = (select id from ref where k = 'tk')), 'unassigning an active ticket returns it to Open');
+select pg_temp.expect_error_like($$update public.support_tickets set status = 'in_progress' where id = (select id from ref where k = 'tk')$$, 'ticket_needs_assignee', 'work cannot start without an assignee');
+update public.support_tickets set assigned_to = 'a3000000-0000-0000-0000-000000000001' where id = (select id from ref where k = 'tk');
+update public.support_tickets set status = 'closed' where id = (select id from ref where k = 'tk');
+select pg_temp.expect((select status = 'closed' and closed_at is not null from public.support_tickets where id = (select id from ref where k = 'tk')), 'a ticket with a resolution note can be closed');
+select pg_temp.expect_error_like($$update public.support_tickets set subject = 'Changed' where id = (select id from ref where k = 'tk')$$, 'ticket_closed', 'a closed ticket is locked');
+select pg_temp.expect_error_like($$insert into public.ticket_messages (ticket_id, body) values ((select id from ref where k = 'tk'), 'Late reply')$$, 'ticket_closed', 'nobody can reply to a closed ticket');
+select pg_temp.expect((select count(*) filter (where kind = 'status') = 7 and count(*) filter (where kind = 'assigned') = 3 and count(*) filter (where kind = 'priority') = 1 and count(*) filter (where kind = 'created') = 1 and count(*) filter (where kind = 'attachment') = 1 from public.ticket_events where ticket_id = (select id from ref where k = 'tk')), 'every status, assignment and priority change is in the history');
+select pg_temp.expect((select active_tickets = 0 from public.ticket_workload where id = 'a3000000-0000-0000-0000-000000000001'), 'closed tickets leave the workload');
+select pg_temp.expect_error_like($$insert into public.ticket_events (business_id, ticket_id, kind) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'tk'), 'status')$$, 'permission denied', 'nobody writes history directly');
+select pg_temp.expect_error_like($$insert into public.notifications (business_id, user_id, title) values ('11111111-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'Fake')$$, 'row-level security', 'nobody writes notifications directly');
+delete from public.ticket_messages where ticket_id = (select id from ref where k = 'tk');
+select pg_temp.expect((select count(*) = 4 from public.ticket_messages where ticket_id = (select id from ref where k = 'tk')), 'staff cannot delete messages');
+select pg_temp.expect((select message_count = 4 from public.ticket_list where id = (select id from ref where k = 'tk')), 'staff see every message counted, internal notes included');
+
+-- Staff open tickets for customers
+with t as (
+  insert into public.support_tickets (customer_id, subject, description, category, priority, assigned_to)
+  values ('c1000000-0000-0000-0000-000000000002', 'Question about October invoice', 'Asked by phone.', 'billing', 'high', 'a3000000-0000-0000-0000-000000000001')
+  returning id)
+insert into ref select 'tk2', id from t;
+select pg_temp.expect((select status = 'assigned' and priority = 'high' and created_by = 'a3000000-0000-0000-0000-000000000001' from public.support_tickets where id = (select id from ref where k = 'tk2')), 'staff open tickets with a priority and an assignee');
+select pg_temp.expect((select total = (select count(*) from public.support_tickets) and closed = 1 and assigned = 1 from public.ticket_summary), 'the summary counts tickets by status');
+select pg_temp.as_owner();
+-- As trusted server code, with nobody signed in.
+select set_config('request.jwt.claim.sub', '', true), set_config('request.jwt.claims', '', true);
+update public.profiles set is_active = false where id = 'a1000000-0000-0000-0000-000000000001';
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect_error_like($$update public.support_tickets set assigned_to = 'a1000000-0000-0000-0000-000000000001' where id = (select id from ref where k = 'tk2')$$, 'assignee_not_staff', 'a deactivated person cannot be assigned');
+select pg_temp.expect_error_like(format($$insert into public.ticket_attachments (ticket_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'late.jpg', 'image/jpeg', 10)$$, (select id from ref where k = 'tk'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'tk') || '/9-late.jpg'), 'ticket_closed', 'nobody attaches files to a closed ticket');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+insert into public.ticket_messages (ticket_id, body) values ('a0200000-0000-0000-0000-000000000001', 'Any news?');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) filter (where user_id = 'a2000000-0000-0000-0000-000000000001') = 1 and count(*) filter (where user_id = 'a1000000-0000-0000-0000-000000000001') = 0 from public.notifications where link = '/support-tickets/a0200000-0000-0000-0000-000000000001' and body = 'Any news?'), 'deactivated people are not notified');
+select set_config('request.jwt.claim.sub', '', true), set_config('request.jwt.claims', '', true);
+update public.profiles set is_active = false where id = 'a4000000-0000-0000-0000-000000000001';
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into public.ticket_messages (ticket_id, body) values ('a0200000-0000-0000-0000-000000000001', 'We are on it.');
+select pg_temp.as_owner();
+select set_config('request.jwt.claim.sub', '', true), set_config('request.jwt.claims', '', true);
+update public.profiles set is_active = true where id = 'a4000000-0000-0000-0000-000000000001';
+select pg_temp.expect(not exists (select 1 from public.notifications where user_id = 'a4000000-0000-0000-0000-000000000001' and body = 'We are on it.'), 'a deactivated customer is not notified of replies');
+select pg_temp.as_owner();
+select set_config('request.jwt.claim.sub', '', true), set_config('request.jwt.claims', '', true);
+update public.profiles set is_active = true where id = 'a1000000-0000-0000-0000-000000000001';
+insert into storage.objects (bucket_id, name, metadata) select 'ticket-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/' || g || '.pdf', '{"size": 10, "mimetype": "application/pdf"}' from ref, generate_series(1, 21) g where k = 'tk2';
+insert into public.ticket_attachments (ticket_id, uploaded_by, storage_path, file_name, content_type, size_bytes) select id, 'a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001/' || id || '/' || g || '.pdf', g || '.pdf', 'application/pdf', 10 from ref, generate_series(1, 20) g where k = 'tk2';
+select pg_temp.expect_error_like(format($$insert into public.ticket_attachments (ticket_id, uploaded_by, storage_path, file_name, content_type, size_bytes) values (%L, 'a3000000-0000-0000-0000-000000000001', %L, '21.pdf', 'application/pdf', 10)$$, (select id from ref where k = 'tk2'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'tk2') || '/21.pdf'), 'ticket_attachment_limit', 'a ticket holds at most 20 files');
+
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select total = 3 and closed = 1 from public.ticket_summary), 'a client''s summary covers only their tickets');
+select pg_temp.expect((select count(*) = 0 from public.ticket_workload), 'clients see no workload');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) select 'ticket-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/5-late.jpg' from ref where k = 'tk'$$, 'row-level security', 'nobody uploads to a closed ticket');
+
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+delete from public.ticket_messages where ticket_id = (select id from ref where k = 'tk') and is_internal;
+select pg_temp.expect((select count(*) = 3 from public.ticket_messages where ticket_id = (select id from ref where k = 'tk')) and exists (select 1 from public.audit_logs where table_name = 'ticket_messages' and action = 'DELETE'), 'a manager can remove a message, and it is in the audit log');
+
+-- Isolation
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.ticket_list) + (select count(*) from public.ticket_events) + (select count(*) from storage.objects) + (select total from public.ticket_summary) = 0, 'another business sees no tickets, history or files');
+select pg_temp.expect_error_like($$insert into public.ticket_messages (ticket_id, body) values ((select id from ref where k = 'tk2'), 'Hello')$$, 'permission denied', 'nor replies to our tickets');
+select pg_temp.expect_error_like($$insert into public.ticket_attachments (ticket_id, storage_path, file_name, content_type, size_bytes) select id, 'x', 'x.jpg', 'image/jpeg', 1 from ref where k = 'tk2'$$, 'permission denied', 'nor attaches files to them');
+select pg_temp.expect_error_like($$insert into public.support_tickets (business_id, customer_id, subject, description) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'Hi', 'x')$$, 'permission denied', 'nor opens tickets for our customers');
+update public.support_tickets set subject = 'Hijacked' where id = (select id from ref where k = 'tk2');
+select pg_temp.as_owner();
+select pg_temp.expect((select subject from public.support_tickets where id = (select id from ref where k = 'tk2')) = 'Question about October invoice', 'nor changes them');
+select pg_temp.expect_error_like($$set local role anon; select * from public.ticket_list$$, 'permission denied', 'anonymous cannot read tickets');
+select pg_temp.expect_error_like($$set local role authenticated; select * from public.ticket_counters$$, 'permission denied', 'nobody reads the ticket counters directly');
 
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');

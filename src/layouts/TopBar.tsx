@@ -3,12 +3,21 @@ import { Button, Dropdown } from '@/components/ui'
 
 interface TopBarProps {
   onOpenMenu: () => void
+  onOpenNotifications?: () => void
+  unread?: number
   onSignOut?: () => void
   userName?: string
   roleLabel?: string
 }
 
-export function TopBar({ onOpenMenu, onSignOut, userName, roleLabel }: TopBarProps) {
+export function TopBar({
+  onOpenMenu,
+  onOpenNotifications,
+  unread = 0,
+  onSignOut,
+  userName,
+  roleLabel,
+}: TopBarProps) {
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-outline-variant bg-surface px-4 lg:px-8">
       <button
@@ -38,10 +47,19 @@ export function TopBar({ onOpenMenu, onSignOut, userName, roleLabel }: TopBarPro
         </Button>
         <button
           type="button"
-          aria-label="Notifications"
-          className="rounded-md p-2 text-on-surface-variant hover:bg-surface-container"
+          onClick={onOpenNotifications}
+          aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+          className="relative rounded-md p-2 text-on-surface-variant hover:bg-surface-container"
         >
           <Bell size={20} aria-hidden="true" />
+          {unread > 0 && (
+            <span
+              aria-hidden="true"
+              className="absolute right-0.5 top-0.5 min-w-4 rounded-full bg-error px-1 text-center text-[10px] font-bold leading-4 text-on-error"
+            >
+              {unread > 99 ? '99+' : unread}
+            </span>
+          )}
         </button>
         {userName && (
           <div className="hidden text-right leading-tight md:block">

@@ -6,6 +6,7 @@ import CreateAccountScreen from '@/screens/CreateAccountScreen'
 import ForgotPasswordScreen from '@/screens/ForgotPasswordScreen'
 import LoginScreen from '@/screens/LoginScreen'
 import NotFoundScreen from '@/screens/NotFoundScreen'
+import NotificationsScreen from '@/screens/NotificationsScreen'
 import OverviewScreen from '@/screens/OverviewScreen'
 import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
 import CustomerProfileScreen from '@/screens/customers/CustomerProfileScreen'
@@ -32,6 +33,9 @@ import { EditMeterScreen, NewMeterScreen } from '@/screens/meters/MeterFormScree
 import MetersScreen from '@/screens/meters/MetersScreen'
 import RecordReadingScreen from '@/screens/meters/RecordReadingScreen'
 import PropertiesScreen from '@/screens/properties/PropertiesScreen'
+import SupportTicketsScreen from '@/screens/support/SupportTicketsScreen'
+import TicketDetailScreen from '@/screens/support/TicketDetailScreen'
+import { EditTicketScreen, NewTicketScreen } from '@/screens/support/TicketFormScreen'
 import PropertyDetailScreen from '@/screens/properties/PropertyDetailScreen'
 import { EditPropertyScreen, NewPropertyScreen } from '@/screens/properties/PropertyFormScreen'
 
@@ -44,6 +48,8 @@ const BUILT = [
   '/sales-orders',
   '/invoices',
   '/inventory',
+  '/support-tickets',
+  '/notifications',
 ]
 
 export default function App() {
@@ -87,6 +93,11 @@ export default function App() {
         <Route path="/inventory/history" element={<InventoryHistoryScreen />} />
         <Route path="/inventory/:id" element={<ProductDetailScreen />} />
         <Route path="/inventory/:id/edit" element={<EditProductScreen />} />
+        <Route path="/support-tickets" element={<SupportTicketsScreen />} />
+        <Route path="/support-tickets/new" element={<NewTicketScreen />} />
+        <Route path="/support-tickets/:id" element={<TicketDetailScreen />} />
+        <Route path="/support-tickets/:id/edit" element={<EditTicketScreen />} />
+        <Route path="/notifications" element={<NotificationsScreen />} />
         <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

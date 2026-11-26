@@ -304,23 +304,23 @@ Create version-controlled migrations for the proposed tables:
 **Goal:** Customers can submit support requests and staff can manage them through resolution.
 
 ### Customer portal
-- [ ] Create the customer support portal.
-- [ ] Allow authenticated clients to submit tickets.
-- [ ] Capture subject, category, description and related property where applicable.
-- [ ] Generate unique ticket reference numbers.
-- [ ] Allow image and document attachments.
-- [ ] Validate file types and sizes.
-- [ ] Allow clients to view only their own tickets.
-- [ ] Display ticket status and response history.
+- [x] Create the customer support portal.
+- [x] Allow authenticated clients to submit tickets.
+- [x] Capture subject, category, description and related property where applicable.
+- [x] Generate unique ticket reference numbers.
+- [x] Allow image and document attachments.
+- [x] Validate file types and sizes.
+- [x] Allow clients to view only their own tickets.
+- [x] Display ticket status and response history.
 
 ### Staff ticket management
-- [ ] Display incoming tickets.
-- [ ] Assign tickets to staff.
-- [ ] Add internal notes separate from customer-visible messages.
-- [ ] Allow staff to respond to customers.
-- [ ] Track status changes and timestamps.
-- [ ] Filter by status, category, priority and assigned staff.
-- [ ] Notify relevant users about updates.
+- [x] Display incoming tickets.
+- [x] Assign tickets to staff.
+- [x] Add internal notes separate from customer-visible messages.
+- [x] Allow staff to respond to customers.
+- [x] Track status changes and timestamps.
+- [x] Filter by status, category, priority and assigned staff.
+- [x] Notify relevant users about updates.
 
 Ticket statuses:
 - Open

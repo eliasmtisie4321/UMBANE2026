@@ -10,6 +10,7 @@ interface AppLayoutProps {
   onSignOut?: () => void
   userName?: string
   roleLabel?: string
+  unread?: number
   children: ReactNode
 }
 
@@ -21,6 +22,7 @@ export function AppLayout({
   onSignOut,
   userName,
   roleLabel,
+  unread,
   children,
 }: AppLayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -39,6 +41,8 @@ export function AppLayout({
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
           onOpenMenu={() => setMenuOpen(true)}
+          onOpenNotifications={() => onNavigate?.('/notifications')}
+          unread={unread}
           onSignOut={onSignOut}
           userName={userName}
           roleLabel={roleLabel}

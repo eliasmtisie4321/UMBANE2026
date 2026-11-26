@@ -298,7 +298,16 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
           </ResourceBoundary>
         </Panel>
 
-        <Panel title="Support tickets" subtitle="Most recent first" className="lg:col-span-2">
+        <Panel
+          title="Support tickets"
+          subtitle="Most recent first"
+          className="lg:col-span-2"
+          action={
+            <Link to={`/support-tickets/new?customer=${customer.id}`} className={linkButton}>
+              <Plus size={16} aria-hidden="true" /> New ticket
+            </Link>
+          }
+        >
           <ResourceBoundary
             state={tickets}
             isEmpty={(rows) => rows.length === 0}
@@ -319,7 +328,14 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
                 <tbody>
                   {rows.map((t) => (
                     <tr key={t.id}>
-                      <Td className="whitespace-nowrap font-mono text-label-md">{t.reference}</Td>
+                      <Td className="whitespace-nowrap">
+                        <Link
+                          to={`/support-tickets/${t.id}`}
+                          className="font-mono text-label-md font-medium text-primary hover:underline"
+                        >
+                          {t.reference}
+                        </Link>
+                      </Td>
                       <Td>{t.subject}</Td>
                       <Td>
                         <Badge

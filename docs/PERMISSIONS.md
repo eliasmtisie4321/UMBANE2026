@@ -99,3 +99,13 @@ of a **development** Supabase project after applying migrations.
 - Stock movements cannot be edited or deleted by anyone. This narrows the matrix above, which let managers
   delete stock transactions.
 - Products are deactivated rather than deleted. Clients see no products or stock.
+
+## Support tickets (Phase 8)
+
+- Clients open tickets for themselves, reply, attach files and follow progress. They never see internal
+  notes, assignment or priority changes, or staff profiles, and cannot change a ticket's status.
+- Staff and above open tickets for any customer, assign them, reply, write internal notes and change status.
+- Messages and history cannot be edited. Removing a ticket, message or file is for managers and
+  administrators and is recorded in the audit log. Staff cannot delete.
+- Attachment files follow their ticket's access, in a private storage bucket.
+- Notifications are written only by the database; each person reads and clears only their own.
