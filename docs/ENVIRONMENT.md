@@ -88,3 +88,8 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
 - `20261126000009_inventory.sql`: product fields, the stock ledger rules, stock taken by fulfilled orders,
   and the inventory views (see `docs/INVENTORY.md`). **Run it after 0008.** It works out each product's
   stock from the movements already recorded.
+
+- `20261126000010_support_tickets.sql`: ticket rules, references, history, notifications, the private
+  `ticket-attachments` storage bucket with its access rules, and the ticket views (see `docs/SUPPORT.md`).
+  **Run it after 0009.** Existing tickets without a valid category become "General question". It creates
+  the storage bucket itself; nothing needs to be set up in the Storage screen.

@@ -2,7 +2,9 @@ import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { canAccess, navFor } from '@/auth/permissions'
 import { useAuth } from '@/auth/useAuth'
 import { FullPageSpinner } from '@/components/FullPageSpinner'
-import { ROLE_LABEL } from '@/types/auth'
+import { useResource } from '@/hooks/useResource'
+import { getUnreadCount } from '@/services/notifications'
+import { ROLE_LABEL, type Profile } from '@/types/auth'
 import ForbiddenScreen from '@/screens/ForbiddenScreen'
 import { AppLayout } from './AppLayout'
 
@@ -11,14 +13,22 @@ import { AppLayout } from './AppLayout'
  * shows a "no access" page when the role may not open the current path.
  */
 export function ProtectedShell() {
-  const { status, profile, signOut } = useAuth()
+  const { status, profile } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
 
   if (status === 'loading') return <FullPageSpinner />
   if (status !== 'authenticated' || !profile) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
+  return <SignedInShell profile={profile} />
+}
+
+function SignedInShell({ profile }: { profile: Profile }) {
+  const { signOut } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  // Checked again on every page change, so the count follows what the person has read.
+  const unread = useResource(() => getUnreadCount(), `unread-${location.pathname}`)
 
   return (
     <AppLayout
@@ -28,6 +38,7 @@ export function ProtectedShell() {
       onSignOut={() => void signOut()}
       userName={profile.full_name || profile.email || undefined}
       roleLabel={ROLE_LABEL[profile.role]}
+      unread={unread.data ?? 0}
     >
       {canAccess(profile.role, location.pathname) ? <Outlet /> : <ForbiddenScreen />}
     </AppLayout>
