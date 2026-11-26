@@ -9,6 +9,15 @@ import NotFoundScreen from '@/screens/NotFoundScreen'
 import NotificationsScreen from '@/screens/NotificationsScreen'
 import OverviewScreen from '@/screens/OverviewScreen'
 import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
+import CustomerReportScreen from '@/screens/reports/CustomerReportScreen'
+import ElectricityReportScreen from '@/screens/reports/ElectricityReportScreen'
+import InventoryReportScreen from '@/screens/reports/InventoryReportScreen'
+import PropertyReportScreen from '@/screens/reports/PropertyReportScreen'
+import ReportsScreen from '@/screens/reports/ReportsScreen'
+import RevenueReportScreen from '@/screens/reports/RevenueReportScreen'
+import SalesReportScreen from '@/screens/reports/SalesReportScreen'
+import SupportReportScreen from '@/screens/reports/SupportReportScreen'
+import TeamReportScreen from '@/screens/reports/TeamReportScreen'
 import CommunicationsScreen from '@/screens/communications/CommunicationsScreen'
 import MessageDetailScreen from '@/screens/communications/MessageDetailScreen'
 import TemplatesScreen from '@/screens/communications/TemplatesScreen'
@@ -62,6 +71,7 @@ const BUILT = [
   '/team',
   '/tasks',
   '/communications',
+  '/reports',
 ]
 
 export default function App() {
@@ -121,6 +131,15 @@ export default function App() {
         <Route path="/communications" element={<CommunicationsScreen />} />
         <Route path="/communications/templates" element={<TemplatesScreen />} />
         <Route path="/communications/:id" element={<MessageDetailScreen />} />
+        <Route path="/reports" element={<ReportsScreen />} />
+        <Route path="/reports/customers" element={<CustomerReportScreen />} />
+        <Route path="/reports/properties" element={<PropertyReportScreen />} />
+        <Route path="/reports/electricity" element={<ElectricityReportScreen />} />
+        <Route path="/reports/sales" element={<SalesReportScreen />} />
+        <Route path="/reports/revenue" element={<RevenueReportScreen />} />
+        <Route path="/reports/inventory" element={<InventoryReportScreen />} />
+        <Route path="/reports/support" element={<SupportReportScreen />} />
+        <Route path="/reports/team" element={<TeamReportScreen />} />
         <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

@@ -128,3 +128,12 @@ of a **development** Supabase project after applying migrations.
   the service-role key). Nobody signed in can mark an email sent or delivered, write delivery history, or
   suppress an address.
 - Messages cannot be edited or deleted by anyone signed in; the history is kept.
+
+## Reports (Phase 11)
+
+- Reports are for managers and administrators. Every report is a database function that refuses anyone
+  else (staff, clients and visitors who are not signed in), so hiding the Reports link is not the only
+  guard.
+- The functions run as the person asking, so Row Level Security still applies, and each one also keeps to
+  that person's business. A report never includes another business's records.
+- Reports only read. CSV and PDF exports are made in the browser from the figures already on screen.

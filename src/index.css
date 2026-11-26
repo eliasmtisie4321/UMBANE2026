@@ -35,6 +35,11 @@
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
+  /* Two-series charts, in this order. Checked with the dataviz palette validator (light surface):
+     lightness, chroma and colour-blind separation pass; chart-2 is below 3:1 contrast, so charts
+     using it always have a legend, a tooltip and a table view. */
+  --color-chart-1: #174ea6;
+  --color-chart-2: #d99a00;
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;

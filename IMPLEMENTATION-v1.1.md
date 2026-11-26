@@ -373,17 +373,17 @@ Ticket statuses:
 
 **Goal:** Authorized users can review business performance and export reports.
 
-- [ ] Create customer and property reports.
-- [ ] Create meter and electricity consumption reports.
-- [ ] Create sales and order reports.
-- [ ] Create invoice and payment reports.
-- [ ] Create inventory reports.
-- [ ] Create support ticket reports.
-- [ ] Add date-range and category filters.
-- [ ] Add charts where useful.
-- [ ] Support CSV or PDF exports where appropriate.
-- [ ] Ensure reports respect permissions and business scope.
-- [ ] Verify report totals against source records.
+- [x] Create customer and property reports.
+- [x] Create meter and electricity consumption reports.
+- [x] Create sales and order reports. _(Sales & invoices report, plus a Team performance report from the designs.)_
+- [x] Create invoice and payment reports.
+- [x] Create inventory reports.
+- [x] Create support ticket reports.
+- [x] Add date-range and category filters.
+- [x] Add charts where useful.
+- [x] Support CSV or PDF exports where appropriate.
+- [x] Ensure reports respect permissions and business scope.
+- [x] Verify report totals against source records. _(Database tests: exact figures on known records, and totals checked against the source tables; see docs/REPORTS.md.)_
 
 **Done when:** Users can generate accurate, permission-aware reports from real application data.
 
