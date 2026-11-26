@@ -193,7 +193,18 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
           </ResourceBoundary>
         </Panel>
 
-        <Panel title="Invoices" subtitle="Most recent first">
+        <Panel
+          title="Invoices"
+          subtitle="Most recent first"
+          action={
+            <Link
+              to={`/invoices/new?customer=${customer.id}`}
+              className="text-label-md font-semibold text-secondary hover:text-primary"
+            >
+              Create invoice
+            </Link>
+          }
+        >
           <ResourceBoundary
             state={invoices}
             isEmpty={(rows) => rows.length === 0}
@@ -213,7 +224,9 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
                   {rows.map((i) => (
                     <tr key={i.id}>
                       <Td className="whitespace-nowrap font-mono text-label-md">
-                        {i.invoiceNumber}
+                        <Link to={`/invoices/${i.id}`} className="text-secondary hover:underline">
+                          {i.invoiceNumber}
+                        </Link>
                       </Td>
                       <Td>
                         <Badge

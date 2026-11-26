@@ -204,6 +204,8 @@ export const ACTIVITY_KINDS: Array<{ value: ActivityKind; label: string }> = [
 
 /** What an activity is about. */
 export type ActivitySubject = { leadId: string } | { orderId: string }
+/** Records with a status history. */
+export type HistorySubject = ActivitySubject | { invoiceId: string }
 
 export interface SalesActivity {
   id: string

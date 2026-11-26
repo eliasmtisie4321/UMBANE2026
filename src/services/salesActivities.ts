@@ -2,6 +2,7 @@ import type {
   ActivityInput,
   ActivityKind,
   ActivitySubject,
+  HistorySubject,
   SalesActivity,
   TimelineEntry,
 } from '@/types/sales'
@@ -107,12 +108,15 @@ export const updateActivity = (id: string, input: ActivityInput, client?: DbClie
     mapWriteError,
   )
 
-export const getTimeline = (subject: ActivitySubject, client?: DbClient) =>
+const historyColumn = (s: HistorySubject): ['lead_id' | 'order_id' | 'invoice_id', string] =>
+  'invoiceId' in s ? ['invoice_id', s.invoiceId] : column(s)
+
+export const getTimeline = (subject: HistorySubject, client?: DbClient) =>
   guarded<TimelineEntry[]>('History', client, async (c) => {
     const { data, error } = await c
       .from('sales_timeline')
       .select('*')
-      .eq(...column(subject))
+      .eq(...historyColumn(subject))
       .order('created_at', { ascending: false })
       .limit(50)
     if (error) return err(mapReadError(error, 'History'))

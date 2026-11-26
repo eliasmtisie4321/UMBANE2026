@@ -1,5 +1,6 @@
 import type { Customer, CustomerListItem } from '@/types/customers'
 import type { MaintenanceItem, Meter, MeterListItem, Reading } from '@/types/meters'
+import type { BillingProfile, Invoice } from '@/types/invoices'
 import type { Lead, Order, SalesActivity } from '@/types/sales'
 import type { Property, PropertyListItem } from '@/types/properties'
 
@@ -235,5 +236,66 @@ export const activityFixture = (over: Partial<SalesActivity> = {}): SalesActivit
   isOverdue: true,
   subjectName: 'Melrose Arch Holdings',
   subjectReference: 'LEAD-00109',
+  ...over,
+})
+
+export const invoiceFixture = (over: Partial<Invoice> = {}): Invoice => ({
+  id: 'inv1',
+  invoiceNumber: 'INV-2026-00007',
+  reference: 'INV-2026-00007',
+  customerId: 'c1',
+  customerName: 'Cleo Client',
+  issueDate: '2026-11-20',
+  dueDate: '2026-12-20',
+  status: 'partially_paid',
+  displayStatus: 'partially_paid',
+  total: 312455,
+  paid: 100000,
+  balance: 212455,
+  isOverdue: false,
+  orderId: 'o1',
+  orderReference: 'ORD-00842',
+  propertyId: null,
+  propertyName: null,
+  paymentTerms: 'net30',
+  discountPercent: 5,
+  vatRate: 15,
+  subtotal: 286000,
+  discount: 14300,
+  tax: 40755,
+  notes: null,
+  cancelReason: null,
+  sentAt: '2026-11-20T08:00:00Z',
+  customerEmail: 'client1@umbane.test',
+  items: [
+    { id: 'l1', productId: null, description: 'CT meter', quantity: 2, unitPrice: 120000 },
+    { id: 'l2', productId: null, description: 'Installation', quantity: 1, unitPrice: 46000 },
+  ],
+  billTo: {
+    name: 'Cleo Client',
+    companyName: null,
+    email: 'client1@umbane.test',
+    phone: '+27820000001',
+    registrationNumber: null,
+    address: ['12 Long Street', 'City Bowl', 'Cape Town 8001', 'Western Cape'],
+  },
+  ...over,
+})
+
+export const supplierFixture = (over: Partial<BillingProfile> = {}): BillingProfile => ({
+  name: 'Umbane Energy (Pty) Ltd',
+  email: 'accounts@umbane.test',
+  phone: '+27105004200',
+  address: '140 West Street, Sandton, 2196',
+  registrationNumber: '2021/482910/07',
+  vatRegistered: true,
+  vatNumber: '4180294512',
+  bankName: 'FNB',
+  bankAccountName: 'Umbane Energy (Pty) Ltd',
+  bankAccountNumber: '62849102488',
+  bankBranchCode: '250655',
+  paymentInstructions: 'Use your invoice number as the payment reference.',
+  invoiceFooter: 'Thank you for your business.',
+  defaultPaymentTerms: 'net30',
   ...over,
 })

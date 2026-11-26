@@ -11,6 +11,7 @@ const OBJECT: Record<string, string> = {
   leads: 'a lead',
   orders: 'an order',
   sales: 'a sale',
+  invoice_items: 'an invoice line',
   access_requests: 'an account request',
   profiles: 'a user',
   invoices: 'an invoice',

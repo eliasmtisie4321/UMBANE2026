@@ -11,6 +11,11 @@ import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
 import CustomerProfileScreen from '@/screens/customers/CustomerProfileScreen'
 import { EditCustomerScreen, NewCustomerScreen } from '@/screens/customers/CustomerFormScreen'
 import CustomersScreen from '@/screens/customers/CustomersScreen'
+import { EditInvoiceScreen, NewInvoiceScreen } from '@/screens/invoices/InvoiceFormScreen'
+import InvoiceDetailScreen from '@/screens/invoices/InvoiceDetailScreen'
+import InvoicesScreen from '@/screens/invoices/InvoicesScreen'
+import PaymentsScreen from '@/screens/invoices/PaymentsScreen'
+import InvoiceSettingsScreen from '@/screens/settings/InvoiceSettingsScreen'
 import LeadDetailScreen from '@/screens/leads/LeadDetailScreen'
 import { EditLeadScreen, NewLeadScreen } from '@/screens/leads/LeadFormScreen'
 import LeadsScreen from '@/screens/leads/LeadsScreen'
@@ -27,7 +32,14 @@ import PropertyDetailScreen from '@/screens/properties/PropertyDetailScreen'
 import { EditPropertyScreen, NewPropertyScreen } from '@/screens/properties/PropertyFormScreen'
 
 // Sections that have real screens; every other nav item still shows the placeholder.
-const BUILT = ['/customers', '/properties', '/electricity-meters', '/leads', '/sales-orders']
+const BUILT = [
+  '/customers',
+  '/properties',
+  '/electricity-meters',
+  '/leads',
+  '/sales-orders',
+  '/invoices',
+]
 
 export default function App() {
   return (
@@ -60,6 +72,12 @@ export default function App() {
         <Route path="/sales-orders/new" element={<NewOrderScreen />} />
         <Route path="/sales-orders/:id" element={<OrderDetailScreen />} />
         <Route path="/sales-orders/:id/edit" element={<EditOrderScreen />} />
+        <Route path="/invoices" element={<InvoicesScreen />} />
+        <Route path="/invoices/new" element={<NewInvoiceScreen />} />
+        <Route path="/invoices/payments" element={<PaymentsScreen />} />
+        <Route path="/invoices/:id" element={<InvoiceDetailScreen />} />
+        <Route path="/invoices/:id/edit" element={<EditInvoiceScreen />} />
+        <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route
             key={item.to}

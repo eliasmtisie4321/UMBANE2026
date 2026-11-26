@@ -1,6 +1,6 @@
-import { Ban, CheckCheck, ClipboardCheck, Pencil } from 'lucide-react'
+import { Ban, CheckCheck, ClipboardCheck, FileText, Pencil } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { canAccess } from '@/auth/permissions'
 import { useAuth } from '@/auth/useAuth'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
@@ -15,6 +15,7 @@ import { OrderTotalsList } from '@/components/sales/OrderTotalsList'
 import { ReasonDialog } from '@/components/sales/ReasonDialog'
 import { Button, Table, Td, Th } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
+import { invoiceOrder } from '@/services/invoices'
 import { getOrder, setOrderStatus } from '@/services/orders'
 import { PAYMENT_METHODS, type Order } from '@/types/sales'
 import { formatDate, formatNumber, formatRand } from '@/utils/format'
@@ -52,6 +53,18 @@ function OrderBody({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const open = order.status === 'pending' || order.status === 'confirmed'
+  const invoiceable = order.status === 'confirmed' || order.status === 'fulfilled'
+  const navigate = useNavigate()
+  async function createInvoice() {
+    setBusy(true)
+    setError(null)
+    const result = await invoiceOrder(order.id)
+    setBusy(false)
+    if (!result.ok) return setError(result.error.message)
+    navigate(`/invoices/${result.data.id}`, {
+      state: { notice: 'Draft invoice created from the order. Check it, then issue it.' },
+    })
+  }
   const next = step === 'confirmed' || step === 'fulfilled' ? STEPS[step] : null
 
   async function advance() {
@@ -83,30 +96,50 @@ function OrderBody({
         }
         back={{ to: '/sales-orders', label: 'Sales & Orders' }}
         actions={
-          canWrite &&
-          open && (
+          canWrite && (
             <>
-              <Button variant="secondary" onClick={() => start('cancel')}>
-                <Ban size={16} aria-hidden="true" /> Cancel Order
-              </Button>
-              {order.status === 'pending' ? (
-                <>
-                  <Link to={`/sales-orders/${order.id}/edit`} className={secondaryLink}>
-                    <Pencil size={16} aria-hidden="true" /> Edit
-                  </Link>
-                  <Button onClick={() => start('confirmed')}>
-                    <ClipboardCheck size={16} aria-hidden="true" /> Confirm Order
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => start('fulfilled')}>
-                  <CheckCheck size={16} aria-hidden="true" /> Mark as Fulfilled
+              {invoiceable && (
+                <Button
+                  variant="secondary"
+                  loading={busy && step === null}
+                  onClick={() => void createInvoice()}
+                >
+                  <FileText size={16} aria-hidden="true" /> Create Invoice
                 </Button>
+              )}
+              {open && (
+                <>
+                  <Button variant="secondary" onClick={() => start('cancel')}>
+                    <Ban size={16} aria-hidden="true" /> Cancel Order
+                  </Button>
+                  {order.status === 'pending' ? (
+                    <>
+                      <Link to={`/sales-orders/${order.id}/edit`} className={secondaryLink}>
+                        <Pencil size={16} aria-hidden="true" /> Edit
+                      </Link>
+                      <Button onClick={() => start('confirmed')}>
+                        <ClipboardCheck size={16} aria-hidden="true" /> Confirm Order
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={() => start('fulfilled')}>
+                      <CheckCheck size={16} aria-hidden="true" /> Mark as Fulfilled
+                    </Button>
+                  )}
+                </>
               )}
             </>
           )
         }
       />
+      {error && step === null && (
+        <p
+          role="alert"
+          className="mb-4 rounded-md bg-error-container px-4 py-3 text-body-md text-on-error-container"
+        >
+          {error}
+        </p>
+      )}
       {order.status === 'cancelled' && (
         <p className="mb-4 rounded-md bg-surface-container px-4 py-3 text-body-md text-on-surface">
           Cancelled: {order.cancelReason}

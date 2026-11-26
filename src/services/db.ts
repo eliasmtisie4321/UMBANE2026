@@ -127,6 +127,40 @@ const RULES: Record<string, { field?: string; message: string }> = {
   order_date_future: { field: 'orderDate', message: 'The order date cannot be in the future.' },
   order_property_mismatch: { message: 'The property does not belong to this customer.' },
   order_lead_mismatch: { message: 'The lead was not converted into this customer.' },
+  invoice_transition: {
+    message: 'The invoice’s status has changed, so this step is not possible. Refresh the page.',
+  },
+  invoice_locked: {
+    message: 'An issued invoice cannot be changed. To correct it, cancel it and issue a new one.',
+  },
+  invoice_empty: { message: 'Add at least one product or service first.' },
+  invoice_too_many_items: { message: 'An invoice can have at most 100 lines.' },
+  invoice_date_future: { message: 'The issue date cannot be in the future.' },
+  invoice_property_mismatch: { message: 'The property does not belong to this customer.' },
+  invoice_order_mismatch: { message: 'The order does not belong to this customer.' },
+  invoice_vat_not_registered: {
+    message: 'Your business is not VAT registered, so this invoice cannot charge VAT.',
+  },
+  invoice_has_payments: {
+    message: 'This invoice has payments. A manager must remove them before it can be cancelled.',
+  },
+  invoice_cancel_manager: {
+    message: 'Only a manager or administrator can cancel an issued invoice.',
+  },
+  invoice_not_payable: {
+    message: 'Payments can only be recorded on an issued invoice that is not yet paid.',
+  },
+  payment_exceeds_balance: { field: 'amount', message: 'This is more than the balance due.' },
+  payment_in_future: { field: 'paidOn', message: 'A payment cannot be in the future.' },
+  payment_before_issue: { field: 'paidOn', message: 'This is before the invoice was issued.' },
+  order_not_invoiceable: { message: 'Only a confirmed or fulfilled order can be invoiced.' },
+  order_already_invoiced: {
+    message: 'This order already has an invoice. Open it from the invoice list.',
+  },
+  businesses_vat_number_check: {
+    field: 'vatNumber',
+    message: 'A South African VAT number has 10 digits and starts with 4.',
+  },
   maintenance_assignee_not_staff: {
     field: 'assignedTo',
     message: 'Choose a current team member.',

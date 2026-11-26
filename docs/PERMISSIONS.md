@@ -80,3 +80,14 @@ of a **development** Supabase project after applying migrations.
 - A sale that belongs to an order is written by the database only. This narrows the matrix above: staff can
   no longer add or change those sales directly.
 - Status history is written by the database and cannot be edited or erased by anyone signed in.
+
+## Invoices and payments (Phase 6)
+
+- Staff create and edit draft invoices, issue them and record payments. Issued invoices are locked for
+  everyone.
+- Cancelling an issued invoice and removing a payment are for managers and administrators. This narrows the
+  matrix above.
+- Clients see their own issued invoices, their lines and payments, and can download the PDF. They never see
+  drafts, including drafts that were cancelled.
+- Every signed-in user can read their own business's billing details (name, VAT number, bank details), so
+  clients can see where to pay. Only administrators can change them.

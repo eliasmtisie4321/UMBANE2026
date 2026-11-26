@@ -263,18 +263,18 @@ Create version-controlled migrations for the proposed tables:
 
 **Goal:** Staff can issue invoices and track payments.
 
-- [ ] Create invoices for customers and orders.
-- [ ] Generate unique invoice numbers.
-- [ ] Add products, services, quantities and prices.
-- [ ] Calculate subtotals, applicable taxes and totals.
-- [ ] Define statuses: Draft, Sent, Partially Paid, Paid, Overdue and Cancelled.
-- [ ] Record payments and payment references.
-- [ ] Calculate outstanding balances.
-- [ ] Generate downloadable PDF invoices.
-- [ ] Store invoice history.
-- [ ] Send invoices through supported channels when configured.
-- [ ] Prevent unauthorized editing of finalized invoices.
-- [ ] Test totals, partial payments and status transitions.
+- [x] Create invoices for customers and orders.
+- [x] Generate unique invoice numbers.
+- [x] Add products, services, quantities and prices.
+- [x] Calculate subtotals, applicable taxes and totals.
+- [x] Define statuses: Draft, Sent, Partially Paid, Paid, Overdue and Cancelled. _(Overdue is worked out from the due date, not stored.)_
+- [x] Record payments and payment references.
+- [x] Calculate outstanding balances.
+- [x] Generate downloadable PDF invoices.
+- [x] Store invoice history.
+- [x] Send invoices through supported channels when configured. _(No channel is configured yet; Email Customer opens a prefilled email. docs/INVOICES.md)_
+- [x] Prevent unauthorized editing of finalized invoices.
+- [x] Test totals, partial payments and status transitions.
 
 **Done when:** Staff can create an invoice, record a payment and see the correct outstanding balance.
 
