@@ -291,6 +291,10 @@ const RULES: Record<string, { field?: string; message: string }> = {
   message_not_cancellable: { message: 'This email has already gone. Refresh the page.' },
   contact_note_required: { field: 'body', message: 'Write what was said or agreed.' },
   template_key_fixed: { message: 'A template’s key cannot change.' },
+  automation_settings_invalid: {
+    message:
+      'Those settings are outside what this automation allows. Check the numbers and try again.',
+  },
   message_templates_key_check: {
     field: 'key',
     message: 'Use 2 to 40 lower-case letters, numbers or underscores, starting with a letter.',

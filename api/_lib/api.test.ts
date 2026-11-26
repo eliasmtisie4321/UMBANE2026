@@ -207,6 +207,7 @@ const env = (over: Partial<ServerEnv> = {}): ServerEnv => ({
   replyTo: null,
   webhookSecret: null,
   cronSecret: 'cron-secret',
+  appUrl: 'https://crm.umbane.test',
   ...over,
 })
 

@@ -313,8 +313,9 @@ describe('notifications', () => {
         ],
       },
     })
-    const r = await listNotifications(true, client)
+    const r = await listNotifications({ unreadOnly: true, category: 'tickets' }, client)
     expect(log[0].ops).toContain('eq("is_read",false)')
+    expect(log[0].ops).toContain('eq("category","tickets")')
     expect(log[0].ops).toContain('order("created_at",{"ascending":false})')
     expect(r.ok && r.data.map((n) => n.link)).toEqual(['/support-tickets/t1', null])
   })

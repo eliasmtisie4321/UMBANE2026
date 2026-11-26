@@ -1,9 +1,10 @@
+import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { canAccess, navFor } from '@/auth/permissions'
 import { useAuth } from '@/auth/useAuth'
 import { FullPageSpinner } from '@/components/FullPageSpinner'
 import { useResource } from '@/hooks/useResource'
-import { getUnreadCount } from '@/services/notifications'
+import { flushNotificationEmails, getUnreadCount } from '@/services/notifications'
 import { ROLE_LABEL, type Profile } from '@/types/auth'
 import ForbiddenScreen from '@/screens/ForbiddenScreen'
 import { AppLayout } from './AppLayout'
@@ -29,6 +30,11 @@ function SignedInShell({ profile }: { profile: Profile }) {
   const navigate = useNavigate()
   // Checked again on every page change, so the count follows what the person has read.
   const unread = useResource(() => getUnreadCount(), `unread-${location.pathname}`)
+  // Sends queued notification emails within minutes while anyone is signed in (at most once a
+  // minute; see flushNotificationEmails).
+  useEffect(() => {
+    void flushNotificationEmails()
+  }, [location.pathname])
 
   return (
     <AppLayout

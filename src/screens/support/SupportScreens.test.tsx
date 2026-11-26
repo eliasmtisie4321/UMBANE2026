@@ -413,6 +413,7 @@ describe('notifications', () => {
           link: '/support-tickets/t1',
           isRead: false,
           createdAt: '2026-11-23T06:35:00Z',
+          category: 'tickets',
         },
       ]),
     )
@@ -420,7 +421,7 @@ describe('notifications', () => {
     open('/support-tickets')
     await userEvent.click(await screen.findByRole('button', { name: 'Notifications, 3 unread' }))
     expect(await screen.findByRole('heading', { name: 'Notifications' })).toBeInTheDocument()
-    expect(notes.listNotifications).toHaveBeenCalledWith(true)
+    expect(notes.listNotifications).toHaveBeenCalledWith({ unreadOnly: true, category: '' })
     await userEvent.click(await screen.findByRole('button', { name: /Ticket assigned to you/ }))
     expect(
       await screen.findByRole('heading', { name: 'CT breaker trip on DB-04' }),
@@ -438,6 +439,7 @@ describe('notifications', () => {
           link: null,
           isRead: false,
           createdAt: '2026-11-23T06:35:00Z',
+          category: 'tickets',
         },
       ]),
     )

@@ -8,7 +8,7 @@
 | `RESEND_API_KEY`          | Vercel only (`api/` functions)                                   | **Never**                                         |
 | `RESEND_WEBHOOK_SECRET`   | Vercel only                                                      | **Never**                                         |
 | `CRON_SECRET`             | Vercel only                                                      | **Never**                                         |
-| `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SUPABASE_URL` | Vercel only                                | Not secret, but server settings                   |
+| `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SUPABASE_URL`, `APP_URL` | Vercel only                     | Not secret, but server settings                   |
 
 ## Local setup
 
@@ -29,7 +29,7 @@ Anything prefixed `VITE_` is bundled into the client, so only put public values 
 - Production: https://umbane2026.vercel.app (deploys from `main`).
 - Build: `npm run build`, output `dist`. `vercel.json` rewrites unknown paths to `index.html` so
   client-side routes work on refresh and deep links, except `/api/*`, which are the server functions in
-  `api/`. It also schedules the daily email retry run (Vercel Cron).
+  `api/`. It also schedules the daily run (`/api/cron/daily`, Vercel Cron): automations, then waiting emails.
 - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for Production and Preview in
   Vercel → Project Settings → Environment Variables. The service-role key goes only in
   `SUPABASE_SERVICE_ROLE_KEY` (never a `VITE_` name, which would put it in the browser). Email settings:
@@ -113,3 +113,8 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
 
 - `20261128000013_reports.sql`: the report functions behind **Reports** (see `docs/REPORTS.md`). It only
   adds functions; no tables change. **Run it after 0012.**
+
+- `20261129000014_notifications_automations.sql`: notification categories, preferences and email, and the
+  automations (see `docs/AUTOMATIONS.md`). **Run it after 0013, and after 0012** (it uses the email queue and
+  templates from 0012). Every business gets the automations with team alerts on and customer emails off,
+  and a fifth email template, "Invoice overdue".
