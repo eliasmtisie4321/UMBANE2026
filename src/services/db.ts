@@ -52,6 +52,14 @@ const UNIQUE_VIOLATIONS: Record<string, { field: string; message: string }> = {
     field: 'reference',
     message: 'A property with this reference already exists.',
   },
+  products_business_sku_ci_uniq: {
+    field: 'sku',
+    message: 'A product with this SKU already exists.',
+  },
+  products_business_id_sku_key: {
+    field: 'sku',
+    message: 'A product with this SKU already exists.',
+  },
   meters_business_serial_ci_uniq: {
     field: 'serialNumber',
     message: 'A meter with this serial number already exists.',
@@ -160,6 +168,23 @@ const RULES: Record<string, { field?: string; message: string }> = {
   businesses_vat_number_check: {
     field: 'vatNumber',
     message: 'A South African VAT number has 10 digits and starts with 4.',
+  },
+  stock_insufficient: {
+    field: 'quantity',
+    message: 'There is not enough stock for this. Receive stock first, then try again.',
+  },
+  stock_not_tracked: { message: 'This product is a service, so it has no stock to move.' },
+  stock_quantity_sign: { field: 'quantity', message: 'Enter a positive number of units.' },
+  stock_sold_by_order: { message: 'Sales take stock out when their order is fulfilled.' },
+  stock_reason_required: { field: 'note', message: 'Say why the stock is being adjusted.' },
+  stock_direct_edit: { message: 'Stock changes only through stock movements.' },
+  stock_not_zero: {
+    field: 'trackStock',
+    message: 'Bring the stock to zero with an adjustment before turning off stock tracking.',
+  },
+  products_sku_format: {
+    field: 'sku',
+    message: 'Use 2 to 40 letters, numbers, dots, dashes or slashes, e.g. UMB-CT-400.',
   },
   maintenance_assignee_not_staff: {
     field: 'assignedTo',

@@ -487,6 +487,74 @@ select pg_temp.expect_error_like($$set local role anon; select * from public.inv
 select pg_temp.expect_error_like($$set local role anon; select * from public.billing_profile()$$, 'permission denied', 'anonymous cannot read supplier details');
 select pg_temp.expect_error_like($$set local role anon; select * from public.invoice_counters$$, 'permission denied', 'nobody reads the counters directly');
 
+-- Inventory (Phase 7) ----------------------------------------------------------------------------
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+-- The seeded meter: +20 received, -17 sold, then 1 more sold by fulfilling the Phase 5 order.
+select pg_temp.expect((select stock_on_hand = 2 from public.products where sku = 'MTR-PREPAID'), 'stock on hand follows the ledger, including the fulfilled order');
+select pg_temp.expect((select quantity = -1 and transaction_type = 'sold' and order_id = (select id from ref where k = 'order') and balance_after = 2 and balance_before = 3 from public.inventory_history where order_id is not null), 'fulfilling an order took its product out, linked to the order');
+select pg_temp.expect((select array_agg(balance_after order by number) = array[20, 3, 2] from public.inventory_transactions where product_id = 'f1000000-0000-0000-0000-000000000001'), 'each movement records the balance after it');
+
+insert into ref select 'prod', public.create_product(' CT-400 ', 'Split-core CT set', 4950, 10, p_cost_price => 3420, p_low_stock_threshold => 6, p_category => 'Commercial CT');
+select pg_temp.expect((select stock_on_hand = 10 and sku = 'CT-400' and stock_status = 'in' and stock_value = 34200 from public.product_list where id = (select id from ref where k = 'prod')), 'a product starts with its opening stock, recorded as received');
+select pg_temp.expect_error_like($$select public.create_product('ct-400', 'Duplicate', 1)$$, 'products_business_sku_ci_uniq', 'a SKU is unique whatever its case');
+select pg_temp.expect_error_like($$select public.create_product('BAD SKU!', 'X', 1)$$, 'products_sku_format', 'a SKU has no spaces or symbols');
+select pg_temp.expect_error_like($$select public.create_product('NEG-1', 'X', -1)$$, 'products_unit_price_check', 'a price cannot be negative');
+select pg_temp.expect_error_like($$select public.create_product('OPEN-1', 'X', 1, -5)$$, 'stock_quantity_sign', 'opening stock cannot be negative');
+select pg_temp.expect(not exists (select 1 from public.products where sku in ('NEG-1', 'OPEN-1')), 'and failed creations leave nothing behind');
+insert into ref select 'edge', public.create_product('EDGE-1', 'Edge case', 1, 3, p_low_stock_threshold => 3);
+select pg_temp.expect((select stock_status = 'low' from public.product_list where id = (select id from ref where k = 'edge')), 'exactly at the minimum counts as low stock');
+insert into ref select 'svc', public.create_product('SRV-INSTALL', 'Installation', 1500, p_track_stock => false);
+
+-- Movements
+insert into public.inventory_transactions (product_id, transaction_type, quantity, note) values ((select id from ref where k = 'prod'), 'received', 5, 'PO-119');
+insert into public.inventory_transactions (product_id, transaction_type, quantity, note) values ((select id from ref where k = 'prod'), 'adjusted', -11, 'Stock count: 11 damaged');
+select pg_temp.expect((select stock_on_hand = 4 and stock_status = 'low' from public.product_list where id = (select id from ref where k = 'prod')), 'at or below the threshold is low stock');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity, note) values ((select id from ref where k = 'prod'), 'adjusted', -5, 'Count')$$, 'stock_insufficient', 'stock cannot go below zero');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity) values ((select id from ref where k = 'prod'), 'adjusted', 1)$$, 'stock_reason_required', 'an adjustment needs a reason');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity) values ((select id from ref where k = 'prod'), 'received', -1)$$, 'stock_quantity_sign', 'received stock must be positive');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity) values ((select id from ref where k = 'prod'), 'returned', -1)$$, 'stock_quantity_sign', 'returns add stock');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity) values ((select id from ref where k = 'prod'), 'sold', -1)$$, 'stock_sold_by_order', 'a person cannot record a sale outside an order');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity) values ((select id from ref where k = 'svc'), 'received', 1)$$, 'stock_not_tracked', 'a service has no stock');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity, note) values ((select id from ref where k = 'prod'), 'adjusted', 0, 'Recount')$$, 'inventory_transactions_quantity_check', 'a movement of nothing is refused');
+insert into public.inventory_transactions (product_id, transaction_type, quantity, created_at, balance_after, recorded_by) values ((select id from ref where k = 'prod'), 'returned', 1, '2001-01-01', 999, 'a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select balance_after = 5 and created_at > '2020-01-01' and recorded_by = 'a3000000-0000-0000-0000-000000000001' from public.inventory_transactions where transaction_type = 'returned'), 'balance, time and author are the database''s to set');
+
+-- Direct edits
+select pg_temp.expect_error_like($$update public.products set stock_on_hand = 1000 where id = (select id from ref where k = 'prod')$$, 'stock_direct_edit', 'the count cannot be edited directly');
+select pg_temp.expect_error_like($$update public.products set track_stock = false where id = (select id from ref where k = 'prod')$$, 'stock_not_zero', 'tracking cannot be switched off while stock is held');
+update public.products set unit_price = 5100, name = 'Split-core CT set (400A)' where id = (select id from ref where k = 'prod');
+select pg_temp.expect((select unit_price = 5100 and stock_on_hand = 5 from public.products where id = (select id from ref where k = 'prod')), 'other details can be edited without touching stock');
+update public.inventory_transactions set quantity = 1000 where product_id = (select id from ref where k = 'prod');
+delete from public.inventory_transactions where product_id = (select id from ref where k = 'prod');
+select pg_temp.expect((select count(*) = 4 and sum(quantity) = 5 from public.inventory_transactions where product_id = (select id from ref where k = 'prod')), 'the ledger cannot be edited or deleted');
+
+-- Orders and stock
+insert into ref select 'o3', public.save_order(null, (select id from ref where k = 'cust'), jsonb_build_array(
+  jsonb_build_object('product_id', (select id from ref where k = 'prod'), 'description', 'CT set', 'quantity', 4, 'unit_price', 5100),
+  jsonb_build_object('product_id', (select id from ref where k = 'prod'), 'description', 'CT set spare', 'quantity', 2, 'unit_price', 5100),
+  jsonb_build_object('product_id', (select id from ref where k = 'svc'), 'description', 'Installation', 'quantity', 1, 'unit_price', 1500)));
+update public.orders set status = 'confirmed' where id = (select id from ref where k = 'o3');
+select pg_temp.expect_error_like($$update public.orders set status = 'fulfilled' where id = (select id from ref where k = 'o3')$$, 'stock_insufficient', 'an order needing more stock than is held cannot be fulfilled');
+select pg_temp.expect((select status = 'confirmed' from public.orders where id = (select id from ref where k = 'o3')) and (select stock_on_hand = 5 from public.products where id = (select id from ref where k = 'prod')) and not exists (select 1 from public.sales where order_id = (select id from ref where k = 'o3')), 'and nothing changes: no stock taken, no sale');
+insert into public.inventory_transactions (product_id, transaction_type, quantity, note) values ((select id from ref where k = 'prod'), 'received', 1, 'Delivery');
+update public.orders set status = 'fulfilled' where id = (select id from ref where k = 'o3');
+select pg_temp.expect((select stock_on_hand = 0 and stock_status = 'out' from public.product_list where id = (select id from ref where k = 'prod')), 'fulfilling takes both lines of the same product (4 + 2) and leaves it out of stock');
+select pg_temp.expect((select count(*) = 1 and sum(quantity) = -6 from public.inventory_transactions where order_id = (select id from ref where k = 'o3')), 'as one movement per product, none for the service');
+select pg_temp.expect((select active_products = 4 and low = 2 and out_of_stock = 1 and units = 5 from public.inventory_summary), 'summary counts products, units, low and out of stock');
+
+-- Isolation
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select count(*) from public.product_list) + (select count(*) from public.inventory_history) + (select count(*) from public.inventory_summary) = 0, 'clients see no products or stock');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity) values ('11111111-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001', 'received', 100)$$, 'permission denied', 'clients cannot move stock');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.product_list) + (select count(*) from public.inventory_history) = 0, 'another business sees no products or movements');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (product_id, transaction_type, quantity) values ('f1000000-0000-0000-0000-000000000001', 'received', 100)$$, 'stock_product_not_found', 'nor moves our stock');
+select pg_temp.expect_error_like($$insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity) values ('11111111-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001', 'received', 100)$$, 'permission denied', 'claiming our business does not help');
+select pg_temp.expect(public.create_product('CT-400', 'Their own CT set', 10) is not null, 'SKUs are unique per business, not across businesses');
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$set local role anon; select * from public.product_list$$, 'permission denied', 'anonymous cannot read products');
+select pg_temp.expect_error_like($$set local role anon; select public.create_product('X1', 'X', 1)$$, 'permission denied', 'anonymous cannot create products');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

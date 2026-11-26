@@ -212,7 +212,7 @@ export const searchProducts = (search: string, client?: DbClient) =>
   guarded<ProductOption[]>('Products', client, async (c) => {
     let q = c
       .from('products')
-      .select('id, sku, name, unit_price')
+      .select('id, sku, name, unit_price, track_stock, stock_on_hand')
       .eq('is_active', true)
       .order('name')
       .limit(8)
@@ -226,6 +226,8 @@ export const searchProducts = (search: string, client?: DbClient) =>
         sku: String(r.sku),
         name: String(r.name),
         unitPrice: num(r.unit_price),
+        trackStock: r.track_stock !== false,
+        stockOnHand: num(r.stock_on_hand),
       })),
     )
   })

@@ -181,6 +181,8 @@ export interface ProductOption {
   sku: string
   name: string
   unitPrice: number
+  trackStock: boolean
+  stockOnHand: number
 }
 
 export interface TimelineEntry {
