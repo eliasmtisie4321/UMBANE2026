@@ -1030,6 +1030,205 @@ select pg_temp.as_owner();
 select pg_temp.expect_error_like($$set local role anon; select * from public.message_list$$, 'permission denied', 'anonymous cannot read messages');
 select pg_temp.expect_error_like($$set local role anon; select public.queue_email('c1000000-0000-0000-0000-000000000001', 'x', 'x')$$, 'permission denied', 'anonymous cannot send email');
 
+-- Reports (Phase 11) ------------------------------------------------------------------------------
+-- Fixtures in Feb-Apr 2024, a window no other test touches. Inserted as the owner with triggers off
+-- so the dates can be set exactly.
+select pg_temp.as_owner();
+create temp table rep (k text primary key, v jsonb) on commit drop;
+grant all on rep to authenticated, anon;
+set local session_replication_role = replica;
+insert into public.customers (id, business_id, name, segment, province, status, created_at) values
+  ('cc240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Report Residential', 'residential', 'Gauteng', 'active', '2024-03-10 10:00+02'),
+  ('cc240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'Report Commercial', 'commercial', 'Western Cape', 'inactive', '2024-03-31 23:30+02'),
+  ('cc240000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'Report Late', 'commercial', null, 'active', '2024-04-01 00:30+02'),
+  ('cc240000-0000-0000-0000-000000000009', '11111111-0000-0000-0000-000000000002', 'Other Business Customer', 'residential', 'Gauteng', 'active', '2024-03-15 10:00+02');
+insert into public.properties (id, business_id, customer_id, name, address, property_type, province, status, units, created_at) values
+  ('dd240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', 'Report House', '1 Report Road', 'residential', 'Gauteng', 'active', 1, '2024-03-12 09:00+02'),
+  ('dd240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000002', 'Report Mall', '2 Report Road', 'commercial', 'Western Cape', 'active', 40, '2024-03-14 09:00+02');
+insert into public.electricity_meters (id, business_id, property_id, serial_number, meter_type, installed_on) values
+  ('ee240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'dd240000-0000-0000-0000-000000000001', 'RPT-M1', 'smart_prepaid', '2024-01-01'),
+  ('ee240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'dd240000-0000-0000-0000-000000000002', 'RPT-M2', 'three_phase_ct', '2024-01-01');
+-- M1 uses 10 kWh a day throughout; M2 uses 20 a day for ten March days, estimated.
+insert into public.meter_readings (business_id, meter_id, reading_date, reading_value, is_estimate) values
+  ('11111111-0000-0000-0000-000000000001', 'ee240000-0000-0000-0000-000000000001', '2024-02-20', 1000, false),
+  ('11111111-0000-0000-0000-000000000001', 'ee240000-0000-0000-0000-000000000001', '2024-03-01', 1100, false),
+  ('11111111-0000-0000-0000-000000000001', 'ee240000-0000-0000-0000-000000000001', '2024-04-01', 1410, false),
+  ('11111111-0000-0000-0000-000000000001', 'ee240000-0000-0000-0000-000000000002', '2024-03-16', 5000, false),
+  ('11111111-0000-0000-0000-000000000001', 'ee240000-0000-0000-0000-000000000002', '2024-03-26', 5200, true);
+insert into public.orders (id, business_id, customer_id, order_date, status, total, created_at, cancel_reason) values
+  ('aa240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', '2024-03-05', 'confirmed', 1150, '2024-03-05 09:00+02', null),
+  ('aa240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000002', '2024-03-20', 'cancelled', 500, '2024-03-20 09:00+02', 'Changed their mind'),
+  ('aa240000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', '2024-04-02', 'fulfilled', 230, '2024-04-02 09:00+02', null);
+insert into public.order_items (business_id, order_id, product_id, description, quantity, unit_price) values
+  ('11111111-0000-0000-0000-000000000001', 'aa240000-0000-0000-0000-000000000001', null, 'Report smart meter', 2, 500),
+  ('11111111-0000-0000-0000-000000000001', 'aa240000-0000-0000-0000-000000000002', null, 'Cancelled item', 1, 500),
+  ('11111111-0000-0000-0000-000000000001', 'aa240000-0000-0000-0000-000000000003', null, 'Report install', 1, 200);
+insert into public.invoices (id, business_id, customer_id, invoice_number, status, issue_date, due_date, total, created_at, cancel_reason) values
+  ('bb240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', 'RPT-1', 'paid', '2024-03-05', '2024-04-04', 1150, '2024-03-05 09:00+02', null),
+  ('bb240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000002', 'RPT-2', 'partially_paid', '2024-03-20', '2024-03-25', 400, '2024-03-20 09:00+02', null),
+  ('bb240000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', 'RPT-3', 'draft', null, null, 999, '2024-03-10 09:00+02', null),
+  ('bb240000-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', 'RPT-4', 'cancelled', '2024-03-12', '2024-04-11', 50, '2024-03-12 09:00+02', 'Issued in error'),
+  ('bb240000-0000-0000-0000-000000000005', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000003', 'RPT-5', 'partially_paid', '2024-04-02', '2030-01-01', 230, '2024-04-02 09:00+02', null),
+  ('bb240000-0000-0000-0000-000000000009', '11111111-0000-0000-0000-000000000002', 'cc240000-0000-0000-0000-000000000009', 'RPT-B', 'paid', '2024-03-15', '2024-04-14', 7777, '2024-03-15 09:00+02', null);
+-- 23:30 on 31 March in South Africa is still March; 00:15 on 1 April is April, though it is 31 March in UTC.
+insert into public.payments (business_id, invoice_id, amount, method, paid_at) values
+  ('11111111-0000-0000-0000-000000000001', 'bb240000-0000-0000-0000-000000000001', 1150, 'eft', '2024-03-31 23:30+02'),
+  ('11111111-0000-0000-0000-000000000001', 'bb240000-0000-0000-0000-000000000002', 100, 'card', '2024-03-22 10:00+02'),
+  ('11111111-0000-0000-0000-000000000001', 'bb240000-0000-0000-0000-000000000005', 50, 'eft', '2024-04-01 00:15+02'),
+  ('11111111-0000-0000-0000-000000000002', 'bb240000-0000-0000-0000-000000000009', 7777, 'eft', '2024-03-16 10:00+02');
+insert into public.products (id, business_id, sku, name, category, unit_price, cost_price, track_stock, stock_on_hand, low_stock_threshold) values
+  ('ff240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'RPT-SKU-1', 'Report Meter Kit', 'Report Kits', 250, 100, true, 6, 2),
+  ('ff240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'RPT-SKU-2', 'Report Spare', 'Report Kits', 50, 20, true, 0, 1);
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, balance_after, created_at) values
+  ('11111111-0000-0000-0000-000000000001', 'ff240000-0000-0000-0000-000000000001', 'received', 10, 10, '2024-03-02 09:00+02'),
+  ('11111111-0000-0000-0000-000000000001', 'ff240000-0000-0000-0000-000000000001', 'sold', -3, 7, '2024-03-20 09:00+02'),
+  ('11111111-0000-0000-0000-000000000001', 'ff240000-0000-0000-0000-000000000001', 'sold', -1, 6, '2024-04-03 09:00+02');
+insert into public.support_tickets (id, business_id, customer_id, reference, subject, category, priority, status, assigned_to, created_at, first_response_at, resolved_at) values
+  ('ab240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', 'RPT-T1', 'Billing question', 'billing', 'high', 'resolved', 'a3000000-0000-0000-0000-000000000001', '2024-03-03 08:00+02', '2024-03-03 10:00+02', '2024-03-04 08:00+02'),
+  ('ab240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000002', 'RPT-T2', 'Meter dead', 'meter_fault', 'urgent', 'open', null, '2024-03-20 09:00+02', null, null),
+  ('ab240000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'cc240000-0000-0000-0000-000000000001', 'RPT-T3', 'Another bill', 'billing', 'normal', 'open', null, '2024-04-02 09:00+02', null, null);
+insert into public.staff_tasks (id, business_id, title, category, status, due_date, assigned_to, created_at, completed_at) values
+  ('ac240000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Report on time', 'field_maintenance', 'done', '2024-03-10', 'a3000000-0000-0000-0000-000000000001', '2024-03-02 09:00+02', '2024-03-09 12:00+02'),
+  ('ac240000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'Report late', 'billing_audit', 'done', '2024-03-08', 'a3000000-0000-0000-0000-000000000001', '2024-03-05 09:00+02', '2024-03-12 12:00+02'),
+  ('ac240000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'Report cancelled', 'other', 'cancelled', null, 'a3000000-0000-0000-0000-000000000001', '2024-03-06 09:00+02', null),
+  ('ac240000-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 'Report pending', 'other', 'todo', '2024-03-15', 'a3000000-0000-0000-0000-000000000001', '2024-03-07 09:00+02', null);
+set local session_replication_role = origin;
+
+-- Who may run reports
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect_error_like($$select public.report_revenue('2024-03-01', '2024-03-31')$$, 'permission denied', 'staff cannot run reports');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect_error_like($$select public.report_customers('2024-03-01', '2024-03-31')$$, 'permission denied', 'clients cannot run reports');
+select pg_temp.as_owner();
+select pg_temp.expect_error($$set local role anon; select public.report_overview('2024-03-01', '2024-03-31')$$, 'anonymous visitors cannot run reports');
+reset role;
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect_error_like($$select public.report_sales('2024-03-31', '2024-03-01')$$, 'report_range_invalid', 'a period must start before it ends');
+select pg_temp.expect_error_like($$select public.report_sales('2018-01-01', '2024-03-01')$$, 'report_range_too_long', 'a period is at most five years');
+
+-- Dates and months
+select pg_temp.expect(public.sa_date('2024-03-31 22:30:00+00') = '2024-04-01', 'dates are South African dates');
+select pg_temp.expect((select count(*) = 4 and min(first_day) = '2024-11-15' and max(last_day) = '2025-02-10' and min(month) = '2024-11-01' from public.report_months('2024-11-15', '2025-02-10')), 'a period is split into the months it touches, clipped to the period');
+select pg_temp.expect(public.report_match(null, 'none') and public.report_match('x', null) and not public.report_match('x', 'none') and not public.report_match(null, 'x'), 'a filter of "none" finds records with the category left empty');
+
+-- Run every report as the manager
+insert into rep values
+  ('overview', public.report_overview('2024-03-01', '2024-03-31')),
+  ('overview_april', public.report_overview('2024-04-01', '2024-04-30')),
+  ('electricity_2025', public.report_electricity('2025-03-01', '2025-03-31')),
+  ('customers_none', public.report_customers('2024-03-01', '2024-04-30', null, 'none')),
+  ('customers', public.report_customers('2024-03-01', '2024-03-31')),
+  ('customers_span', public.report_customers('2024-02-15', '2024-04-10')),
+  ('customers_commercial', public.report_customers('2024-03-01', '2024-03-31', 'commercial')),
+  ('customers_wc', public.report_customers('2024-03-01', '2024-03-31', null, 'Western Cape')),
+  ('properties', public.report_properties('2024-03-01', '2024-03-31')),
+  ('properties_res', public.report_properties('2024-03-01', '2024-03-31', 'residential')),
+  ('electricity', public.report_electricity('2024-03-01', '2024-03-31')),
+  ('electricity_span', public.report_electricity('2024-02-25', '2024-03-05')),
+  ('electricity_type', public.report_electricity('2024-03-01', '2024-03-31', null, 'smart_prepaid')),
+  ('electricity_property', public.report_electricity('2024-03-01', '2024-03-31', 'dd240000-0000-0000-0000-000000000002')),
+  ('sales', public.report_sales('2024-03-01', '2024-03-31')),
+  ('sales_april', public.report_sales('2024-04-01', '2024-04-30')),
+  ('revenue', public.report_revenue('2024-03-01', '2024-04-30')),
+  ('revenue_march', public.report_revenue('2024-03-01', '2024-03-31')),
+  ('revenue_card', public.report_revenue('2024-03-01', '2024-03-31', 'card')),
+  ('revenue_april', public.report_revenue('2024-04-01', '2024-04-30')),
+  ('inventory', public.report_inventory('2024-03-01', '2024-03-31', 'Report Kits')),
+  ('support', public.report_support('2024-03-01', '2024-03-31')),
+  ('support_billing', public.report_support('2024-03-01', '2024-03-31', 'billing')),
+  ('support_urgent', public.report_support('2024-03-01', '2024-03-31', null, 'urgent')),
+  ('team', public.report_team('2024-03-01', '2024-03-31')),
+  ('team_field', public.report_team('2024-03-01', '2024-03-31', 'field_operations')),
+  ('team_marketing', public.report_team('2024-03-01', '2024-03-31', 'marketing'));
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((public.report_revenue('2024-03-01', '2024-03-31')->>'collected')::numeric = 1250, 'administrators can run reports');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- business 2 administrator
+insert into rep values
+  ('b2_revenue', public.report_revenue('2024-03-01', '2024-03-31')),
+  ('b2_customers', public.report_customers('2024-03-01', '2024-03-31'));
+
+-- Overview
+select pg_temp.expect((select (v->>'collected')::numeric = 1250 and (v->>'invoiced')::numeric = 1550 and (v->>'invoiced_paid')::numeric = 1250 and (v->>'kwh')::numeric = 510 and (v->>'new_customers')::int = 2 and (v->>'customers')::int = 2 and (v->>'orders')::int = 1 and (v->>'order_value')::numeric = 1150 and (v->>'tickets_opened')::int = 2 and (v->>'tickets_resolved')::int = 1 and (v->>'tasks_completed')::int = 2 from rep where k = 'overview'), 'the overview adds up the month');
+select pg_temp.expect((select (v->>'collected')::numeric = 50 and (v->>'collected_prior')::numeric = 1250 and (v->>'kwh_prior')::numeric = 500 from rep where k = 'overview_april'), 'the previous period is the same number of days just before');
+select pg_temp.expect((select (v->>'kwh_last_year')::numeric = 510 from rep where k = 'electricity_2025'), 'and use is compared with the same period last year');
+select pg_temp.expect((select (v->>'total')::int = 1 and v->'rows'->0->>'name' = 'Report Late' from rep where k = 'customers_none'), 'customers filtered to those with no province recorded');
+select pg_temp.expect((select jsonb_array_length(v->'months') = 1 and (v->'months'->0->>'collected')::numeric = 1250 and (v->'months'->0->>'kwh')::numeric = 510 from rep where k = 'overview'), 'and splits it by month');
+
+-- Customers
+select pg_temp.expect((select (v->>'total')::int = 2 and (v->>'new')::int = 2 and (v->'by_status'->>'active')::int = 1 and (v->'by_status'->>'inactive')::int = 1 from rep where k = 'customers'), 'customers registered by the end of the period, by status (23:30 on the last day counts)');
+select pg_temp.expect((select (v->>'billed')::numeric = 1550 and (v->>'paid')::numeric = 1250 and (v->>'row_count')::int = 2 and v->'rows'->0->>'name' = 'Report Residential' and (v->'rows'->0->>'billed')::numeric = 1150 and (v->'rows'->0->>'properties')::int = 1 and (v->'rows'->0->>'meters')::int = 1 from rep where k = 'customers'), 'each customer shows what they were billed and paid, biggest first');
+select pg_temp.expect((select jsonb_agg(e->'count' order by e->>'key') = '[1, 1]' from rep, jsonb_array_elements(v->'by_province') e where k = 'customers'), 'customers by province');
+select pg_temp.expect((select (v->>'total')::int = 3 from rep where k = 'customers_span') and (select string_agg((e->>'new') || '/' || (e->>'total'), ',' order by e->>'month') = '0/0,2/2,1/3' from rep, jsonb_array_elements(v->'months') e where k = 'customers_span'), 'monthly new and running total; 00:30 on 1 April is April');
+select pg_temp.expect((select (v->>'total')::int = 1 and v->'rows'->0->>'name' = 'Report Commercial' from rep where k = 'customers_commercial'), 'customers filtered by segment');
+select pg_temp.expect((select (v->>'total')::int = 1 from rep where k = 'customers_wc'), 'customers filtered by province');
+
+-- Properties
+select pg_temp.expect((select (v->>'total')::int = 2 and (v->>'new')::int = 2 and (v->>'units')::int = 41 and (v->>'meters_in_service')::int = 2 and (v->>'without_meter')::int = 0 and (v->>'kwh')::numeric = 510 from rep where k = 'properties'), 'properties with their units, meters and use');
+select pg_temp.expect((select (v->>'total')::int = 1 and (v->>'kwh')::numeric = 310 from rep where k = 'properties_res'), 'properties filtered by type');
+
+-- Electricity
+select pg_temp.expect((select (v->>'kwh')::numeric = 510 and (v->>'estimated_kwh')::numeric = 200 and (v->>'meters_reporting')::int = 2 and (v->>'days')::int = 31 and (v->>'row_count')::int = 3 from rep where k = 'electricity'), 'use in the period, the estimated part, and the readings taken');
+select pg_temp.expect((select v->'by_meter'->0->>'serial_number' = 'RPT-M1' and (v->'by_meter'->0->>'kwh')::numeric = 310 and v->'by_property'->1->>'name' = 'Report Mall' from rep where k = 'electricity'), 'use by meter and by property, biggest first');
+select pg_temp.expect((select (v->>'kwh')::numeric = 100 and string_agg(e->>'kwh', ',' order by e->>'month') = '50.000,50.000' from rep, jsonb_array_elements(v->'months') e where k = 'electricity_span' group by v), 'only the days inside the period count, split across months');
+select pg_temp.expect((select (v->>'kwh')::numeric = 310 from rep where k = 'electricity_type') and (select (v->>'kwh')::numeric = 200 from rep where k = 'electricity_property'), 'use filtered by meter type and by property');
+
+-- Sales and invoices
+select pg_temp.expect((select (v->>'orders')::int = 1 and (v->>'order_value')::numeric = 1150 and jsonb_array_length(v->'orders_by_status') = 2 and v->'top_items'->0->>'name' = 'Report smart meter' and (v->'top_items'->0->>'quantity')::int = 2 and jsonb_array_length(v->'top_items') = 1 from rep where k = 'sales'), 'orders in the period, excluding cancelled ones');
+select pg_temp.expect((select (v->>'invoices')::int = 2 and (v->>'invoiced')::numeric = 1550 and (v->>'paid_count')::int = 1 and (v->>'paid_amount')::numeric = 1150 and (v->>'overdue_count')::int = 1 and (v->>'overdue_balance')::numeric = 300 and (v->>'unpaid_count')::int = 0 and (v->>'outstanding')::numeric = 300 and (v->>'avg_settlement_days')::numeric = 26 from rep where k = 'sales'), 'issued invoices only (no drafts or cancelled), with what is paid, overdue and the days to settle');
+select pg_temp.expect((select (v->>'unpaid_count')::int = 1 and (v->>'unpaid_balance')::numeric = 180 and (v->>'orders')::int = 1 and (v->'months'->0->>'collected')::numeric = 50 from rep where k = 'sales_april'), 'an invoice within its terms is unpaid, not overdue');
+
+-- Revenue
+select pg_temp.expect((select (v->>'collected')::numeric = 1250 and (v->>'payments')::int = 2 and (v->>'invoiced')::numeric = 1550 from rep where k = 'revenue_march'), 'payments received in the period');
+select pg_temp.expect((select (v->>'collected')::numeric = 50 and (v->>'payments')::int = 1 and (v->>'row_count')::int = 1 from rep where k = 'revenue_april'), 'payments before the period are left out');
+select pg_temp.expect((select string_agg((e->>'collected') || '/' || (e->>'invoiced'), ',' order by e->>'month') = '1250.00/1550.00,50.00/230.00' from rep, jsonb_array_elements(v->'months') e where k = 'revenue'), 'collected and invoiced by month');
+select pg_temp.expect((select (v->'by_method'->0->>'key') = 'eft' and (v->'by_method'->0->>'amount')::numeric = 1150 from rep where k = 'revenue_march'), 'revenue by payment method');
+select pg_temp.expect((select (v->>'collected')::numeric = 100 and (v->>'row_count')::int = 1 from rep where k = 'revenue_card'), 'revenue filtered by payment method');
+
+-- Inventory
+select pg_temp.expect((select (v->>'products')::int = 2 and (v->>'units')::int = 6 and (v->>'stock_value')::numeric = 600 and (v->>'out')::int = 1 and (v->>'inbound')::int = 10 and (v->>'outbound')::int = 3 from rep where k = 'inventory'), 'stock now, and units in and out during the period');
+select pg_temp.expect((select v->'fast'->0->>'sku' = 'RPT-SKU-1' and (v->'fast'->0->>'outbound')::int = 3 and (v->'months'->0->>'inbound')::int = 10 and (v->>'row_count')::int = 2 from rep where k = 'inventory'), 'the fastest-moving products and monthly movement');
+
+-- Support
+select pg_temp.expect((select (v->>'opened')::int = 2 and (v->>'resolved')::int = 1 and (v->>'avg_first_response_hours')::numeric = 2 and (v->>'avg_resolution_hours')::numeric = 24 and (v->>'row_count')::int = 2 from rep where k = 'support'), 'tickets opened and resolved, with response and resolution times');
+select pg_temp.expect((select (v->>'opened')::int = 1 from rep where k = 'support_billing') and (select (v->>'opened')::int = 1 and v->'rows'->0->>'reference' = 'RPT-T2' from rep where k = 'support_urgent'), 'tickets filtered by category and priority');
+
+-- Team
+select pg_temp.expect((select (r->>'assigned')::int = 3 and (r->>'assigned_done')::int = 2 and (r->>'completed')::int = 2 and (r->>'with_due')::int = 2 and (r->>'on_time')::int = 1 and (r->>'tickets_resolved')::int = 1 from rep, jsonb_array_elements(v->'rows') r where k = 'team' and r->>'id' = 'a3000000-0000-0000-0000-000000000001'), 'each person''s tasks: given, finished, on time, and tickets resolved');
+select pg_temp.expect((select (v->>'completed')::int = 2 and (v->>'on_time')::int = 1 from rep where k = 'team_field') and (select (v->>'completed')::int = 0 from rep where k = 'team_marketing'), 'team filtered by department');
+select pg_temp.expect((select string_agg((e->>'created') || '/' || (e->>'completed'), ',') = '3/2' from rep, jsonb_array_elements(v->'months') e where k = 'team'), 'tasks given and finished by month');
+
+-- Each business sees only its own figures
+select pg_temp.expect((select (v->>'collected')::numeric = 1250 from rep where k = 'revenue_march') and (select (v->>'collected')::numeric = 7777 from rep where k = 'b2_revenue'), 'revenue never includes another business');
+select pg_temp.expect((select (v->>'total')::int = 1 and v->'rows'->0->>'name' = 'Other Business Customer' from rep where k = 'b2_customers'), 'customers never include another business');
+
+-- Totals match the source records (the last five years of all test data)
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+insert into rep select 'all_' || k, v from (values
+  ('revenue', public.report_revenue(public.business_today() - 1830, public.business_today())),
+  ('sales', public.report_sales(public.business_today() - 1830, public.business_today())),
+  ('customers', public.report_customers(public.business_today() - 1830, public.business_today())),
+  ('properties', public.report_properties(public.business_today() - 1830, public.business_today())),
+  ('electricity', public.report_electricity(public.business_today() - 1830, public.business_today())),
+  ('inventory', public.report_inventory(public.business_today() - 1830, public.business_today())),
+  ('support', public.report_support(public.business_today() - 1830, public.business_today())),
+  ('team', public.report_team(public.business_today() - 1830, public.business_today())),
+  ('overview', public.report_overview(public.business_today() - 1830, public.business_today()))
+) x(k, v);
+select pg_temp.as_owner();
+create temp table win as select public.business_today() - 1830 as f, public.business_today() as t;
+select pg_temp.expect((select (v->>'collected')::numeric = (select sum(amount) from public.payments, win where business_id = '11111111-0000-0000-0000-000000000001' and public.sa_date(paid_at) between f and t) from rep where k = 'all_revenue'), 'revenue equals the payments recorded');
+select pg_temp.expect((select (v->>'collected')::numeric = (select sum((e->>'collected')::numeric) from jsonb_array_elements(v->'months') e) and (v->>'collected')::numeric = (select sum((e->>'amount')::numeric) from jsonb_array_elements(v->'by_method') e) and (v->>'collected')::numeric = (select sum((e->>'amount')::numeric) from jsonb_array_elements(v->'rows') e) from rep where k = 'all_revenue'), 'revenue by month, by method and the payment list all add up to the total');
+select pg_temp.expect((select (v->>'invoiced')::numeric = (select sum(total) from public.invoices, win where business_id = '11111111-0000-0000-0000-000000000001' and status not in ('draft', 'cancelled') and issue_date between f and t) and (v->>'invoices')::int = (select count(*) from public.invoices, win where business_id = '11111111-0000-0000-0000-000000000001' and status not in ('draft', 'cancelled') and issue_date between f and t) from rep where k = 'all_sales'), 'invoiced equals the invoices issued');
+select pg_temp.expect((select (v->>'invoiced')::numeric = (select sum((e->>'invoiced')::numeric) from jsonb_array_elements(v->'months') e) and (v->>'outstanding')::numeric = (select sum((e->>'balance')::numeric) from jsonb_array_elements(v->'rows') e) and (v->>'invoices')::int = (v->>'paid_count')::int + (v->>'unpaid_count')::int + (v->>'overdue_count')::int from rep where k = 'all_sales'), 'invoices split into paid, unpaid and overdue without gaps');
+select pg_temp.expect((select (v->>'order_value')::numeric = (select sum(total) from public.orders, win where business_id = '11111111-0000-0000-0000-000000000001' and status <> 'cancelled' and order_date between f and t) from rep where k = 'all_sales'), 'order value equals the orders placed');
+select pg_temp.expect((select (v->>'total')::int = (select count(*) from public.customers, win where business_id = '11111111-0000-0000-0000-000000000001' and public.sa_date(created_at) <= t) and (v->>'total')::int = (select sum((e->>'count')::int) from jsonb_array_elements(v->'by_segment') e) and (v->>'total')::int = (v->>'row_count')::int from rep where k = 'all_customers'), 'customer totals equal the customer records');
+select pg_temp.expect((select (v->>'total')::int = (select count(*) from public.properties, win where business_id = '11111111-0000-0000-0000-000000000001' and public.sa_date(created_at) <= t) and (v->>'total')::int = (select sum((e->>'count')::int) from jsonb_array_elements(v->'by_type') e) from rep where k = 'all_properties'), 'property totals equal the property records');
+select pg_temp.expect((select abs((v->>'kwh')::numeric - (select sum((e->>'kwh')::numeric) from jsonb_array_elements(v->'months') e)) < 0.01 and abs((v->>'kwh')::numeric - (select (p.v->>'kwh')::numeric from rep p where p.k = 'all_properties')) < 0.01 and (v->>'row_count')::int = (select count(*) from public.meter_readings, win where business_id = '11111111-0000-0000-0000-000000000001' and reading_date between f and t) from rep where k = 'all_electricity'), 'electricity by month adds up, matches the property report, and lists every reading');
+select pg_temp.expect((select (v->>'stock_value')::numeric = (select sum(stock_value) from public.product_list where business_id = '11111111-0000-0000-0000-000000000001') and (v->>'stock_value')::numeric = (select (o.v->>'stock_value')::numeric from rep o where o.k = 'all_overview') from rep where k = 'all_inventory'), 'stock value equals the products on hand');
+select pg_temp.expect((select (v->>'outbound')::int = (select -sum(quantity) from public.inventory_transactions, win where business_id = '11111111-0000-0000-0000-000000000001' and quantity < 0 and public.sa_date(created_at) between f and t) from rep where k = 'all_inventory'), 'units out equal the stock movements');
+select pg_temp.expect((select (v->>'opened')::int = (select count(*) from public.support_tickets, win where business_id = '11111111-0000-0000-0000-000000000001' and public.sa_date(created_at) between f and t) and (v->>'opened')::int = (select sum((e->>'count')::int) from jsonb_array_elements(v->'by_category') e) and (v->>'open_now')::int = (select count(*) from public.support_tickets where business_id = '11111111-0000-0000-0000-000000000001' and status in ('open', 'assigned', 'in_progress')) from rep where k = 'all_support'), 'ticket totals equal the tickets');
+select pg_temp.expect((select (v->>'completed')::int = (select count(*) from public.staff_tasks t join public.profiles p on p.id = t.assigned_to, win where t.business_id = '11111111-0000-0000-0000-000000000001' and p.role <> 'client' and t.status = 'done' and public.sa_date(t.completed_at) between f and t) and (v->>'pending')::int = (select count(*) from public.staff_tasks t join public.profiles p on p.id = t.assigned_to where t.business_id = '11111111-0000-0000-0000-000000000001' and p.role <> 'client' and t.status in ('todo', 'in_progress')) and (v->>'completed')::int = (select sum((e->>'completed')::int) from jsonb_array_elements(v->'months') e) from rep where k = 'all_team'), 'task totals equal the tasks');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

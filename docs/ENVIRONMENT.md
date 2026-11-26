@@ -110,3 +110,6 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   and delivery history, the private `message-attachments` storage bucket and the server-only sending
   functions (see `docs/COMMUNICATIONS.md`). **Run it after 0011.** Every business gets four starting
   templates.
+
+- `20261128000013_reports.sql`: the report functions behind **Reports** (see `docs/REPORTS.md`). It only
+  adds functions; no tables change. **Run it after 0012.**
