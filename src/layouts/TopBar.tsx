@@ -1,4 +1,4 @@
-import { Bell, LogOut, Menu, Plus, Search, User } from 'lucide-react'
+import { Bell, LogOut, Menu, Plus, Search, User, KeyRound } from 'lucide-react'
 import { Button, Dropdown } from '@/components/ui'
 
 interface TopBarProps {
@@ -6,6 +6,8 @@ interface TopBarProps {
   onOpenNotifications?: () => void
   unread?: number
   onSignOut?: () => void
+  /** Opens the person's own password and sign-in page. */
+  onOpenSecurity?: () => void
   userName?: string
   roleLabel?: string
 }
@@ -15,6 +17,7 @@ export function TopBar({
   onOpenNotifications,
   unread = 0,
   onSignOut,
+  onOpenSecurity,
   userName,
   roleLabel,
 }: TopBarProps) {
@@ -68,6 +71,15 @@ export function TopBar({
           </div>
         )}
         <Dropdown label="Account menu" trigger={<User size={20} aria-hidden="true" />}>
+          {onOpenSecurity && (
+            <button
+              type="button"
+              onClick={onOpenSecurity}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-label-md hover:bg-surface-container"
+            >
+              <KeyRound size={16} aria-hidden="true" /> Password and sign-in
+            </button>
+          )}
           <button
             type="button"
             onClick={onSignOut}

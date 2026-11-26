@@ -1,6 +1,8 @@
 import { Pencil, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { useAuth } from '@/auth/useAuth'
+import { EraseCustomerDialog } from '@/components/customers/EraseCustomerDialog'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
 import { ConfirmDialog } from '@/components/data/ConfirmDialog'
 import { Notice } from '@/components/data/ListPanel'
@@ -42,6 +44,9 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
   const [error, setError] = useState<string | null>(null)
   const [commsNotice, setCommsNotice] = useState<string | null>(null)
   const inactive = customer.status === 'inactive'
+  const { profile } = useAuth()
+  const [erasing, setErasing] = useState(false)
+  const erased = Boolean(customer.erasedAt)
 
   async function toggle() {
     setBusy(true)
@@ -72,24 +77,48 @@ function ProfileBody({ customer, reload }: { customer: Customer; reload: () => v
         }
         back={{ to: '/customers', label: 'Customers' }}
         actions={
-          <>
-            <Link to={`/customers/${customer.id}/edit`} className={linkButton}>
-              <Pencil size={16} aria-hidden="true" /> Edit
-            </Link>
-            <Link to={`/properties/new?customer=${customer.id}`} className={linkButton}>
-              <Plus size={16} aria-hidden="true" /> Add property
-            </Link>
-            <Button
-              variant={inactive ? 'secondary' : 'danger'}
-              onClick={() => {
-                setError(null)
-                setConfirming(true)
-              }}
-            >
-              {inactive ? 'Reactivate' : 'Deactivate'}
-            </Button>
-          </>
+          !erased && (
+            <>
+              <Link to={`/customers/${customer.id}/edit`} className={linkButton}>
+                <Pencil size={16} aria-hidden="true" /> Edit
+              </Link>
+              <Link to={`/properties/new?customer=${customer.id}`} className={linkButton}>
+                <Plus size={16} aria-hidden="true" /> Add property
+              </Link>
+              <Button
+                variant={inactive ? 'secondary' : 'danger'}
+                onClick={() => {
+                  setError(null)
+                  setConfirming(true)
+                }}
+              >
+                {inactive ? 'Reactivate' : 'Deactivate'}
+              </Button>
+              {profile?.role === 'administrator' && (
+                <Button variant="ghost" className="text-error" onClick={() => setErasing(true)}>
+                  Erase Personal Details
+                </Button>
+              )}
+            </>
+          )
         }
+      />
+      {erased && (
+        <Notice>
+          This customer’s personal details were erased
+          {customer.erasedAt ? ` on ${formatDate(customer.erasedAt)}` : ''}. Their invoices,
+          payments, properties and meters are kept.
+        </Notice>
+      )}
+      <EraseCustomerDialog
+        open={erasing}
+        customerId={customer.id}
+        customerName={customer.name}
+        onClose={() => setErasing(false)}
+        onErased={() => {
+          setErasing(false)
+          reload()
+        }}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

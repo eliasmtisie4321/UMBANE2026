@@ -110,3 +110,34 @@ export async function fetchProfile(userId: string, client?: AuthClient): Promise
     return err(toAppError(e))
   }
 }
+
+/**
+ * Changes the signed-in person's password. The current password is checked first (by signing in
+ * with it again), so someone at an unattended screen cannot change it.
+ */
+export async function changePassword(
+  email: string,
+  current: string,
+  next: string,
+  client?: AuthClient,
+): Promise<Result<void>> {
+  const check = await signIn(email, current, client)
+  if (!check.ok) {
+    return check.error.code === 'unauthenticated'
+      ? err({
+          code: 'validation',
+          field: 'current',
+          message: 'Your current password is not right.',
+        })
+      : check
+  }
+  return updatePassword(next, client)
+}
+
+/** Signs the person out on every other browser and device; this one stays signed in. */
+export const signOutOtherSessions = (client?: AuthClient) =>
+  run(
+    (c) => c.auth.signOut({ scope: 'others' }),
+    client,
+    'Could not sign out your other devices. Please try again.',
+  )

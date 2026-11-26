@@ -32,6 +32,13 @@ import InvoiceDetailScreen from '@/screens/invoices/InvoiceDetailScreen'
 import InvoicesScreen from '@/screens/invoices/InvoicesScreen'
 import PaymentsScreen from '@/screens/invoices/PaymentsScreen'
 import InvoiceSettingsScreen from '@/screens/settings/InvoiceSettingsScreen'
+import AccountSecurityScreen from '@/screens/account/AccountSecurityScreen'
+import AuditLogScreen from '@/screens/settings/AuditLogScreen'
+import BusinessProfileScreen from '@/screens/settings/BusinessProfileScreen'
+import CategoriesScreen from '@/screens/settings/CategoriesScreen'
+import PrivacyScreen from '@/screens/settings/PrivacyScreen'
+import RolesScreen from '@/screens/settings/RolesScreen'
+import SettingsScreen from '@/screens/settings/SettingsScreen'
 import InventoryHistoryScreen from '@/screens/inventory/InventoryHistoryScreen'
 import InventoryScreen from '@/screens/inventory/InventoryScreen'
 import ProductDetailScreen from '@/screens/inventory/ProductDetailScreen'
@@ -76,6 +83,7 @@ const BUILT = [
   '/communications',
   '/reports',
   '/automations',
+  '/settings',
 ]
 
 export default function App() {
@@ -147,7 +155,14 @@ export default function App() {
         <Route path="/reports/inventory" element={<InventoryReportScreen />} />
         <Route path="/reports/support" element={<SupportReportScreen />} />
         <Route path="/reports/team" element={<TeamReportScreen />} />
+        <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
+        <Route path="/settings/business" element={<BusinessProfileScreen />} />
+        <Route path="/settings/categories" element={<CategoriesScreen />} />
+        <Route path="/settings/roles" element={<RolesScreen />} />
+        <Route path="/settings/audit" element={<AuditLogScreen />} />
+        <Route path="/settings/privacy" element={<PrivacyScreen />} />
+        <Route path="/account/security" element={<AccountSecurityScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route
             key={item.to}

@@ -48,6 +48,8 @@ export interface Customer {
   status: CustomerStatus
   createdAt: string
   updatedAt: string
+  /** Set once an administrator has erased the personal details (POPIA request). */
+  erasedAt?: string | null
 }
 
 export type CustomerInput = Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>

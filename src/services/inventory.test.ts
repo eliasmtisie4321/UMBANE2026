@@ -96,13 +96,13 @@ describe('products', () => {
     expect(r.ok ? '' : r.error.message).toMatch(text)
   })
 
-  it('lists stock alerts emptiest first, and distinct categories', async () => {
+  it('lists stock alerts emptiest first, and the switched-on categories', async () => {
     const a = fake({ product_list: { data: [] } })
     await getStockAlerts(a.client)
     expect(a.log[0].ops).toContain('in("stock_status",["low","out"])')
     expect(a.log[0].ops).toContain('order("stock_on_hand")')
     const c = fake({
-      products: { data: [{ category: 'A' }, { category: 'A' }, { category: 'B' }] },
+      product_categories: { data: [{ name: 'A' }, { name: 'B' }] },
     })
     const r = await getCategories(c.client)
     expect(r.ok && r.data).toEqual(['A', 'B'])

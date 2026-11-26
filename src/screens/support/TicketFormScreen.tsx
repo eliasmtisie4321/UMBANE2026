@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/data/PageHeader'
 import { StaffSelect } from '@/components/sales/StaffSelect'
 import { Button, Input, Select, Textarea } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
+import { useTicketCategories } from '@/hooks/useTicketCategories'
 import { getCustomerOption } from '@/services/properties'
 import {
   createTicket,
@@ -21,7 +22,6 @@ import {
 } from '@/services/support'
 import type { CustomerOption } from '@/types/properties'
 import {
-  TICKET_CATEGORIES,
   TICKET_PRIORITIES,
   type Ticket,
   type TicketCategory,
@@ -66,6 +66,7 @@ function TicketForm({
   cancelTo,
   onSubmit,
 }: FormProps) {
+  const categories = useTicketCategories()
   const [values, setValues] = useState(initial)
   const [customer, setCustomer] = useState(initialCustomer)
   const [errors, setErrors] = useState<TicketFormErrors>({})
@@ -228,7 +229,7 @@ function TicketForm({
           <Select
             id="ticket-category"
             label="Category"
-            options={[{ value: '', label: 'Choose a category' }, ...TICKET_CATEGORIES]}
+            options={[{ value: '', label: 'Choose a category' }, ...categories.options]}
             value={values.category}
             error={shown.category}
             onChange={(e) => set('category', e.target.value as TicketCategory | '')}

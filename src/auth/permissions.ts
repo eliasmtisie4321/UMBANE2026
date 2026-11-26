@@ -14,6 +14,7 @@ const CLIENT_ALLOWED = [
   '/invoices',
   '/support-tickets',
   '/notifications',
+  '/account',
 ]
 
 const matches = (prefix: string, path: string) =>
@@ -22,12 +23,14 @@ const matches = (prefix: string, path: string) =>
 // Adding and editing employees is for administrators.
 const isEmployeeEdit = (path: string) =>
   path === '/team/new' || /^\/team\/[^/]+\/edit\/?$/.test(path)
+// The audit log and data-privacy tools are for administrators only.
+const ADMIN_ONLY = ['/settings/audit', '/settings/privacy']
 // Creating and changing tasks is for managers; staff work the tasks assigned to them.
 const isTaskEdit = (path: string) => /^\/tasks\/(new|[^/]+\/edit)\/?$/.test(path)
 
 export function canAccess(role: UserRole, path: string): boolean {
   if (role === 'administrator') return true
-  if (role === 'manager') return !isEmployeeEdit(path)
+  if (role === 'manager') return !isEmployeeEdit(path) && !ADMIN_ONLY.some((p) => matches(p, path))
   if (role === 'staff') return !STAFF_BLOCKED.some((p) => matches(p, path)) && !isTaskEdit(path)
   // The support portal: clients open tickets for themselves.
   if (path === '/support-tickets/new') return true

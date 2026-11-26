@@ -20,7 +20,8 @@ import { LinkedTasksPanel } from '@/components/team/LinkedTasksPanel'
 import { Button } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
 import { getTicket } from '@/services/support'
-import { labelOf, TICKET_CATEGORIES, type Ticket, type TicketStatus } from '@/types/support'
+import { type Ticket, type TicketStatus } from '@/types/support'
+import { useTicketCategories } from '@/hooks/useTicketCategories'
 import { formatDateTime } from '@/utils/format'
 import { formatPhone } from '@/utils/phone'
 
@@ -33,6 +34,7 @@ function TicketBody({
   version: number
   onChanged: (notice: string) => void
 }) {
+  const categories = useTicketCategories()
   const { profile } = useAuth()
   const role = profile?.role ?? 'client'
   const isStaff = role !== 'client'
@@ -94,7 +96,7 @@ function TicketBody({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
-          <Panel title="Issue" subtitle={labelOf(TICKET_CATEGORIES, t.category)}>
+          <Panel title="Issue" subtitle={categories.label(t.category)}>
             <p className="whitespace-pre-wrap break-words text-body-md text-on-surface">
               {t.description || 'No description.'}
             </p>

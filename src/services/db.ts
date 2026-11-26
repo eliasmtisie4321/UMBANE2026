@@ -72,6 +72,18 @@ const UNIQUE_VIOLATIONS: Record<string, { field: string; message: string }> = {
     field: 'readingDate',
     message: 'This meter already has a reading on this date.',
   },
+  ticket_categories_label_uniq: {
+    field: 'label',
+    message: 'There is already a category with this name.',
+  },
+  ticket_categories_business_id_key_key: {
+    field: 'label',
+    message: 'There is already a category with this name.',
+  },
+  product_categories_name_uniq: {
+    field: 'name',
+    message: 'There is already a category with this name.',
+  },
   message_templates_business_id_key_key: {
     field: 'key',
     message: 'A template with this key already exists.',
@@ -291,6 +303,40 @@ const RULES: Record<string, { field?: string; message: string }> = {
   message_not_cancellable: { message: 'This email has already gone. Refresh the page.' },
   contact_note_required: { field: 'body', message: 'Write what was said or agreed.' },
   template_key_fixed: { message: 'A template’s key cannot change.' },
+  ticket_category_unknown: { field: 'category', message: 'Choose one of the ticket categories.' },
+  product_category_inactive: {
+    field: 'category',
+    message:
+      'That category is switched off. Choose another, or switch it on under Settings → Categories.',
+  },
+  category_in_use: {
+    message: 'This category is in use, so it cannot be deleted. Switch it off instead.',
+  },
+  category_key_fixed: { message: 'A category’s key cannot change.' },
+  ticket_categories_key_check: {
+    message: 'That name does not make a usable category. Use letters.',
+  },
+  erase_reason_required: {
+    field: 'reason',
+    message: 'Say why, e.g. “Customer asked by email on 26 Nov”.',
+  },
+  customer_has_balance: {
+    message: 'This customer still owes money. Settle or credit their invoices before erasing them.',
+  },
+  customer_has_open_tickets: {
+    message: 'This customer has open support tickets. Close them before erasing the customer.',
+  },
+  customer_already_erased: { message: 'This customer’s details have already been erased.' },
+  customer_erased: {
+    message: 'This customer’s personal details were erased and cannot be added back.',
+  },
+  businesses_website_check: {
+    field: 'website',
+    message: 'Start the website with https:// or http://',
+  },
+  businesses_postal_code_check: { field: 'postalCode', message: 'A postal code has four digits.' },
+  businesses_province_check: { field: 'province', message: 'Choose a province from the list.' },
+  businesses_email_check: { field: 'email', message: 'Enter a valid email address.' },
   automation_settings_invalid: {
     message:
       'Those settings are outside what this automation allows. Check the numbers and try again.',

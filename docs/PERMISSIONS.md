@@ -32,7 +32,7 @@ C = create, R = read, U = update, D = delete. "own" = rows linked to the user's 
 | Staff tasks                  | C R U D       | C R U D | R U assigned to them   | -                           |
 | Notifications                | own           | own     | own                    | own                         |
 | Communication logs           | C R           | C R     | C R                    | -                           |
-| Audit logs                   | R             | R       | -                      | -                           |
+| Audit logs                   | R             | -       | -                      | -                           |
 
 Notes:
 
@@ -149,3 +149,18 @@ of a **development** Supabase project after applying migrations.
   this. Nobody can write the run history or action log; only the automations do.
 - The daily run for every business, and sending notification email, are done only by the server
   (`api/` with the service-role key).
+
+## Settings, administration and audit (Phase 13)
+
+- **Business profile, invoice and tax settings:** administrators edit; managers can view them. Staff and
+  clients cannot open Settings.
+- **Ticket and product categories:** managers and administrators manage them. Staff can add a new product
+  category while adding a product. Clients see only the switched-on ticket categories.
+- **Audit log:** administrators only (managers had read access before Phase 13). Managers' dashboard
+  shows a "recent activity" feed of everyday records instead, without people, settings or security. No
+  one can write, change or delete audit entries.
+- **Data and privacy, and erasing a customer's details:** administrators only. The database refuses an
+  erasure while the customer owes money or has open tickets.
+- **Password and sign-in:** each person, for themselves only; the security events they report are logged
+  under their own name.
+- **The daily data-retention clean-up:** the server only.

@@ -10,15 +10,10 @@ import { TicketPriorityBadge, TicketStatusBadge } from '@/components/support/Tic
 import { Select, Table, Td, Th } from '@/components/ui'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useResource } from '@/hooks/useResource'
+import { useTicketCategories } from '@/hooks/useTicketCategories'
 import { listStaffOptions } from '@/services/maintenance'
 import { getTicketCounts, listTickets, type TicketFilters } from '@/services/support'
-import {
-  labelOf,
-  TICKET_CATEGORIES,
-  TICKET_PRIORITIES,
-  TICKET_STATUSES,
-  type TicketSort,
-} from '@/types/support'
+import { TICKET_PRIORITIES, TICKET_STATUSES, type TicketSort } from '@/types/support'
 import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import { nextSort, PAGE_SIZE, patchParams, readEnum, readPage, readSort } from '@/utils/listParams'
 
@@ -29,11 +24,11 @@ const STATUS_FILTER = [
   { value: 'active', label: 'Open, assigned or in progress' },
   ...TICKET_STATUSES,
 ]
-const CATEGORY_FILTER = [{ value: '', label: 'All categories' }, ...TICKET_CATEGORIES]
 const PRIORITY_FILTER = [{ value: '', label: 'All priorities' }, ...TICKET_PRIORITIES]
 const isUuid = (v: string) => /^[0-9a-f-]{36}$/i.test(v)
 
 export default function SupportTicketsScreen() {
+  const categories = useTicketCategories()
   const { profile } = useAuth()
   const isStaff = profile !== null && profile.role !== 'client'
   const [params, setParams] = useSearchParams()
@@ -43,7 +38,7 @@ export default function SupportTicketsScreen() {
   const category = readEnum(
     params,
     'category',
-    TICKET_CATEGORIES.map((c) => c.value),
+    categories.every.map((c) => c.value),
   )
   const priority = readEnum(
     params,
@@ -168,7 +163,7 @@ export default function SupportTicketsScreen() {
             <Select
               id="ticket-category"
               label="Category"
-              options={CATEGORY_FILTER}
+              options={[{ value: '', label: 'All categories' }, ...categories.every]}
               value={category}
               onChange={(e) => update({ category: e.target.value })}
             />
@@ -246,7 +241,7 @@ export default function SupportTicketsScreen() {
                   <Td className="min-w-48">
                     {t.subject}
                     <span className="block text-label-md text-on-surface-variant">
-                      {labelOf(TICKET_CATEGORIES, t.category)}
+                      {categories.label(t.category)}
                     </span>
                   </Td>
                   {isStaff && (
