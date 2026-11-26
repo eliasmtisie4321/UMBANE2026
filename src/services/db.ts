@@ -219,6 +219,59 @@ const RULES: Record<string, { field?: string; message: string }> = {
   },
   tickets_resolution_length: { field: 'resolution', message: 'Keep this to 2000 characters.' },
   ticket_messages_body_length: { field: 'body', message: 'Keep the message to 5000 characters.' },
+  task_transition: { message: 'A new task starts as Pending or In Progress.' },
+  task_needs_assignee: {
+    field: 'assignedTo',
+    message: 'Assign the task to someone first.',
+  },
+  task_manager_only: {
+    message: 'Only a manager can change, cancel or reopen a task. You can start and complete it.',
+  },
+  task_fixed_fields: { message: 'The reference and creator of a task cannot change.' },
+  task_closed: {
+    message: 'This task is completed or cancelled. A manager must reopen it first.',
+  },
+  task_proof_required: {
+    message: 'This task needs a photo of the finished work. Attach one, then complete it.',
+  },
+  task_cancel_reason: { field: 'cancelReason', message: 'Say why the task is cancelled.' },
+  task_ticket_mismatch: {
+    field: 'ticketId',
+    message: 'The ticket belongs to a different customer.',
+  },
+  task_property_mismatch: {
+    field: 'propertyId',
+    message: 'The property belongs to a different customer.',
+  },
+  task_attachment_limit: { message: 'A task can have at most 20 files.' },
+  task_attachments_content_type_check: {
+    message: 'Only photos (JPG, PNG, WebP) and PDF files can be attached to a task.',
+  },
+  task_attachments_size_bytes_check: { message: 'Files can be at most 10 MB.' },
+  tasks_dates: { field: 'dueDate', message: 'The due date cannot be before the start date.' },
+  tasks_title_length: { field: 'title', message: 'Keep the title to 150 characters.' },
+  tasks_description_length: {
+    field: 'description',
+    message: 'Keep the description to 5000 characters.',
+  },
+  staff_email_taken: {
+    field: 'email',
+    message:
+      'This email already belongs to someone with access. Each person needs their own email.',
+  },
+  staff_already_invited: {
+    field: 'email',
+    message: 'This email has already been invited. Cancel that invitation to send a new one.',
+  },
+  staff_role_client: { field: 'role', message: 'Customers are not added as team members.' },
+  staff_invitations_email_check: { field: 'email', message: 'Enter a valid email address.' },
+  staff_invitations_phone_check: { field: 'phone', message: 'Enter a South African number.' },
+  staff_self_lockout: {
+    message: 'You cannot deactivate yourself or change your own role. Ask another administrator.',
+  },
+  staff_fixed_fields: { message: 'An employee number never changes.' },
+  profiles_not_own_manager: { field: 'reportsTo', message: 'Nobody can report to themselves.' },
+  invitation_closed: { message: 'This invitation has already been accepted or cancelled.' },
   maintenance_assignee_not_staff: {
     field: 'assignedTo',
     message: 'Choose a current team member.',

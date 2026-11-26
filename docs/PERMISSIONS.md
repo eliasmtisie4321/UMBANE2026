@@ -109,3 +109,13 @@ of a **development** Supabase project after applying migrations.
   administrators and is recorded in the audit log. Staff cannot delete.
 - Attachment files follow their ticket's access, in a private storage bucket.
 - Notifications are written only by the database; each person reads and clears only their own.
+
+## Team and tasks (Phase 9)
+
+- Managers and administrators see the team and every task; staff see only the tasks assigned to them and
+  cannot open the Team pages. Clients see neither.
+- Only administrators add people (by invitation), change employment details or deactivate someone, and
+  nobody can deactivate themselves or change their own access level. People can still change their own
+  name and phone number.
+- Staff move their own tasks along (start, pause, complete) and post updates and photos, but cannot
+  change, cancel or reopen a task. Deleting tasks, updates or files is for managers and is audited.

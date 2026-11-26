@@ -93,3 +93,8 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   `ticket-attachments` storage bucket with its access rules, and the ticket views (see `docs/SUPPORT.md`).
   **Run it after 0009.** Existing tickets without a valid category become "General question". It creates
   the storage bucket itself; nothing needs to be set up in the Storage screen.
+
+- `20261126000011_team_tasks.sql`: employee details, staff invitations, task rules, progress updates,
+  the private `task-attachments` storage bucket and the team and task views (see `docs/TEAM.md`).
+  **Run it after 0010.** It numbers the existing team in the order they joined. It also adds a trigger on
+  Supabase's sign-in accounts so that an invited email gets its profile when it is confirmed.

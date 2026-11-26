@@ -1,5 +1,6 @@
 import {
   Bell,
+  ClipboardList,
   BarChart3,
   Building2,
   Zap,
@@ -38,6 +39,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/marketing', label: 'Marketing', icon: Megaphone },
   { to: '/communications', label: 'Communications', icon: MessagesSquare },
   { to: '/team', label: 'Team', icon: UsersRound },
+  { to: '/tasks', label: 'Tasks', icon: ClipboardList },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/automations', label: 'Automations', icon: Zap },
   { to: '/notifications', label: 'Notifications', icon: Bell },

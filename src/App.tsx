@@ -36,6 +36,12 @@ import PropertiesScreen from '@/screens/properties/PropertiesScreen'
 import SupportTicketsScreen from '@/screens/support/SupportTicketsScreen'
 import TicketDetailScreen from '@/screens/support/TicketDetailScreen'
 import { EditTicketScreen, NewTicketScreen } from '@/screens/support/TicketFormScreen'
+import TaskDetailScreen from '@/screens/tasks/TaskDetailScreen'
+import { EditTaskScreen, NewTaskScreen } from '@/screens/tasks/TaskFormScreen'
+import TasksScreen from '@/screens/tasks/TasksScreen'
+import EmployeeProfileScreen from '@/screens/team/EmployeeProfileScreen'
+import { EditEmployeeScreen, NewEmployeeScreen } from '@/screens/team/EmployeeFormScreen'
+import TeamScreen from '@/screens/team/TeamScreen'
 import PropertyDetailScreen from '@/screens/properties/PropertyDetailScreen'
 import { EditPropertyScreen, NewPropertyScreen } from '@/screens/properties/PropertyFormScreen'
 
@@ -50,6 +56,8 @@ const BUILT = [
   '/inventory',
   '/support-tickets',
   '/notifications',
+  '/team',
+  '/tasks',
 ]
 
 export default function App() {
@@ -98,6 +106,14 @@ export default function App() {
         <Route path="/support-tickets/:id" element={<TicketDetailScreen />} />
         <Route path="/support-tickets/:id/edit" element={<EditTicketScreen />} />
         <Route path="/notifications" element={<NotificationsScreen />} />
+        <Route path="/team" element={<TeamScreen />} />
+        <Route path="/team/new" element={<NewEmployeeScreen />} />
+        <Route path="/team/:id" element={<EmployeeProfileScreen />} />
+        <Route path="/team/:id/edit" element={<EditEmployeeScreen />} />
+        <Route path="/tasks" element={<TasksScreen />} />
+        <Route path="/tasks/new" element={<NewTaskScreen />} />
+        <Route path="/tasks/:id" element={<TaskDetailScreen />} />
+        <Route path="/tasks/:id/edit" element={<EditTaskScreen />} />
         <Route path="/settings/invoicing" element={<InvoiceSettingsScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

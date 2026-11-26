@@ -8,76 +8,25 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from '@/types/support'
+import { TICKET_FILES } from './files'
 
 // Limits mirrored from migration 20261126000010; the database enforces them.
 export const SUBJECT_MAX = 150
 export const TEXT_MAX = 5000
 export const RESOLUTION_MAX = 2000
-export const FILE_MAX_BYTES = 10 * 1024 * 1024
-export const FILES_PER_TICKET = 20
 
-/**
- * Accepted files by extension. The type is decided from the name, not the browser, because some
- * systems report CSV files as spreadsheets; the storage bucket accepts exactly these types.
- */
-const FILE_TYPES: Record<string, string> = {
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  png: 'image/png',
-  webp: 'image/webp',
-  pdf: 'application/pdf',
-  csv: 'text/csv',
-  txt: 'text/plain',
-}
-export const FILE_ACCEPT = Object.keys(FILE_TYPES)
-  .map((e) => `.${e}`)
-  .join(',')
-export const FILE_HINT = 'Photos (JPG, PNG, WebP), PDF, CSV or text files, up to 10 MB each.'
-
-export const fileTypeOf = (name: string): string | null =>
-  FILE_TYPES[name.split('.').pop()?.toLowerCase() ?? ''] ?? null
-
-export const isImage = (contentType: string) => contentType.startsWith('image/')
-
-/** A storage-safe name: letters, numbers, dots, dashes and underscores, at most 80 characters. */
-export function safeFileName(name: string): string {
-  const dot = name.lastIndexOf('.')
-  const rawExt = dot > 0 ? name.slice(dot + 1).toLowerCase() : ''
-  const ext = /^[a-z0-9]{1,8}$/.test(rawExt) ? rawExt : ''
-  const base = (ext ? name.slice(0, dot) : name)
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^A-Za-z0-9._-]+/g, '_')
-    .replace(/^[._]+|[._]+$/g, '')
-    .slice(0, 70)
-  return `${base || 'file'}${ext ? `.${ext}` : ''}`
-}
-
-export function formatBytes(n: number): string {
-  if (n < 1024) return `${n} B`
-  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`
-}
-
-export interface FileCheck {
-  accepted: File[]
-  problems: string[]
-}
-
-/** Keeps the files that can be attached and explains each one that cannot. */
-export function checkFiles(files: File[], alreadyAttached: number): FileCheck {
-  const accepted: File[] = []
-  const problems: string[] = []
-  for (const f of files) {
-    if (!fileTypeOf(f.name)) problems.push(`${f.name}: this type of file cannot be attached.`)
-    else if (f.size === 0) problems.push(`${f.name}: the file is empty.`)
-    else if (f.size > FILE_MAX_BYTES) problems.push(`${f.name}: larger than 10 MB.`)
-    else if (alreadyAttached + accepted.length >= FILES_PER_TICKET)
-      problems.push(`${f.name}: a ticket can have at most ${FILES_PER_TICKET} files.`)
-    else accepted.push(f)
-  }
-  return { accepted, problems }
-}
+export {
+  checkFiles,
+  FILE_MAX_BYTES,
+  fileTypeOf,
+  formatBytes,
+  isImage,
+  safeFileName,
+  type FileCheck,
+} from './files'
+export const FILES_PER_TICKET = TICKET_FILES.maxFiles
+export const FILE_ACCEPT = TICKET_FILES.accept
+export const FILE_HINT = TICKET_FILES.hint
 
 export interface TicketFormValues {
   customerId: string

@@ -337,14 +337,14 @@ Ticket statuses:
 
 **Goal:** Managers can coordinate staff and monitor assigned work.
 
-- [ ] Create and manage staff profiles.
-- [ ] Assign tasks with descriptions, priorities and deadlines.
-- [ ] Track task statuses.
-- [ ] Link tasks to customers, properties or tickets where relevant.
-- [ ] Allow staff to add progress updates.
-- [ ] Support proof-of-work image uploads where needed.
-- [ ] Track completion dates and responsible staff.
-- [ ] Restrict task visibility and updates according to role.
+- [x] Create and manage staff profiles.
+- [x] Assign tasks with descriptions, priorities and deadlines.
+- [x] Track task statuses.
+- [x] Link tasks to customers, properties or tickets where relevant.
+- [x] Allow staff to add progress updates.
+- [x] Support proof-of-work image uploads where needed.
+- [x] Track completion dates and responsible staff.
+- [x] Restrict task visibility and updates according to role.
 
 **Done when:** A manager can assign a task and track its progress through completion.
 
