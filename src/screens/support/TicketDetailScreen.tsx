@@ -1,4 +1,5 @@
-import { CheckCircle2, Pencil, RefreshCw, UserPlus } from 'lucide-react'
+import { CheckCircle2, Mail, Pencil, RefreshCw, UserPlus } from 'lucide-react'
+import { ComposeEmailDialog } from '@/components/messages/ComposeEmailDialog'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { canAccess } from '@/auth/permissions'
@@ -36,7 +37,7 @@ function TicketBody({
   const role = profile?.role ?? 'client'
   const isStaff = role !== 'client'
   const closed = t.status === 'closed'
-  const [dialog, setDialog] = useState<'assign' | TicketStatus | 'status' | null>(null)
+  const [dialog, setDialog] = useState<'assign' | 'email' | TicketStatus | 'status' | null>(null)
   const done = (notice: string) => {
     setDialog(null)
     onChanged(notice)
@@ -65,6 +66,9 @@ function TicketBody({
               <Link to={`/support-tickets/${t.id}/edit`} className={secondaryLink}>
                 <Pencil size={16} aria-hidden="true" /> Edit
               </Link>
+              <Button variant="secondary" onClick={() => setDialog('email')}>
+                <Mail size={16} aria-hidden="true" /> Email Customer
+              </Button>
               <Button variant="secondary" onClick={() => setDialog('assign')}>
                 <UserPlus size={16} aria-hidden="true" /> Assign Ticket
               </Button>
@@ -177,6 +181,17 @@ function TicketBody({
         </div>
       </div>
 
+      {dialog === 'email' && (
+        <ComposeEmailDialog
+          customerId={t.customerId}
+          customerName={t.customerName}
+          templateKey="ticket_update"
+          values={{ ticket_reference: t.reference, ticket_subject: t.subject }}
+          ticketId={t.id}
+          onClose={() => setDialog(null)}
+          onDone={done}
+        />
+      )}
       {dialog === 'assign' && (
         <AssignDialog ticket={t} onClose={() => setDialog(null)} onDone={done} />
       )}

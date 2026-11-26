@@ -72,6 +72,10 @@ const UNIQUE_VIOLATIONS: Record<string, { field: string; message: string }> = {
     field: 'readingDate',
     message: 'This meter already has a reading on this date.',
   },
+  message_templates_business_id_key_key: {
+    field: 'key',
+    message: 'A template with this key already exists.',
+  },
   properties_customer_address_uniq: {
     field: 'address',
     message: 'This customer already has a property at this address.',
@@ -272,6 +276,25 @@ const RULES: Record<string, { field?: string; message: string }> = {
   staff_fixed_fields: { message: 'An employee number never changes.' },
   profiles_not_own_manager: { field: 'reportsTo', message: 'Nobody can report to themselves.' },
   invitation_closed: { message: 'This invitation has already been accepted or cancelled.' },
+  message_no_email: {
+    message: 'This customer has no email address. Add one to their profile first.',
+  },
+  message_recipient_suppressed: {
+    message:
+      'Email to this customer is stopped because an earlier email bounced or was marked as spam.',
+  },
+  message_opted_out: { message: 'This customer has asked not to receive email.' },
+  message_no_consent: { message: 'Marketing email needs the customer’s recorded consent.' },
+  message_customer_not_found: { message: 'This customer could not be found.' },
+  message_link_mismatch: { message: 'The invoice or ticket belongs to a different customer.' },
+  message_not_retryable: { message: 'Only a failed email can be tried again. Refresh the page.' },
+  message_not_cancellable: { message: 'This email has already gone. Refresh the page.' },
+  contact_note_required: { field: 'body', message: 'Write what was said or agreed.' },
+  template_key_fixed: { message: 'A template’s key cannot change.' },
+  message_templates_key_check: {
+    field: 'key',
+    message: 'Use 2 to 40 lower-case letters, numbers or underscores, starting with a letter.',
+  },
   maintenance_assignee_not_staff: {
     field: 'assignedTo',
     message: 'Choose a current team member.',

@@ -10,6 +10,8 @@ const db = new PGlite({ extensions: { pgcrypto } })
 await db.exec(`
   create role anon nologin;
   create role authenticated nologin;
+  -- The server's role: it bypasses row security, as in Supabase.
+  create role service_role nologin bypassrls;
   create schema extensions;
   create extension if not exists pgcrypto schema extensions;
   create schema auth;
@@ -47,10 +49,11 @@ await db.exec(`
   grant usage on schema storage to anon, authenticated;
   grant all on storage.objects to anon, authenticated;
   grant select on storage.buckets to anon, authenticated;
-  grant usage on schema public, auth, extensions to anon, authenticated;
+  grant usage on schema public, auth, extensions to anon, authenticated, service_role;
+  grant usage on schema storage to service_role;
   -- Supabase grants table access to these roles by default; RLS is what restricts it.
-  alter default privileges in schema public grant all on tables to anon, authenticated;
-  alter default privileges in schema public grant all on functions to anon, authenticated;
+  alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+  alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
   grant execute on function auth.uid() to anon, authenticated;
 `)
 

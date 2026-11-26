@@ -4,7 +4,11 @@
 | ------------------------- | ---------------------------------------------------------------- | ------------------------------------------------- |
 | `VITE_SUPABASE_URL`       | `.env` locally; Vercel project settings for preview + production | Yes                                               |
 | `VITE_SUPABASE_ANON_KEY`  | same                                                             | Yes (protected by Row Level Security)             |
-| Supabase service-role key | Server-side only (future Edge Functions / CI secrets)            | **Never** in the frontend, `.env.example`, or git |
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel environment variables only, read by the `api/` functions | **Never** in the frontend, `.env.example`, or git |
+| `RESEND_API_KEY`          | Vercel only (`api/` functions)                                   | **Never**                                         |
+| `RESEND_WEBHOOK_SECRET`   | Vercel only                                                      | **Never**                                         |
+| `CRON_SECRET`             | Vercel only                                                      | **Never**                                         |
+| `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SUPABASE_URL` | Vercel only                                | Not secret, but server settings                   |
 
 ## Local setup
 
@@ -24,9 +28,12 @@ Anything prefixed `VITE_` is bundled into the client, so only put public values 
 
 - Production: https://umbane2026.vercel.app (deploys from `main`).
 - Build: `npm run build`, output `dist`. `vercel.json` rewrites unknown paths to `index.html` so
-  client-side routes work on refresh and deep links.
+  client-side routes work on refresh and deep links, except `/api/*`, which are the server functions in
+  `api/`. It also schedules the daily email retry run (Vercel Cron).
 - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for Production and Preview in
-  Vercel → Project Settings → Environment Variables. Never add the service-role key.
+  Vercel → Project Settings → Environment Variables. The service-role key goes only in
+  `SUPABASE_SERVICE_ROLE_KEY` (never a `VITE_` name, which would put it in the browser). Email settings:
+  see `docs/COMMUNICATIONS.md`.
 
 ## Supabase Auth settings (required for sign-in and password reset)
 
@@ -98,3 +105,8 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   the private `task-attachments` storage bucket and the team and task views (see `docs/TEAM.md`).
   **Run it after 0010.** It numbers the existing team in the order they joined. It also adds a trigger on
   Supabase's sign-in accounts so that an invited email gets its profile when it is confirmed.
+
+- `20261127000012_communications.sql`: customer email preferences, message templates, the email outbox
+  and delivery history, the private `message-attachments` storage bucket and the server-only sending
+  functions (see `docs/COMMUNICATIONS.md`). **Run it after 0011.** Every business gets four starting
+  templates.
