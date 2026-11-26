@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { AdminClient, DeliveryConfig } from './deliver.js'
 import { sendViaResend } from './resend.js'
@@ -14,6 +15,8 @@ export interface ServerEnv {
   replyTo: string | null
   webhookSecret: string | null
   cronSecret: string | null
+  /** The app's address, for links in emails (APP_URL, or the Vercel production domain). */
+  appUrl: string | null
 }
 
 const value = (v: string | undefined) => (v && v.trim() ? v.trim() : null)
@@ -26,6 +29,11 @@ export const readEnv = (env: Record<string, string | undefined> = process.env): 
   replyTo: value(env.EMAIL_REPLY_TO),
   webhookSecret: value(env.RESEND_WEBHOOK_SECRET),
   cronSecret: value(env.CRON_SECRET),
+  appUrl:
+    value(env.APP_URL) ??
+    (value(env.VERCEL_PROJECT_PRODUCTION_URL)
+      ? `https://${value(env.VERCEL_PROJECT_PRODUCTION_URL)}`
+      : null),
 })
 
 /** What is missing before email can be sent, by setting name. Empty when ready. */
@@ -54,6 +62,14 @@ export const deliveryConfig = (e: ServerEnv): DeliveryConfig => ({
   send: (email) => sendViaResend(email, e.resendKey ?? ''),
 })
 
+/** A constant-time check of "Authorization: Bearer <CRON_SECRET>". No secret set: always false. */
+export function isCronRequest(request: Request, secret: string | null): boolean {
+  if (!secret) return false
+  const given = Buffer.from(request.headers.get('authorization') ?? '')
+  const expected = Buffer.from(`Bearer ${secret}`)
+  return given.length === expected.length && timingSafeEqual(given, expected)
+}
+
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -64,6 +80,26 @@ export const json = (body: unknown, status = 200) =>
 export interface StaffCaller {
   id: string
   businessId: string
+}
+
+/** The signed-in person behind a request, if active (any role, clients included). */
+export async function signedInCaller(
+  admin: Pick<SupabaseClient, 'auth' | 'from'>,
+  request: Request,
+): Promise<StaffCaller | null> {
+  const header = request.headers.get('authorization') ?? ''
+  const token = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
+  if (!token) return null
+  const { data, error } = await admin.auth.getUser(token)
+  if (error || !data.user) return null
+  const profile = await admin
+    .from('profiles')
+    .select('id, business_id, is_active')
+    .eq('id', data.user.id)
+    .maybeSingle()
+  const p = profile.data as { id: string; business_id: string; is_active: boolean } | null
+  if (profile.error || !p || !p.is_active) return null
+  return { id: p.id, businessId: p.business_id }
 }
 
 export async function staffCaller(

@@ -137,3 +137,15 @@ of a **development** Supabase project after applying migrations.
 - The functions run as the person asking, so Row Level Security still applies, and each one also keeps to
   that person's business. A report never includes another business's records.
 - Reports only read. CSV and PDF exports are made in the browser from the figures already on screen.
+
+## Notifications and automations (Phase 12)
+
+- Everyone sees and marks read only their own notifications, and can change nothing else about them.
+  Notifications are created only by the database (`notify()`), never directly.
+- Each person sets their own notification preferences (in the app, by email) and cannot see or change
+  anyone else's. Clients see only support ticket and "other" notifications.
+- Automations are for managers and administrators: they see them, switch them on or off, change their
+  settings (within fixed limits) and run them now for their own business. Staff and clients see none of
+  this. Nobody can write the run history or action log; only the automations do.
+- The daily run for every business, and sending notification email, are done only by the server
+  (`api/` with the service-role key).

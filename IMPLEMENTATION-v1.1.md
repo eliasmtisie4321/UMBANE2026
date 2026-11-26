@@ -393,15 +393,15 @@ Ticket statuses:
 
 **Goal:** Keep users informed and reduce repetitive work.
 
-- [ ] Implement in-app notifications.
-- [ ] Notify staff about newly assigned tickets and tasks.
-- [ ] Notify customers about ticket status changes.
-- [ ] Notify authorized staff about low stock.
-- [ ] Notify relevant users about overdue invoices.
-- [ ] Add read/unread status and notification preferences.
-- [ ] Avoid duplicate notifications.
-- [ ] Log automation outcomes and failures.
-- [ ] Ensure automated actions are safe to retry.
+- [x] Implement in-app notifications.
+- [x] Notify staff about newly assigned tickets and tasks. _(Since Phases 8–9; now also urgent tickets, due and overdue tasks, maintenance.)_
+- [x] Notify customers about ticket status changes. _(In the app for customers who sign in; by email for others when the automation is on.)_
+- [x] Notify authorized staff about low stock.
+- [x] Notify relevant users about overdue invoices. _(Managers and the issuer; customers too, by email, when switched on.)_
+- [x] Add read/unread status and notification preferences. _(In-app and email per kind of notification.)_
+- [x] Avoid duplicate notifications. _(Dedupe keys on notifications and automation actions.)_
+- [x] Log automation outcomes and failures.
+- [x] Ensure automated actions are safe to retry. _(Successes never repeat; failures retried next run; email claimed and idempotent.)_
 
 **Done when:** Relevant events trigger the correct notifications without duplicates or unauthorized messages.
 

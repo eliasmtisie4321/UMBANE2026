@@ -1,4 +1,4 @@
 {
   "rewrites": [{ "source": "/((?!assets/|api/).*)", "destination": "/index.html" }],
-  "crons": [{ "path": "/api/messages/retry-due", "schedule": "0 6 * * *" }]
+  "crons": [{ "path": "/api/cron/daily", "schedule": "0 6 * * *" }]
 }

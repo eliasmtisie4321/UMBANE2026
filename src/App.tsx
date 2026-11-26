@@ -6,7 +6,10 @@ import CreateAccountScreen from '@/screens/CreateAccountScreen'
 import ForgotPasswordScreen from '@/screens/ForgotPasswordScreen'
 import LoginScreen from '@/screens/LoginScreen'
 import NotFoundScreen from '@/screens/NotFoundScreen'
+import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen'
 import NotificationsScreen from '@/screens/NotificationsScreen'
+import AutomationDetailScreen from '@/screens/automations/AutomationDetailScreen'
+import AutomationsScreen from '@/screens/automations/AutomationsScreen'
 import OverviewScreen from '@/screens/OverviewScreen'
 import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
 import CustomerReportScreen from '@/screens/reports/CustomerReportScreen'
@@ -72,6 +75,7 @@ const BUILT = [
   '/tasks',
   '/communications',
   '/reports',
+  '/automations',
 ]
 
 export default function App() {
@@ -120,6 +124,9 @@ export default function App() {
         <Route path="/support-tickets/:id" element={<TicketDetailScreen />} />
         <Route path="/support-tickets/:id/edit" element={<EditTicketScreen />} />
         <Route path="/notifications" element={<NotificationsScreen />} />
+        <Route path="/notifications/settings" element={<NotificationSettingsScreen />} />
+        <Route path="/automations" element={<AutomationsScreen />} />
+        <Route path="/automations/:key" element={<AutomationDetailScreen />} />
         <Route path="/team" element={<TeamScreen />} />
         <Route path="/team/new" element={<NewEmployeeScreen />} />
         <Route path="/team/:id" element={<EmployeeProfileScreen />} />

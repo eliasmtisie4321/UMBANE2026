@@ -32,8 +32,9 @@ Every email, call and note is in **Communications**, and on the customer's profi
   follows a send that actually went through, Resend does not send it again.
 - A person can **Try Again** on a failed email (it goes to the customer's current address) or **Cancel**
   one that has not gone.
-- Retries run when anyone next sends an email, and once a day from Vercel Cron (the most the free Vercel
-  plan allows). On a paid plan, change the schedule in `vercel.json` to every 15 minutes.
+- Retries run when anyone next sends an email, every few minutes while someone is using the app, and once
+  a day from Vercel Cron (`/api/cron/daily`, the most the free Vercel plan allows), which also runs the
+  automations (see `docs/AUTOMATIONS.md`). On a paid plan, change the schedule in `vercel.json` to every 15 minutes.
 
 ## Consent and preferences (POPIA)
 
@@ -75,7 +76,8 @@ You need: a Resend account, access to your domain's DNS, and access to Vercel an
    | `EMAIL_FROM`                | e.g. `Umbane <accounts@umbane.co.za>` (on your verified domain) |
    | `EMAIL_REPLY_TO`            | optional, e.g. `support@umbane.co.za`                    |
    | `SUPABASE_SERVICE_ROLE_KEY` | the key from step 4                                      |
-   | `CRON_SECRET`               | any long random text (for the daily retry run)           |
+   | `CRON_SECRET`               | any long random text (for the daily run: automations and retries) |
+   | `APP_URL`                   | optional, e.g. `https://crm.umbane.co.za` (links in notification emails; defaults to the Vercel domain) |
 
    `SUPABASE_URL` is optional: the server uses `VITE_SUPABASE_URL` if it is not set.
 6. **Delivery reports:** in Resend → **Webhooks**, add an endpoint

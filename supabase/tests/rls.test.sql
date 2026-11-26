@@ -644,7 +644,7 @@ select pg_temp.expect_error_like($$insert into public.ticket_messages (ticket_id
 select pg_temp.expect((select count(*) filter (where kind = 'status') = 7 and count(*) filter (where kind = 'assigned') = 3 and count(*) filter (where kind = 'priority') = 1 and count(*) filter (where kind = 'created') = 1 and count(*) filter (where kind = 'attachment') = 1 from public.ticket_events where ticket_id = (select id from ref where k = 'tk')), 'every status, assignment and priority change is in the history');
 select pg_temp.expect((select active_tickets = 0 from public.ticket_workload where id = 'a3000000-0000-0000-0000-000000000001'), 'closed tickets leave the workload');
 select pg_temp.expect_error_like($$insert into public.ticket_events (business_id, ticket_id, kind) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'tk'), 'status')$$, 'permission denied', 'nobody writes history directly');
-select pg_temp.expect_error_like($$insert into public.notifications (business_id, user_id, title) values ('11111111-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'Fake')$$, 'row-level security', 'nobody writes notifications directly');
+select pg_temp.expect_error_like($$insert into public.notifications (business_id, user_id, title) values ('11111111-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'Fake')$$, 'permission denied', 'nobody writes notifications directly');
 delete from public.ticket_messages where ticket_id = (select id from ref where k = 'tk');
 select pg_temp.expect((select count(*) = 4 from public.ticket_messages where ticket_id = (select id from ref where k = 'tk')), 'staff cannot delete messages');
 select pg_temp.expect((select message_count = 4 from public.ticket_list where id = (select id from ref where k = 'tk')), 'staff see every message counted, internal notes included');
@@ -889,7 +889,7 @@ grant all on ref to service_role;
 
 -- Templates
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
-select pg_temp.expect((select array_agg(key order by key) = array['general', 'invoice_issued', 'payment_reminder', 'ticket_update'] from public.message_templates), 'every business starts with four templates');
+select pg_temp.expect((select array_agg(key order by key) = array['general', 'invoice_issued', 'invoice_overdue', 'payment_reminder', 'ticket_update'] from public.message_templates), 'every business starts with five templates (the overdue notice added in Phase 12)');
 update public.message_templates set subject = 'Changed by staff' where key = 'general';
 select pg_temp.expect((select subject = 'A message from {{business_name}}' from public.message_templates where key = 'general'), 'staff cannot change templates');
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
@@ -899,10 +899,10 @@ select pg_temp.expect_error_like($$update public.message_templates set key = 're
 select pg_temp.expect_error_like($$insert into public.message_templates (key, name, subject, body) values ('Bad Key', 'Bad', 'x', 'x')$$, 'message_templates_key_check', 'template keys are lower case words');
 insert into public.message_templates (key, name, purpose, subject, body) values ('winter_tips', 'Winter tips', 'marketing', 'Save electricity this winter', 'Hello {{customer_name}}');
 select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
-select pg_temp.expect((select count(*) = 4 and bool_and(business_id = '11111111-0000-0000-0000-000000000002') from public.message_templates), 'another business has its own templates only');
+select pg_temp.expect((select count(*) = 5 and bool_and(business_id = '11111111-0000-0000-0000-000000000002') from public.message_templates), 'another business has its own templates only');
 select pg_temp.as_owner();
 insert into public.businesses (id, name) values ('11111111-0000-0000-0000-000000000009', 'New Business');
-select pg_temp.expect((select count(*) = 4 from public.message_templates where business_id = '11111111-0000-0000-0000-000000000009'), 'a new business gets the templates');
+select pg_temp.expect((select count(*) = 5 from public.message_templates where business_id = '11111111-0000-0000-0000-000000000009'), 'a new business gets the templates');
 
 -- Preferences
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
@@ -1228,6 +1228,287 @@ select pg_temp.expect((select (v->>'stock_value')::numeric = (select sum(stock_v
 select pg_temp.expect((select (v->>'outbound')::int = (select -sum(quantity) from public.inventory_transactions, win where business_id = '11111111-0000-0000-0000-000000000001' and quantity < 0 and public.sa_date(created_at) between f and t) from rep where k = 'all_inventory'), 'units out equal the stock movements');
 select pg_temp.expect((select (v->>'opened')::int = (select count(*) from public.support_tickets, win where business_id = '11111111-0000-0000-0000-000000000001' and public.sa_date(created_at) between f and t) and (v->>'opened')::int = (select sum((e->>'count')::int) from jsonb_array_elements(v->'by_category') e) and (v->>'open_now')::int = (select count(*) from public.support_tickets where business_id = '11111111-0000-0000-0000-000000000001' and status in ('open', 'assigned', 'in_progress')) from rep where k = 'all_support'), 'ticket totals equal the tickets');
 select pg_temp.expect((select (v->>'completed')::int = (select count(*) from public.staff_tasks t join public.profiles p on p.id = t.assigned_to, win where t.business_id = '11111111-0000-0000-0000-000000000001' and p.role <> 'client' and t.status = 'done' and public.sa_date(t.completed_at) between f and t) and (v->>'pending')::int = (select count(*) from public.staff_tasks t join public.profiles p on p.id = t.assigned_to where t.business_id = '11111111-0000-0000-0000-000000000001' and p.role <> 'client' and t.status in ('todo', 'in_progress')) and (v->>'completed')::int = (select sum((e->>'completed')::int) from jsonb_array_elements(v->'months') e) from rep where k = 'all_team'), 'task totals equal the tasks');
+
+-- Notifications and automations (Phase 12) -------------------------------------------------------------
+select pg_temp.as_owner();
+create function pg_temp.mgrs() returns integer language sql as $$ select count(*)::integer from public.profiles where business_id = '11111111-0000-0000-0000-000000000001' and is_active and role in ('administrator', 'manager') $$;
+select pg_temp.expect(exists (select 1 from public.notifications where category = 'tickets') and not exists (select 1 from public.notifications where link like '/support-tickets%' and category <> 'tickets') and not exists (select 1 from public.notifications where link like '/tasks%' and category <> 'tasks'), 'notifications are sorted into categories by what they are about');
+
+-- A notification can only be marked read
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect_error_like($$update public.notifications set title = 'Changed'$$, 'permission denied', 'nobody can rewrite a notification');
+select pg_temp.expect_error_like($$update public.notifications set email_status = 'queued'$$, 'permission denied', 'or queue an email from one');
+
+-- Preferences: each person's own
+insert into public.notification_preferences (user_id, category, in_app, email) values ('a3000000-0000-0000-0000-000000000001', 'tasks', false, true);
+select pg_temp.expect_error_like($$insert into public.notification_preferences (user_id, category) values ('a2000000-0000-0000-0000-000000000001', 'tasks')$$, 'row-level security', 'nobody sets another person''s preferences');
+select pg_temp.expect_error_like($$insert into public.notification_preferences (user_id, category) values ('a3000000-0000-0000-0000-000000000001', 'billing')$$, 'notification_preferences_category_check', 'categories come from a fixed list');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect((select count(*) = 0 from public.notification_preferences), 'nobody sees another person''s preferences');
+
+-- notify() follows the preferences and never repeats a key
+select pg_temp.as_owner();
+select pg_temp.expect(public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Email only', 'Body', '/tasks', 'p12-k1', false), 'a notification goes by the route the person chose');
+select pg_temp.expect((select not in_app and email_status = 'queued' and email_next_at is not null from public.notifications where dedupe_key = 'p12-k1'), 'with tasks set to email only, it is queued for email and kept out of the app');
+select pg_temp.expect(not public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Email only', 'Body', '/tasks', 'p12-k1', false) and (select count(*) = 1 from public.notifications where dedupe_key = 'p12-k1'), 'the same notification is never delivered twice');
+select pg_temp.expect(not public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000002', 'tasks', 'Wrong business', 'Body', '/tasks', null, false), 'nor to someone in another business');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) = 0 from public.notifications where dedupe_key = 'p12-k1'), 'an email-only notification is not shown in the app');
+update public.notification_preferences set email = false where category = 'tasks';
+select pg_temp.as_owner();
+select pg_temp.expect(not public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Nothing', 'x', '/tasks', 'p12-k2', false), 'a category switched off entirely sends nothing');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.notification_preferences set email = true where category = 'tasks';
+
+-- Notification email: sent by the server, once, with retries
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 1 and bool_and(recipient = 'staff1@umbane.test' and title = 'Email only') from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'the server picks up the email, addressed to the person');
+select pg_temp.expect((select email_status = 'sending' and email_attempts = 1 from public.notifications where dedupe_key = 'p12-k1'), 'and marks it as being sent');
+select pg_temp.expect((select count(*) = 0 from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'nobody else can pick it up meanwhile');
+select pg_temp.expect(public.record_notification_email((select id from public.notifications where dedupe_key = 'p12-k1'), false, 'Resend 503', true), 'a temporary failure is recorded');
+select pg_temp.expect((select email_status = 'failed' and email_next_at > now() and email_error = 'Resend 503' from public.notifications where dedupe_key = 'p12-k1') and (select count(*) = 0 from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'and tried again later, not straight away');
+select pg_temp.as_owner();
+update public.notifications set email_next_at = now() - interval '1 minute' where dedupe_key = 'p12-k1';
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 1 from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'when it is due it is picked up again');
+select public.record_notification_email(id, true, null, false) from public.notifications where dedupe_key = 'p12-k1';
+select pg_temp.expect((select email_status = 'sent' and emailed_at is not null and email_attempts = 2 and email_next_at is null and email_error is null from public.notifications where dedupe_key = 'p12-k1'), 'and marked sent');
+select pg_temp.expect(not public.record_notification_email((select id from public.notifications where dedupe_key = 'p12-k1'), false, 'late', true), 'a result is recorded once only');
+select pg_temp.as_owner();
+select public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Permanent', 'x', '/tasks', 'p12-k3', false);
+select public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Stuck', 'x', '/tasks', 'p12-k6', false);
+select pg_temp.as_service();
+select count(*) from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001');
+select public.record_notification_email(id, false, 'Resend 422: invalid address', false) from public.notifications where dedupe_key = 'p12-k3';
+select pg_temp.expect((select email_status = 'failed' and email_next_at is null from public.notifications where dedupe_key = 'p12-k3'), 'a permanent failure is not retried');
+select pg_temp.as_owner();
+update public.notifications set email_next_at = now() - interval '11 minutes' where dedupe_key = 'p12-k6';
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 1 and bool_and(title = 'Stuck') from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'an email stuck mid-send is picked up again after ten minutes');
+select pg_temp.as_owner();
+update public.notifications set email_status = 'failed', email_attempts = 5, email_next_at = now() - interval '1 minute' where dedupe_key = 'p12-k6';
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 0 from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'after five attempts the server stops trying');
+select pg_temp.as_owner();
+select public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Old news', 'x', '/tasks', 'p12-k5', false);
+update public.notifications set created_at = now() - interval '3 days' where dedupe_key = 'p12-k5';
+select public.notify('a3000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'tasks', 'Unwanted', 'x', '/tasks', 'p12-k4', false);
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.notification_preferences set email = false, in_app = true where category = 'tasks';
+select pg_temp.as_service();
+select pg_temp.expect((select count(*) = 0 from public.claim_notification_emails(10, '11111111-0000-0000-0000-000000000001')), 'emails no longer wanted, or too old to matter, are not sent');
+select pg_temp.expect((select email_status = 'skipped' and email_error = 'Too old to send' from public.notifications where dedupe_key = 'p12-k5') and (select email_status = 'skipped' and email_error = 'No longer wanted' from public.notifications where dedupe_key = 'p12-k4'), 'and say why');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+delete from public.notification_preferences where category = 'tasks';
+select pg_temp.expect_error_like($$select * from public.claim_notification_emails(10)$$, 'permission denied', 'only the server sends notification email');
+select pg_temp.expect_error_like($$select public.run_automations()$$, 'permission denied', 'or runs every business''s automations');
+
+-- Template filling for automated customer email
+select pg_temp.expect(public.render_template('Hi {{customer_name}}, {{unknown}}you owe {{balance_due}}', '{"customer_name": "Thabo", "balance_due": "R 1,234.50"}') = 'Hi Thabo, you owe R 1,234.50', 'templates are filled in, and unknown placeholders dropped');
+select pg_temp.expect(public.format_rand(1234.5) = 'R 1,234.50' and public.format_sa_date('2026-03-05') = '5 Mar 2026', 'amounts and dates are written the South African way');
+
+-- Automation settings
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect((select count(*) = 9 and count(*) filter (where enabled) = 6 and bool_and(not enabled) filter (where key in ('payment_reminder', 'overdue_notice', 'ticket_status_email')) from public.automations), 'every business starts with nine automations, with customer emails off');
+update public.automations set settings = '{"days_overdue": 3}' where key = 'overdue_invoices';
+select pg_temp.expect((select settings ->> 'days_overdue' = '3' and updated_by = 'a2000000-0000-0000-0000-000000000001' from public.automations where key = 'overdue_invoices'), 'a manager changes a setting and is recorded as doing so');
+select pg_temp.expect_error_like($$update public.automations set settings = '{"days_overdue": 999}' where key = 'overdue_invoices'$$, 'automation_settings_invalid', 'settings stay within their limits');
+select pg_temp.expect_error_like($$update public.automations set settings = '{"days_overdue": 1, "send_to": "everyone"}' where key = 'overdue_invoices'$$, 'automation_settings_invalid', 'unknown settings are refused');
+select pg_temp.expect_error_like($$update public.automations set settings = '{}' where key = 'overdue_invoices'$$, 'automation_settings_invalid', 'a setting cannot be left out');
+select pg_temp.expect_error_like($$update public.automations set settings = '{"days_overdue": 1.5}' where key = 'overdue_invoices'$$, 'automation_settings_invalid', 'days are whole numbers');
+select pg_temp.expect_error_like($$update public.automations set settings = '{"x": 1}' where key = 'low_stock'$$, 'automation_settings_invalid', 'automations without settings take none');
+select pg_temp.expect_error_like($$update public.automations set key = 'low_stock' where key = 'new_customer'$$, 'permission denied', 'an automation''s kind never changes');
+select pg_temp.expect_error_like($$update public.automations set last_status = 'success'$$, 'permission denied', 'and its results cannot be faked');
+select pg_temp.expect_error_like($$insert into public.automation_actions (business_id, automation_key, target_type, outcome) values ('11111111-0000-0000-0000-000000000001', 'low_stock', 'product', 'notified')$$, 'permission denied', 'nor its log');
+update public.automations set settings = '{"days_overdue": 1}' where key = 'overdue_invoices';
+update public.automations set enabled = true where key in ('payment_reminder', 'overdue_notice', 'ticket_status_email');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) = 0 from public.automations) and (select count(*) = 0 from public.automation_runs) and (select count(*) = 0 from public.automation_actions), 'staff do not see automations');
+select pg_temp.expect_error_like($$select public.run_my_automations()$$, 'permission denied', 'nor run them');
+update public.automations set enabled = false;
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 0 from public.automations where business_id = '11111111-0000-0000-0000-000000000001' and not enabled), 'nor switch them off');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- business 2 administrator
+select pg_temp.expect((select count(*) = 9 and bool_and(business_id = '11111111-0000-0000-0000-000000000002') and count(*) filter (where enabled) = 6 from public.automations), 'another business has its own automations');
+
+-- New customers
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+with c as (insert into public.customers (name, email, segment, province) values ('Phase Twelve Traders', 'p12@example.test', 'commercial', 'Gauteng') returning id)
+insert into ref select 'p12cust', id from c;
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() and bool_and(category = 'customers' and title = 'New customer: Phase Twelve Traders' and body = 'Commercial · Gauteng · p12@example.test' and link = '/customers/' || (select id from ref where k = 'p12cust')) and bool_and(user_id in (select id from public.profiles where role in ('administrator', 'manager'))) from public.notifications where dedupe_key = 'new-customer:' || (select id from ref where k = 'p12cust')), 'the managers hear about a new customer');
+select pg_temp.expect((select outcome = 'notified' and detail = 'Notified ' || pg_temp.mgrs() || ' people' and run_id is null and target_label = 'Phase Twelve Traders' from public.automation_actions where dedupe_key = 'new-customer:' || (select id from ref where k = 'p12cust')), 'and the action is logged');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+with c as (insert into public.customers (name) values ('Manager Added') returning id) insert into ref select 'p12mgr', id from c;
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() - 1 and bool_and(user_id <> 'a2000000-0000-0000-0000-000000000001') from public.notifications where title = 'New customer: Manager Added'), 'the manager who added the customer is not told about it');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.automations set enabled = false where key = 'new_customer';
+insert into public.customers (name) values ('Quiet Customer');
+update public.automations set enabled = true where key = 'new_customer';
+select pg_temp.as_owner();
+select pg_temp.expect(not exists (select 1 from public.notifications where title = 'New customer: Quiet Customer'), 'a switched-off automation does nothing');
+
+-- Low stock: once, when stock crosses the reorder level
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+insert into ref select 'p12prod', public.create_product('P12-SKU', 'Phase 12 meter', 100, 10, p_low_stock_threshold => 5);
+select pg_temp.as_service();  -- no one signed in, so every manager is told
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'adjusted', -4, 'Count');
+select pg_temp.expect(not exists (select 1 from public.notifications where title like '%: Phase 12 meter'), 'no alert while stock is above the reorder level');
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'adjusted', -2, 'Count');
+select pg_temp.expect((select count(*) = pg_temp.mgrs() and bool_and(category = 'inventory' and body = 'P12-SKU has 4 left (reorder level 5).') from public.notifications where title = 'Low stock: Phase 12 meter'), 'the managers are told when it drops to the reorder level');
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'adjusted', -1, 'Count');
+select pg_temp.expect((select count(*) = pg_temp.mgrs() from public.notifications where title like '%: Phase 12 meter'), 'not again on every sale below it');
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'adjusted', -3, 'Count');
+select pg_temp.expect((select count(*) = pg_temp.mgrs() from public.notifications where title = 'Out of stock: Phase 12 meter'), 'and once more when it runs out');
+-- As if it were another day: today's keys no longer block a repeat, so only the crossing rule does.
+select pg_temp.as_owner();
+delete from public.automation_actions where automation_key = 'low_stock' and target_id = (select id from ref where k = 'p12prod');
+delete from public.notifications where title like '%: Phase 12 meter';
+select pg_temp.as_service();
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'received', 2, 'Part delivery');
+select pg_temp.expect(not exists (select 1 from public.notifications where title like '%: Phase 12 meter'), 'restocking that leaves it below the reorder level does not alert again');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.automations set enabled = false where key = 'low_stock';
+select pg_temp.as_service();
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'received', 10, 'Restock');
+insert into public.inventory_transactions (business_id, product_id, transaction_type, quantity, note) values ('11111111-0000-0000-0000-000000000001', (select id from ref where k = 'p12prod'), 'adjusted', -12, 'Count');
+select pg_temp.expect(not exists (select 1 from public.notifications where title like '%: Phase 12 meter'), 'with low stock alerts switched off, nobody is told');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.automations set enabled = true where key = 'low_stock';
+
+-- Urgent tickets
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+with t as (insert into public.support_tickets (customer_id, subject, description, category, priority, assigned_to) values ('c1000000-0000-0000-0000-000000000001', 'P12 sparks', 'Sparks at the meter', 'meter_fault', 'urgent', 'a3000000-0000-0000-0000-000000000001') returning id)
+insert into ref select 'p12urgent', id from t;
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() and bool_and(category = 'tickets' and title like 'Urgent ticket TKT-%' and body = 'P12 sparks') from public.notifications where dedupe_key = 'urgent-ticket:' || (select id from ref where k = 'p12urgent')), 'the managers hear at once about an urgent ticket');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+with t as (insert into public.support_tickets (customer_id, subject, description, category, assigned_to) values ('c1000000-0000-0000-0000-000000000002', 'P12 flicker', 'Lights flicker', 'meter_fault', 'a3000000-0000-0000-0000-000000000001') returning id)
+insert into ref select 'p12later', id from t;
+update public.support_tickets set priority = 'urgent' where id = (select id from ref where k = 'p12later');
+update public.support_tickets set priority = 'high' where id = (select id from ref where k = 'p12later');
+update public.support_tickets set priority = 'urgent' where id = (select id from ref where k = 'p12later');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() - 1 and bool_and(user_id <> 'a2000000-0000-0000-0000-000000000001') from public.notifications where dedupe_key = 'urgent-ticket:' || (select id from ref where k = 'p12later')), 'a ticket raised to urgent alerts once, however often it changes');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+with t as (insert into public.support_tickets (customer_id, subject, description, category, priority) values ('c1000000-0000-0000-0000-000000000002', 'P12 unassigned urgent', 'No power', 'meter_fault', 'urgent') returning id)
+insert into ref select 'p12unassigned', id from t;
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.support_tickets set assigned_to = 'a3000000-0000-0000-0000-000000000001', status = 'assigned' where id = (select id from ref where k = 'p12unassigned');
+update public.support_tickets set status = 'in_progress' where id = (select id from ref where k = 'p12unassigned');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) > 0 from public.notifications where title = 'New support ticket' and link = '/support-tickets/' || (select id from ref where k = 'p12unassigned')) and not exists (select 1 from public.notifications where dedupe_key = 'urgent-ticket:' || (select id from ref where k = 'p12unassigned')), 'an urgent ticket opened unassigned is announced once, as a new ticket, not again when it is worked on');
+
+-- Ticket status emails to customers without a login
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+with t as (insert into public.support_tickets (customer_id, subject, description, category, assigned_to) values ((select id from ref where k = 'p12cust'), 'Status mail', 'Please help', 'billing', 'a3000000-0000-0000-0000-000000000001') returning id)
+insert into ref select 'p12mail', id from t;
+update public.support_tickets set status = 'in_progress' where id = (select id from ref where k = 'p12mail');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 1 and bool_and(channel = 'email' and status = 'queued' and template_key = 'ticket_update' and recipient = 'p12@example.test' and subject like 'Update on your support ticket TKT-%' and body like 'Good day Phase Twelve Traders,%We are working on your support ticket.%' and created_by is null) from public.communication_logs where ticket_id = (select id from ref where k = 'p12mail')), 'the customer is emailed when the team starts work');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+with t as (insert into public.support_tickets (customer_id, subject, description, category, assigned_to) values ((select id from ref where k = 'p12cust'), 'Server change', 'Please help', 'billing', 'a3000000-0000-0000-0000-000000000001') returning id)
+insert into ref select 'p12srv', id from t;
+select pg_temp.as_service();
+update public.support_tickets set status = 'in_progress' where id = (select id from ref where k = 'p12srv');
+select pg_temp.as_owner();
+select pg_temp.expect(not exists (select 1 from public.communication_logs where ticket_id = (select id from ref where k = 'p12srv')) and not exists (select 1 from public.automation_actions where target_id = (select id from ref where k = 'p12srv')), 'a change not made by the team emails nobody');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.support_tickets set status = 'resolved', resolution = 'Billing corrected.' where id = (select id from ref where k = 'p12mail');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 2 and bool_or(body like '%has been resolved.%Billing corrected.%') from public.communication_logs where ticket_id = (select id from ref where k = 'p12mail')), 'and when it is resolved, with the resolution');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.support_tickets set status = 'in_progress' where id = (select id from ref where k = 'p12urgent');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 0 from public.communication_logs where ticket_id = (select id from ref where k = 'p12urgent')) and (select count(*) = 1 from public.notifications where title like '% is now In Progress' and link = '/support-tickets/' || (select id from ref where k = 'p12urgent')), 'a customer who signs in gets the update in the app instead');
+select pg_temp.expect(not exists (select 1 from public.automation_actions where automation_key = 'ticket_status_email' and target_id = (select id from ref where k = 'p12urgent')), 'and the email automation leaves them alone');
+update public.customers set email_opt_out = true where id = (select id from ref where k = 'p12cust');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.support_tickets set status = 'closed' where id = (select id from ref where k = 'p12mail');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 2 from public.communication_logs where ticket_id = (select id from ref where k = 'p12mail')) and (select outcome = 'skipped' and detail = 'message_opted_out' from public.automation_actions where dedupe_key like 'ticket-status:' || (select id from ref where k = 'p12mail') || ':closed:%'), 'a customer who opted out is not emailed, and the log says why');
+
+-- Scheduled automations
+select pg_temp.as_owner();
+set local session_replication_role = replica;
+insert into public.customers (id, business_id, name, email, email_opt_out) values
+  ('c1200000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Reminder Customer', 'remind@example.test', false),
+  ('c1200000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'Opted Out Customer', 'optout@example.test', true);
+insert into public.invoices (id, business_id, customer_id, invoice_number, status, issue_date, due_date, total, issued_by) values
+  ('1a120000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000001', 'P12-OVERDUE', 'sent', public.business_today() - 30, public.business_today() - 3, 1234.50, 'a3000000-0000-0000-0000-000000000001'),
+  ('1a120000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000001', 'P12-ANCIENT', 'sent', public.business_today() - 90, public.business_today() - 60, 500, null),
+  ('1a120000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000001', 'P12-SOON', 'sent', public.business_today() - 10, public.business_today() + 2, 1234.50, null),
+  ('1a120000-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000002', 'P12-SOON-OPTOUT', 'sent', public.business_today() - 10, public.business_today() + 2, 800, null),
+  ('1a120000-0000-0000-0000-000000000005', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000001', 'P12-WEEK', 'partially_paid', public.business_today() - 40, public.business_today() - 7, 2000, null),
+  ('1a120000-0000-0000-0000-000000000006', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000001', 'P12-PAID', 'paid', public.business_today() - 30, public.business_today() - 3, 300, null);
+insert into public.payments (business_id, invoice_id, amount, method, paid_at) values
+  ('11111111-0000-0000-0000-000000000001', '1a120000-0000-0000-0000-000000000005', 500, 'eft', now() - interval '10 days'),
+  ('11111111-0000-0000-0000-000000000001', '1a120000-0000-0000-0000-000000000006', 300, 'eft', now() - interval '10 days');
+insert into public.staff_tasks (id, business_id, title, status, due_date, assigned_to, created_by) values
+  ('7a120000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'P12 due tomorrow', 'todo', public.business_today() + 1, 'a3000000-0000-0000-0000-000000000001', 'a2000000-0000-0000-0000-000000000001'),
+  ('7a120000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'P12 overdue', 'in_progress', public.business_today() - 1, 'a3000000-0000-0000-0000-000000000001', 'a2000000-0000-0000-0000-000000000001'),
+  ('7a120000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'P12 finished', 'done', public.business_today() + 1, 'a3000000-0000-0000-0000-000000000001', 'a2000000-0000-0000-0000-000000000001');
+insert into public.meter_maintenance (id, business_id, meter_id, kind, issue, status, scheduled_for) values
+  ('3a120000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', (select id from public.electricity_meters where business_id = '11111111-0000-0000-0000-000000000001' order by created_at, id limit 1), 'inspection', 'Six-monthly inspection', 'scheduled', public.business_today() + 1);
+set local session_replication_role = origin;
+
+select pg_temp.as_service();
+select public.run_automations('11111111-0000-0000-0000-000000000001');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() + 1 and bool_and(category = 'invoices' and title = 'Invoice P12-OVERDUE is overdue' and body = 'Reminder Customer owes R 1,234.50, due ' || public.format_sa_date(public.business_today() - 3) || '.') from public.notifications where dedupe_key = 'overdue-invoice:1a120000-0000-0000-0000-000000000001'), 'an overdue invoice alerts the managers and the person who issued it');
+select pg_temp.expect(not exists (select 1 from public.notifications where title like 'Invoice P12-ANCIENT%' or title like 'Invoice P12-PAID%'), 'invoices overdue long before, or already paid, are left alone');
+select pg_temp.expect((select count(*) = 1 and bool_and(template_key = 'payment_reminder' and recipient = 'remind@example.test' and subject = 'Reminder: invoice P12-SOON is due' and body like '%invoice P12-SOON has a balance of R 1,234.50, due ' || public.format_sa_date(public.business_today() + 2) || '.%' and created_by is null and status = 'queued') from public.communication_logs where invoice_id = '1a120000-0000-0000-0000-000000000003'), 'the customer gets a payment reminder before the due date');
+select pg_temp.expect((select count(*) = 0 from public.communication_logs where invoice_id = '1a120000-0000-0000-0000-000000000004') and (select outcome = 'skipped' and detail = 'message_opted_out' from public.automation_actions where target_id = '1a120000-0000-0000-0000-000000000004'), 'but not a customer who opted out');
+select pg_temp.expect((select count(*) = 1 and bool_and(template_key = 'invoice_overdue' and subject = 'Invoice P12-WEEK is overdue' and body like '%still has a balance of R 1,500.00%') from public.communication_logs where invoice_id = '1a120000-0000-0000-0000-000000000005'), 'and an overdue notice a week after it');
+select pg_temp.expect((select count(*) = 1 and bool_and(user_id = 'a3000000-0000-0000-0000-000000000001' and title like 'TSK-% is due tomorrow' and body = 'P12 due tomorrow') from public.notifications where dedupe_key = 'task-due:7a120000-0000-0000-0000-000000000001:' || (public.business_today() + 1)), 'a task due tomorrow reminds the person doing it');
+select pg_temp.expect((select count(*) = 2 and bool_and(title like 'TSK-% is overdue') from public.notifications where dedupe_key = 'task-overdue:7a120000-0000-0000-0000-000000000002:' || (public.business_today() - 1)), 'an overdue task tells the person doing it and the person who set it');
+select pg_temp.expect(not exists (select 1 from public.notifications where dedupe_key like 'task-%:7a120000-0000-0000-0000-000000000003:%'), 'a finished task is left alone');
+select pg_temp.expect((select count(*) = pg_temp.mgrs() and bool_and(category = 'maintenance' and title like 'Inspection due tomorrow on meter %' and body = 'Nobody is assigned yet.') from public.notifications where dedupe_key = 'maintenance-due:3a120000-0000-0000-0000-000000000001:' || (public.business_today() + 1)), 'unassigned maintenance due tomorrow goes to the managers');
+select pg_temp.expect((select count(*) = 5 and bool_and(trigger = 'schedule' and finished_at is not null and status in ('success', 'nothing_to_do')) from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000001'), 'each switched-on scheduled automation logs its run');
+select pg_temp.expect((select last_status = 'success' and last_run_at is not null and last_message like '% done, % skipped, 0 failed' from public.automations where business_id = '11111111-0000-0000-0000-000000000001' and key = 'payment_reminder'), 'and its latest result');
+select pg_temp.expect((select count(*) = 0 from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000002'), 'one business''s run leaves the others alone');
+create temp table p12_before as select (select count(*) from public.notifications) as n, (select count(*) from public.communication_logs) as m, (select count(*) from public.automation_actions) as a;
+select pg_temp.as_service();
+select public.run_automations('11111111-0000-0000-0000-000000000001');
+select pg_temp.as_owner();
+select pg_temp.expect((select (select count(*) from public.notifications) = n and (select count(*) from public.communication_logs) = m and (select count(*) from public.automation_actions) = a from p12_before), 'running again sends nothing twice');
+select pg_temp.expect((select count(*) = 5 and bool_and(status = 'nothing_to_do' and checked = 0) from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000001' and number > (select max(number) - 5 from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000001')), 'and says there was nothing to do');
+
+-- A failure is logged and retried on the next run
+set local session_replication_role = replica;
+insert into public.invoices (id, business_id, customer_id, invoice_number, status, issue_date, due_date, total) values
+  ('1a120000-0000-0000-0000-000000000009', '11111111-0000-0000-0000-000000000001', 'c1200000-0000-0000-0000-000000000001', 'P12-FAIL', 'sent', public.business_today() - 30, public.business_today() - 2, 99);
+set local session_replication_role = origin;
+alter table public.notifications add constraint p12_fail check (title not like 'Invoice P12-FAIL%');
+select pg_temp.as_service();
+select public.run_automations('11111111-0000-0000-0000-000000000001');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 1 and bool_and(outcome = 'failed' and dedupe_key is null and target_label = 'P12-FAIL · Reminder Customer' and detail like '%p12_fail%' and run_id is not null) from public.automation_actions where target_id = '1a120000-0000-0000-0000-000000000009'), 'a failure is logged with the reason');
+select pg_temp.expect((select last_status = 'failed' and last_message = '0 done, 0 skipped, 1 failed' from public.automations where business_id = '11111111-0000-0000-0000-000000000001' and key = 'overdue_invoices'), 'and the automation shows it failed');
+alter table public.notifications drop constraint p12_fail;
+select pg_temp.as_service();
+select public.run_automations('11111111-0000-0000-0000-000000000001');
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() from public.notifications where title = 'Invoice P12-FAIL is overdue') and (select count(*) = 1 from public.automation_actions where target_id = '1a120000-0000-0000-0000-000000000009' and outcome = 'notified'), 'the next run tries again and succeeds');
+set local session_replication_role = replica;
+update public.automations set settings = '{"days_overdue": "soon"}' where business_id = '11111111-0000-0000-0000-000000000001' and key = 'overdue_invoices';
+set local session_replication_role = origin;
+select pg_temp.as_service();
+select public.run_automations('11111111-0000-0000-0000-000000000001');
+select pg_temp.as_owner();
+select pg_temp.expect((select status = 'failed' and error like '%invalid input syntax%' from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000001' and automation_key = 'overdue_invoices' order by number desc limit 1) and (select status <> 'failed' from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000001' and automation_key = 'task_reminders' order by number desc limit 1), 'one automation failing does not stop the others');
+update public.automations set settings = '{"days_overdue": 1}' where business_id = '11111111-0000-0000-0000-000000000001' and key = 'overdue_invoices';
+
+-- Run now, and every business on schedule
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select public.run_my_automations();
+select pg_temp.expect((select count(*) = 5 and bool_and(started_by = 'a2000000-0000-0000-0000-000000000001') from public.automation_runs where trigger = 'manual'), 'a manager can run their business''s automations now');
+select pg_temp.expect((select count(*) > 0 from public.automation_actions) and (select bool_and(business_id = '11111111-0000-0000-0000-000000000001') from public.automation_runs), 'and sees only their own business''s runs');
+select pg_temp.as_service();
+select public.run_automations();
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = 3 from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000002'), 'the daily run covers every business (with its own switched-on automations)');
 
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
