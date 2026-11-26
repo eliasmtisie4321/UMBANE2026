@@ -10,6 +10,25 @@ describe('canAccess', () => {
     }
   })
 
+  it('keeps adding and editing employees for administrators', () => {
+    expect(canAccess('administrator', '/team/new')).toBe(true)
+    expect(canAccess('administrator', '/team/abc/edit')).toBe(true)
+    expect(canAccess('manager', '/team')).toBe(true)
+    expect(canAccess('manager', '/team/abc')).toBe(true)
+    expect(canAccess('manager', '/team/new')).toBe(false)
+    expect(canAccess('manager', '/team/abc/edit')).toBe(false)
+  })
+
+  it('lets staff work their tasks but not create or change them', () => {
+    expect(canAccess('staff', '/tasks')).toBe(true)
+    expect(canAccess('staff', '/tasks/abc')).toBe(true)
+    expect(canAccess('staff', '/tasks/new')).toBe(false)
+    expect(canAccess('staff', '/tasks/abc/edit')).toBe(false)
+    expect(canAccess('manager', '/tasks/new')).toBe(true)
+    expect(canAccess('client', '/tasks')).toBe(false)
+    expect(canAccess('client', '/team')).toBe(false)
+  })
+
   it('keeps staff out of settings, team, reports and automations', () => {
     expect(canAccess('staff', '/customers')).toBe(true)
     for (const path of ['/settings', '/team', '/reports', '/automations', '/settings/security']) {

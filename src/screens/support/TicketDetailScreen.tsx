@@ -15,6 +15,7 @@ import {
   ConversationPanel,
   HistoryPanel,
 } from '@/components/support/TicketPanels'
+import { LinkedTasksPanel } from '@/components/team/LinkedTasksPanel'
 import { Button } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
 import { getTicket } from '@/services/support'
@@ -166,6 +167,12 @@ function TicketBody({
               ]}
             />
           </Panel>
+          {isStaff && (
+            <LinkedTasksPanel
+              ticketId={t.id}
+              canCreate={canAccess(role, '/tasks/new') && !closed}
+            />
+          )}
           <HistoryPanel ticketId={t.id} version={version} />
         </div>
       </div>

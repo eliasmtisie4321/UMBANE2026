@@ -1,4 +1,3 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Result } from '@/types/api'
 import type { ListQuery, Page } from '@/types/customers'
 import type {
@@ -20,17 +19,15 @@ import type {
 } from '@/types/support'
 import { err, ok } from '@/utils/result'
 import { orIlike } from '@/utils/search'
-import { fileTypeOf, safeFileName } from '@/utils/ticketForm'
+import { TICKET_FILES } from '@/utils/files'
 import { guarded, mapReadError, mapWriteError, num, type DbClient } from './db'
-import { getSupabase } from './supabase'
+import { listFiles, signedUrls, uploadFile, type FileStore, type StorageApi } from './storageFiles'
 
 type Row = Record<string, unknown>
 const str = (v: unknown): string | null => (v === null || v === undefined ? null : String(v))
 
-/** The slice of Supabase Storage used for attachments; tests pass a fake. */
-export type StorageApi = Pick<SupabaseClient['storage'], 'from'>
+export type { StorageApi } from './storageFiles'
 export const BUCKET = 'ticket-attachments'
-const resolveStorage = (s?: StorageApi): StorageApi => s ?? getSupabase().storage
 
 const fromListRow = (r: Row): TicketListItem => ({
   id: String(r.id),
@@ -264,103 +261,28 @@ export const listEvents = (ticketId: string, client?: DbClient) =>
   })
 
 // Attachments --------------------------------------------------------------------------------------
-export const listAttachments = (ticketId: string, client?: DbClient) =>
-  guarded<TicketAttachment[]>('Attachments', client, async (c) => {
-    const { data, error } = await c
-      .from('ticket_attachments')
-      .select('id, file_name, content_type, size_bytes, storage_path, uploader_name, created_at')
-      .eq('ticket_id', ticketId)
-      .order('created_at')
-      .order('id')
-    if (error) return err(mapReadError(error, 'Attachments'))
-    return ok(
-      ((data ?? []) as Row[]).map((r) => ({
-        id: String(r.id),
-        fileName: String(r.file_name),
-        contentType: String(r.content_type),
-        sizeBytes: num(r.size_bytes),
-        storagePath: String(r.storage_path),
-        uploaderName: str(r.uploader_name),
-        createdAt: String(r.created_at),
-      })),
-    )
-  })
+export const TICKET_STORE: FileStore = {
+  bucket: BUCKET,
+  table: 'ticket_attachments',
+  parentColumn: 'ticket_id',
+  rules: TICKET_FILES,
+}
 
-const randomId = () =>
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2)
+export const listAttachments = (
+  ticketId: string,
+  client?: DbClient,
+): Promise<Result<TicketAttachment[]>> => listFiles(TICKET_STORE, ticketId, client)
 
-/**
- * Uploads the file to private storage, then records it on the ticket. The database checks the file
- * really arrived and keeps its stored size and type.
- */
-export async function uploadAttachment(
+/** Uploads to private storage, then records it on the ticket (see storageFiles.uploadFile). */
+export const uploadAttachment = (
   ticket: { id: string; businessId: string },
   file: File,
   deps: { client?: DbClient; storage?: StorageApi } = {},
-) {
-  const contentType = fileTypeOf(file.name)
-  if (!contentType) {
-    return err({
-      code: 'validation',
-      message: `${file.name}: this type of file cannot be attached.`,
-    })
-  }
-  const path = `${ticket.businessId}/${ticket.id}/${randomId()}-${safeFileName(file.name)}`
-  try {
-    const bucket = resolveStorage(deps.storage).from(BUCKET)
-    const up = await bucket.upload(path, file, { contentType, upsert: false })
-    if (up.error) {
-      return err({
-        code: /fetch|network/i.test(up.error.message) ? 'network' : 'validation',
-        message: `${file.name} could not be uploaded. Check the file is a photo, PDF, CSV or text file under 10 MB and try again.`,
-      })
-    }
-  } catch {
-    return err({
-      code: 'network',
-      message: `${file.name} could not be uploaded. Please try again.`,
-    })
-  }
-  return guarded<{ id: string }>(
-    'attachment',
-    deps.client,
-    async (c) => {
-      const { data, error } = await c
-        .from('ticket_attachments')
-        .insert({
-          ticket_id: ticket.id,
-          storage_path: path,
-          file_name: file.name.slice(0, 200),
-          content_type: contentType,
-          size_bytes: file.size,
-        })
-        .select('id')
-        .single()
-      if (error) return err(mapWriteError(error, 'attachment'))
-      return ok({ id: String((data as Row).id) })
-    },
-    mapWriteError,
-  )
-}
+) => uploadFile(TICKET_STORE, ticket, file, deps)
 
 /** Private links to the files, valid for an hour, keyed by storage path. */
-export async function attachmentUrls(
-  paths: string[],
-  storage?: StorageApi,
-): Promise<Result<Record<string, string>>> {
-  if (paths.length === 0) return ok({})
-  try {
-    const { data, error } = await resolveStorage(storage).from(BUCKET).createSignedUrls(paths, 3600)
-    if (error || !data) return err({ code: 'unknown', message: 'The files could not be opened.' })
-    const urls: Record<string, string> = {}
-    for (const d of data) if (d.path && d.signedUrl && !d.error) urls[d.path] = d.signedUrl
-    return ok(urls)
-  } catch {
-    return err({ code: 'network', message: 'The files could not be opened.' })
-  }
-}
+export const attachmentUrls = (paths: string[], storage?: StorageApi) =>
+  signedUrls(BUCKET, paths, storage)
 
 // Assigning ----------------------------------------------------------------------------------------
 export const getWorkload = (client?: DbClient) =>

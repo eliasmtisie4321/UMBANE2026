@@ -704,6 +704,177 @@ select pg_temp.expect((select subject from public.support_tickets where id = (se
 select pg_temp.expect_error_like($$set local role anon; select * from public.ticket_list$$, 'permission denied', 'anonymous cannot read tickets');
 select pg_temp.expect_error_like($$set local role authenticated; select * from public.ticket_counters$$, 'permission denied', 'nobody reads the ticket counters directly');
 
+-- Team and tasks (Phase 9) -------------------------------------------------------------------------
+-- Employee details
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select employee_number from public.profiles where id = 'a1000000-0000-0000-0000-000000000001') = 1 and (select employee_number from public.profiles where id = 'a3000000-0000-0000-0000-000000000001') = 3 and (select employee_number from public.profiles where id = 'a4000000-0000-0000-0000-000000000001') is null, 'the existing team is numbered in the order they joined; clients are not');
+update public.profiles set department = 'field_operations', job_title = 'Field Technician', employment_status = 'training', start_date = '2025-03-01', reports_to = 'a2000000-0000-0000-0000-000000000001' where id = 'a3000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select department = 'field_operations' and job_title = 'Field Technician' and employment_status = 'training' and reports_to = 'a2000000-0000-0000-0000-000000000001' from public.team_list where id = 'a3000000-0000-0000-0000-000000000001'), 'an administrator sets employment details');
+select pg_temp.expect((select employee_code = 'EMP-003' and reports_to_name = 'Mia Manager' from public.team_list where id = 'a3000000-0000-0000-0000-000000000001'), 'the team list shows the employee code and manager');
+select pg_temp.expect_error_like($$update public.profiles set reports_to = id where id = 'a3000000-0000-0000-0000-000000000001'$$, 'profiles_not_own_manager', 'nobody reports to themselves');
+select pg_temp.expect_error_like($$update public.profiles set reports_to = 'b1000000-0000-0000-0000-000000000001' where id = 'a3000000-0000-0000-0000-000000000001'$$, 'profiles_reports_to_fkey', 'or to someone in another business');
+select pg_temp.expect_error_like($$update public.profiles set employee_number = 99 where id = 'a3000000-0000-0000-0000-000000000001'$$, 'staff_fixed_fields', 'an employee number never changes');
+select pg_temp.expect_error_like($$update public.profiles set is_active = false where id = 'a1000000-0000-0000-0000-000000000001'$$, 'staff_self_lockout', 'an administrator cannot deactivate themselves');
+select pg_temp.expect_error_like($$update public.profiles set role = 'staff' where id = 'a1000000-0000-0000-0000-000000000001'$$, 'staff_self_lockout', 'or demote themselves');
+select pg_temp.expect_error_like($$update public.profiles set department = 'sales' where id = 'a3000000-0000-0000-0000-000000000001'$$, 'profiles_department_check', 'departments come from a fixed list');
+
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.profiles set phone = '+27820000003' where id = 'a3000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select phone = '+27820000003' from public.profiles where id = 'a3000000-0000-0000-0000-000000000001'), 'people can update their own phone number');
+select pg_temp.expect_error_like($$update public.profiles set job_title = 'Head of Everything' where id = 'a3000000-0000-0000-0000-000000000001'$$, 'staff_admin_only', 'but not their own job title');
+select pg_temp.expect_error_like($$update public.profiles set employment_status = 'active' where id = 'a3000000-0000-0000-0000-000000000001'$$, 'staff_admin_only', 'or employment status');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect_error_like($$update public.profiles set department = 'marketing' where id = 'a2000000-0000-0000-0000-000000000001'$$, 'staff_admin_only', 'managers cannot change employment details either');
+
+-- Invitations
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select public.invite_staff(' Lerato@Umbane.Test ', 'Lerato Khumalo', 'staff', '+27831234567', 'customer_support', 'Support Agent', '2026-12-01', 'a2000000-0000-0000-0000-000000000001') ->> 'status') = 'invited', 'an administrator invites someone without an account');
+select pg_temp.expect((select email = 'lerato@umbane.test' and status = 'pending' and invited_by = 'a1000000-0000-0000-0000-000000000001' from public.staff_invitations where full_name = 'Lerato Khumalo'), 'the invitation is kept in lower case, with who sent it');
+select pg_temp.expect_error_like($$select public.invite_staff('lerato@umbane.test', 'Lerato Again', 'staff')$$, 'staff_already_invited', 'an email is invited once');
+select pg_temp.expect_error_like($$select public.invite_staff('STAFF1@umbane.test', 'Copy', 'staff')$$, 'staff_email_taken', 'someone already on the team cannot be invited, whatever the case');
+select pg_temp.expect_error_like($$select public.invite_staff('new@umbane.test', 'New Client', 'client')$$, 'staff_role_client', 'clients are not invited as staff');
+select pg_temp.expect_error_like($$select public.invite_staff('not-an-email', 'Bad Email', 'staff')$$, 'staff_invitations_email_check', 'the email must be valid');
+select pg_temp.expect_error_like($$select public.invite_staff('phone@umbane.test', 'Bad Phone', 'staff', '0821234567')$$, 'staff_invitations_phone_check', 'the phone must be in +27 form');
+select public.invite_staff('pending@umbane.test', 'Still Pending', 'staff');
+select public.invite_staff('gone@umbane.test', 'Gone Person', 'staff');
+update public.staff_invitations set status = 'cancelled' where email = 'gone@umbane.test';
+select pg_temp.expect((select status = 'cancelled' from public.staff_invitations where email = 'gone@umbane.test'), 'an administrator can cancel a pending invitation');
+select pg_temp.expect_error_like($$update public.staff_invitations set status = 'pending' where email = 'gone@umbane.test'$$, 'invitation_closed', 'a cancelled invitation stays cancelled');
+select pg_temp.expect_error_like($$update public.staff_invitations set role = 'administrator' where email = 'lerato@umbane.test'$$, 'invitation_closed', 'and a pending one cannot be changed, only cancelled');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect_error_like($$select public.invite_staff('m@umbane.test', 'By Manager', 'staff')$$, 'permission denied', 'only administrators invite');
+select pg_temp.expect((select count(*) from public.staff_invitations) = 0, 'managers do not see invitations');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.staff_invitations) = 0, 'another business does not see our invitations');
+select pg_temp.expect_error_like($$select public.invite_staff('pending@umbane.test', 'Poached', 'administrator')$$, 'staff_already_invited', 'nor invites someone we have already invited');
+
+-- The invited person confirms their account (what Supabase Auth does)
+select pg_temp.as_owner();
+select set_config('request.jwt.claim.sub', '', true), set_config('request.jwt.claims', '', true);
+insert into auth.users (id, aud, role, email, created_at) values ('a5000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'Lerato@umbane.test', now());
+select pg_temp.expect(not exists (select 1 from public.profiles where id = 'a5000000-0000-0000-0000-000000000001'), 'an unconfirmed account gets no profile');
+update auth.users set email_confirmed_at = now() where id = 'a5000000-0000-0000-0000-000000000001';
+select pg_temp.expect((select business_id = '11111111-0000-0000-0000-000000000001' and role = 'staff' and full_name = 'Lerato Khumalo' and department = 'customer_support' and reports_to = 'a2000000-0000-0000-0000-000000000001' and employee_number = 4 and email = 'lerato@umbane.test' from public.profiles where id = 'a5000000-0000-0000-0000-000000000001'), 'confirming an invited email creates the profile in the inviting business');
+select pg_temp.expect((select status = 'accepted' and profile_id = 'a5000000-0000-0000-0000-000000000001' and accepted_at is not null from public.staff_invitations where email = 'lerato@umbane.test'), 'and accepts the invitation');
+insert into auth.users (id, aud, role, email, email_confirmed_at, created_at) values ('a7000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'gone@umbane.test', now(), now());
+select pg_temp.expect(not exists (select 1 from public.profiles where id = 'a7000000-0000-0000-0000-000000000001'), 'a cancelled invitation gives no access');
+insert into auth.users (id, aud, role, email, email_confirmed_at, created_at) values ('a6000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'thabo@umbane.test', now(), now());
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select public.invite_staff('thabo@umbane.test', 'Thabo Mokoena', 'manager') ->> 'status') = 'linked', 'someone with a confirmed account is added at once');
+select pg_temp.expect((select role = 'manager' and employee_number = 5 from public.profiles where id = 'a6000000-0000-0000-0000-000000000001'), 'with the next employee number');
+select pg_temp.as_owner();
+select set_config('request.jwt.claim.sub', '', true), set_config('request.jwt.claims', '', true);
+insert into auth.users (id, aud, role, email, created_at) values ('a8000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'unconfirmed@umbane.test', now());
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select public.invite_staff('unconfirmed@umbane.test', 'Not Yet', 'staff') ->> 'status') = 'invited' and not exists (select 1 from public.profiles where id = 'a8000000-0000-0000-0000-000000000001'), 'an account that has not confirmed its email is invited, not added');
+
+-- Tasks: a manager creates and assigns
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+with t as (
+  insert into public.staff_tasks (title, description, category, priority, assigned_to, ticket_id, start_date, due_date, proof_required, status, created_by)
+  values ('Replace cracked faceplate', 'Faceplate cracked on MTR-0002.', 'field_maintenance', 'high', 'a3000000-0000-0000-0000-000000000001', 'a0200000-0000-0000-0000-000000000002', public.business_today(), public.business_today() + 2, true, 'todo', 'a1000000-0000-0000-0000-000000000001')
+  returning id)
+insert into ref select 'task', id from t;
+with t as (
+  insert into public.staff_tasks (title, assigned_to) values ('Tariff batch audit', 'a1000000-0000-0000-0000-000000000001') returning id)
+insert into ref select 'task2', id from t;
+select pg_temp.expect((select customer_id = 'c1000000-0000-0000-0000-000000000002' and created_by = 'a2000000-0000-0000-0000-000000000001' and status = 'todo' and started_at is null from public.staff_tasks where id = (select id from ref where k = 'task')), 'a manager creates a task; its ticket fills in the customer, and the creator is the person signed in');
+select pg_temp.expect((select reference ~ '^TSK-[0-9]{5}$' and ticket_reference = 'TKT-0002' and assignee_name = 'Sam Staff' and display_status = 'todo' from public.task_list where id = (select id from ref where k = 'task')), 'tasks get a TSK reference and show their links');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, status) values ('Done already', 'done')$$, 'task_transition', 'a task cannot start completed');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, status) values ('Nobody', 'in_progress')$$, 'task_needs_assignee', 'work in progress needs someone doing it');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, assigned_to) values ('For a client', 'a4000000-0000-0000-0000-000000000001')$$, 'assignee_not_staff', 'only team members get tasks');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, ticket_id, property_id) values ('Mixed', 'a0200000-0000-0000-0000-000000000002', 'd1000000-0000-0000-0000-000000000001')$$, 'task_property_mismatch', 'the property must be the ticket''s customer''s');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, customer_id, ticket_id) values ('Mixed', 'c1000000-0000-0000-0000-000000000001', 'a0200000-0000-0000-0000-000000000002')$$, 'task_ticket_mismatch', 'and so must the ticket');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, start_date, due_date) values ('Backwards', '2026-12-10', '2026-12-01')$$, 'tasks_dates', 'the due date is not before the start');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title, category) values ('Odd', 'gardening')$$, 'staff_tasks_category_check', 'categories come from a fixed list');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title) values (repeat('x', 151))$$, 'tasks_title_length', 'a title is at most 150 characters');
+
+-- The assignee works it
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) from public.task_list) = 1, 'staff see only the tasks assigned to them');
+select pg_temp.expect((select count(*) = 1 from public.notifications where title = 'Task assigned to you' and link = '/tasks/' || (select id from ref where k = 'task')), 'the assignee is told');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (title) values ('Self-made')$$, 'permission denied', 'staff do not create tasks');
+update public.staff_tasks set status = 'in_progress' where id = (select id from ref where k = 'task');
+select pg_temp.expect((select status = 'in_progress' and started_at is not null from public.staff_tasks where id = (select id from ref where k = 'task')), 'the assignee starts their task, and the start is timed');
+select pg_temp.expect_error_like($$update public.staff_tasks set title = 'Easier job' where id = (select id from ref where k = 'task')$$, 'task_manager_only', 'but cannot change what the task is');
+select pg_temp.expect_error_like($$update public.staff_tasks set due_date = due_date + 30 where id = (select id from ref where k = 'task')$$, 'task_manager_only', 'or its due date');
+select pg_temp.expect_error_like($$update public.staff_tasks set status = 'cancelled' where id = (select id from ref where k = 'task')$$, 'task_manager_only', 'or cancel it');
+update public.staff_tasks set status = 'done' where id = (select id from ref where k = 'task2');
+insert into public.task_updates (task_id, body, author_id) values ((select id from ref where k = 'task'), 'On site, faceplate removed.', 'a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select author_id = 'a3000000-0000-0000-0000-000000000001' and author_name = 'Sam Staff' from public.task_updates where body = 'On site, faceplate removed.'), 'a progress update is always from the person signed in');
+select pg_temp.expect_error_like($$insert into public.task_updates (task_id, body) values ((select id from ref where k = 'task2'), 'Not mine')$$, 'permission denied', 'nobody posts on someone else''s task');
+select pg_temp.expect_error_like($$insert into public.task_attachments (task_id, storage_path, file_name, content_type, size_bytes) select id, 'x', 'x.jpg', 'image/jpeg', 1 from ref where k = 'task2'$$, 'permission denied', 'nor attaches files to it');
+select pg_temp.expect((select count(*) from public.task_events where task_id = (select id from ref where k = 'task2')) = 0, 'nor sees its history');
+select pg_temp.expect_error_like($$insert into public.task_events (business_id, task_id, kind) select '11111111-0000-0000-0000-000000000001', id, 'status' from ref where k = 'task'$$, 'permission denied', 'nobody writes task history directly');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) select 'task-attachments', '11111111-0000-0000-0000-000000000002/' || id || '/x.jpg' from ref where k = 'task'$$, 'row-level security', 'task files must sit under the task''s own business');
+insert into storage.objects (bucket_id, name, metadata) select 'task-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/1-jobcard.pdf', '{"size": 900, "mimetype": "application/pdf"}' from ref where k = 'task';
+insert into public.task_attachments (task_id, uploaded_by, storage_path, file_name, content_type, size_bytes) select id, 'a1000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001/' || id || '/1-jobcard.pdf', 'jobcard.pdf', 'image/png', 1 from ref where k = 'task';
+select pg_temp.expect((select uploaded_by = 'a3000000-0000-0000-0000-000000000001' and content_type = 'application/pdf' and size_bytes = 900 from public.task_attachments where file_name = 'jobcard.pdf'), 'a file records its uploader and its stored type and size');
+select pg_temp.expect_error_like($$update public.staff_tasks set status = 'done' where id = (select id from ref where k = 'task')$$, 'task_proof_required', 'a task needing proof cannot be completed without a photo; a document is not enough');
+insert into storage.objects (bucket_id, name, metadata) select 'task-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/2-after.jpg', '{"size": 2048, "mimetype": "image/jpeg"}' from ref where k = 'task';
+insert into public.task_attachments (task_id, storage_path, file_name, content_type, size_bytes) select id, '11111111-0000-0000-0000-000000000001/' || id || '/2-after.jpg', 'after.jpg', 'image/jpeg', 2048 from ref where k = 'task';
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) select 'task-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/x.jpg' from ref where k = 'task2'$$, 'row-level security', 'nobody uploads to someone else''s task');
+select pg_temp.expect_error_like(format($$insert into public.task_attachments (task_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'x.jpg', 'image/jpeg', 1)$$, (select id from ref where k = 'task'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'task') || '/9-ghost.jpg'), 'attachment_not_uploaded', 'a file must really be uploaded');
+select pg_temp.expect_error_like(format($$insert into public.task_attachments (task_id, storage_path, file_name, content_type, size_bytes) values (%L, %L, 'x.jpg', 'image/jpeg', 1)$$, (select id from ref where k = 'task'), '11111111-0000-0000-0000-000000000001/' || (select id from ref where k = 'task2') || '/2-after.jpg'), 'attachment_path_mismatch', 'and stored under its own task');
+update public.staff_tasks set status = 'done' where id = (select id from ref where k = 'task');
+select pg_temp.expect((select status = 'done' and completed_by = 'a3000000-0000-0000-0000-000000000001' and completed_at is not null from public.staff_tasks where id = (select id from ref where k = 'task')), 'with a photo the assignee completes it, and who and when are recorded');
+select pg_temp.expect_error_like($$update public.staff_tasks set status = 'in_progress' where id = (select id from ref where k = 'task')$$, 'task_manager_only', 'only a manager reopens a completed task');
+select pg_temp.expect_error_like($$insert into public.task_updates (task_id, body) values ((select id from ref where k = 'task'), 'Late note')$$, 'task_closed', 'a completed task takes no more updates');
+select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name) select 'task-attachments', '11111111-0000-0000-0000-000000000001/' || id || '/3-late.jpg' from ref where k = 'task'$$, 'row-level security', 'or files');
+delete from public.staff_tasks where id = (select id from ref where k = 'task');
+select pg_temp.expect((select count(*) = 1 from public.staff_tasks where id = (select id from ref where k = 'task')), 'staff cannot delete tasks');
+
+-- The manager follows up
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect((select status = 'todo' from public.staff_tasks where id = (select id from ref where k = 'task2')), 'staff cannot move a task that is not theirs');
+select pg_temp.expect((select count(*) filter (where title = 'Task completed') = 1 and count(*) filter (where title like 'Update on TSK-%') = 1 from public.notifications where link = '/tasks/' || (select id from ref where k = 'task')), 'the manager hears about progress and completion');
+select pg_temp.expect((select count(*) filter (where kind = 'created') = 1 and count(*) filter (where kind = 'status') = 2 and count(*) filter (where kind = 'attachment') = 2 from public.task_events where task_id = (select id from ref where k = 'task')), 'the history records creation, each status change and each file');
+select pg_temp.expect((select completed_tasks = 1 and completed_on_time = 1 and completed_with_due = 1 and completed_this_month = 1 and active_tasks = 0 from public.team_list where id = 'a3000000-0000-0000-0000-000000000001'), 'the team list counts completed and on-time work');
+select pg_temp.expect_error_like($$update public.staff_tasks set title = 'Renamed' where id = (select id from ref where k = 'task')$$, 'task_closed', 'a completed task is locked until reopened');
+update public.staff_tasks set status = 'in_progress' where id = (select id from ref where k = 'task');
+select pg_temp.expect((select status = 'in_progress' and completed_at is null and completed_by is null from public.staff_tasks where id = (select id from ref where k = 'task')), 'a manager reopens it, clearing the completion');
+select pg_temp.expect_error_like($$update public.staff_tasks set created_at = '2001-01-01' where id = (select id from ref where k = 'task')$$, 'task_fixed_fields', 'a task''s creation time cannot be changed');
+select pg_temp.expect_error_like($$update public.staff_tasks set assigned_to = 'a4000000-0000-0000-0000-000000000001' where id = (select id from ref where k = 'task')$$, 'assignee_not_staff', 'nor can it be reassigned to a client');
+update public.staff_tasks set completed_at = now(), started_at = null, last_activity_at = '2001-01-01' where id = (select id from ref where k = 'task');
+select pg_temp.expect((select completed_at is null and started_at is not null and last_activity_at > '2020-01-01' from public.staff_tasks where id = (select id from ref where k = 'task')), 'timestamps are the database''s to set');
+select pg_temp.expect_error_like($$update public.staff_tasks set status = 'cancelled' where id = (select id from ref where k = 'task')$$, 'task_cancel_reason', 'cancelling needs a reason');
+update public.staff_tasks set assigned_to = null where id = (select id from ref where k = 'task');
+select pg_temp.expect((select status = 'todo' from public.staff_tasks where id = (select id from ref where k = 'task')), 'unassigning a task in progress returns it to Pending');
+select pg_temp.expect_error_like($$update public.staff_tasks set status = 'done' where id = (select id from ref where k = 'task')$$, 'task_needs_assignee', 'and nobody can complete it until it is assigned');
+update public.staff_tasks set assigned_to = 'a3000000-0000-0000-0000-000000000001', priority = 'urgent', due_date = due_date + 1 where id = (select id from ref where k = 'task');
+select pg_temp.expect((select count(*) filter (where kind = 'assigned') = 2 and count(*) filter (where kind = 'priority') = 1 and count(*) filter (where kind = 'due') = 1 from public.task_events where task_id = (select id from ref where k = 'task')), 'assignment, priority and due date changes are in the history');
+with t as (
+  insert into public.staff_tasks (title, assigned_to, due_date) values ('Overdue follow-up', 'a3000000-0000-0000-0000-000000000001', public.business_today() - 1) returning id)
+insert into ref select 'late', id from t;
+select pg_temp.expect((select is_overdue and display_status = 'overdue' from public.task_list where id = (select id from ref where k = 'late')), 'an open task past its due date is overdue');
+select pg_temp.expect((select overdue_tasks = 1 and active_tasks = 2 from public.team_list where id = 'a3000000-0000-0000-0000-000000000001') and (select overdue = 1 and completed = 0 from public.task_summary), 'the team list and summary count overdue work');
+update public.staff_tasks set status = 'cancelled', cancel_reason = 'Customer moved out' where id = (select id from ref where k = 'late');
+select pg_temp.expect((select not is_overdue and display_status = 'cancelled' from public.task_list where id = (select id from ref where k = 'late')), 'a cancelled task is not overdue');
+delete from public.staff_tasks where id = (select id from ref where k = 'task2');
+select pg_temp.expect(exists (select 1 from public.audit_logs where table_name = 'staff_tasks' and action = 'DELETE'), 'a manager can delete a task, and it is in the audit log');
+with t as (
+  insert into public.staff_tasks (title, assigned_to, due_date, status) values ('Late job', 'a3000000-0000-0000-0000-000000000001', public.business_today() - 1, 'in_progress') returning id)
+insert into ref select 'late2', id from t;
+update public.staff_tasks set status = 'done' where id = (select id from ref where k = 'late2');
+select pg_temp.expect((select completed_tasks = 1 and completed_with_due = 1 and completed_on_time = 0 from public.team_list where id = 'a3000000-0000-0000-0000-000000000001'), 'a task finished after its due date is not on time');
+select pg_temp.expect((select overdue = 0 and completed = 1 from public.task_summary), 'completed and cancelled tasks are never overdue');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) = 1 from public.notifications where title = 'Task cancelled' and link = '/tasks/' || (select id from ref where k = 'late')), 'the assignee is told when their task is cancelled');
+
+-- Isolation
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select count(*) from public.task_list) + (select count(*) from public.task_events) + (select count(*) from public.task_updates) + (select count(*) from public.team_list) = 0, 'clients see no tasks or team');
+select pg_temp.expect_error_like($$select public.invite_staff('x@umbane.test', 'Client Invite', 'staff')$$, 'permission denied', 'clients cannot invite');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.task_list) + (select count(*) from public.task_events) + (select count(*) from public.task_attachments) + (select count(*) from storage.objects where bucket_id = 'task-attachments') = 0, 'another business sees no tasks or task files');
+select pg_temp.expect((select count(*) from public.team_list) = 1, 'and only its own team');
+select pg_temp.expect_error_like($$insert into public.task_updates (task_id, body) values ((select id from ref where k = 'task'), 'Hello')$$, 'permission denied', 'nor posts on our tasks');
+select pg_temp.expect_error_like($$insert into public.staff_tasks (business_id, title) values ('11111111-0000-0000-0000-000000000001', 'Planted')$$, 'permission denied', 'nor creates tasks in our business');
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$set local role anon; select * from public.task_list$$, 'permission denied', 'anonymous cannot read tasks');
+select pg_temp.expect_error_like($$set local role anon; select * from public.team_list$$, 'permission denied', 'anonymous cannot read the team');
+select pg_temp.expect_error_like($$set local role anon; select public.invite_staff('x@umbane.test', 'Anon', 'staff')$$, 'permission denied', 'anonymous cannot invite');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';
