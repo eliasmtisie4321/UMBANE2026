@@ -1,31 +1,29 @@
-import { PackagePlus, Plus, Trash2 } from 'lucide-react'
-import { useRef, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Panel } from '@/components/dashboard/Panel'
 import { CustomerPicker } from '@/components/data/CustomerPicker'
 import { FormSection } from '@/components/data/FormSection'
 import { FormError } from '@/components/data/ListPanel'
 import { secondaryLink } from '@/components/data/linkStyles'
-import { OptionPicker } from '@/components/data/OptionPicker'
+import { LineItemsEditor } from '@/components/sales/LineItemsEditor'
 import { OrderTotalsList } from '@/components/sales/OrderTotalsList'
 import { StaffSelect } from '@/components/sales/StaffSelect'
 import { Button, Input, Select, Textarea } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
-import { getCustomerPropertyOptions, searchProducts } from '@/services/orders'
+import { getCustomerPropertyOptions } from '@/services/orders'
 import type { AppError } from '@/types/api'
 import type { CustomerOption } from '@/types/properties'
-import { PAYMENT_METHODS, VAT_RATES, type PaymentMethod, type ProductOption } from '@/types/sales'
+import { PAYMENT_METHODS, VAT_RATES, type PaymentMethod } from '@/types/sales'
 import { businessToday } from '@/utils/consumption'
-import { formatRand } from '@/utils/format'
 import { ok } from '@/utils/result'
 import {
-  blankLine,
+  clearLineErrors,
+  firstLineErrorId,
   hasOrderErrors,
   totalsOf,
   validateOrderForm,
   type OrderFormErrors,
   type OrderFormValues,
-  type OrderLine,
 } from '@/utils/salesForm'
 
 interface OrderFormProps {
@@ -55,8 +53,6 @@ export function OrderForm({
   const [values, setValues] = useState(initial)
   const [customer, setCustomer] = useState(initialCustomer)
   const [errors, setErrors] = useState<OrderFormErrors>({ line: {} })
-  const [choosing, setChoosing] = useState(false)
-  const nextKey = useRef(Math.max(0, ...initial.lines.map((l) => l.key)) + 1)
 
   const properties = useResource(
     () =>
@@ -70,50 +66,17 @@ export function OrderForm({
     setValues((v) => ({ ...v, [key]: value }))
     setErrors((e) => ({ ...e, [key]: undefined }))
   }
-  const setLine = (key: number, patch: Partial<OrderLine>) => {
-    setValues((v) => ({
-      ...v,
-      lines: v.lines.map((l) => (l.key === key ? { ...l, ...patch } : l)),
-    }))
-    setErrors((e) => {
-      const line = { ...e.line, [key]: { ...e.line[key] } }
-      for (const field of Object.keys(patch) as Array<keyof OrderLine>)
-        delete line[key][field as keyof (typeof line)[number]]
-      return { ...e, line, lines: undefined }
-    })
-  }
-  const addLine = (line: Partial<OrderLine> = {}) => {
-    const key = nextKey.current++
-    setValues((v) => ({ ...v, lines: [...v.lines, { ...blankLine(key), ...line }] }))
-    setErrors((e) => ({ ...e, lines: undefined }))
-  }
-
-  function chooseProduct(p: ProductOption | null) {
-    if (!p) return
-    const line = {
-      productId: p.id,
-      description: p.name,
-      unitPrice: p.unitPrice.toFixed(2),
-    }
-    // The first, still blank line is filled in rather than left behind.
-    const blank = values.lines.find((l) => !l.productId && !l.description && !l.unitPrice)
-    if (blank) setLine(blank.key, line)
-    else addLine(line)
-    setChoosing(false)
-  }
-
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     const found = validateOrderForm(values)
     setErrors(found)
     if (hasOrderErrors(found)) {
-      const badLine = values.lines.find((l) => found.line[l.key])
       const id = found.customerId
         ? 'order-customerId'
         : found.orderDate
           ? 'order-orderDate'
-          : badLine
-            ? `line-${badLine.key}-${Object.keys(found.line[badLine.key])[0]}`
+          : firstLineErrorId(values.lines, found)
+            ? firstLineErrorId(values.lines, found)
             : found.discountPercent
               ? 'order-discountPercent'
               : null
@@ -198,102 +161,12 @@ export function OrderForm({
           />
         </FormSection>
 
-        <section
-          aria-label="Products and services"
-          className="rounded-lg border border-outline-variant bg-surface p-5 shadow-card"
-        >
-          <h2 className="text-title-md font-semibold text-on-surface">Products and services</h2>
-          <p className="mt-0.5 text-label-md text-on-surface-variant">Prices exclude VAT.</p>
-          {errors.lines && (
-            <p role="alert" className="mt-3 text-label-md text-error">
-              {errors.lines}
-            </p>
-          )}
-          <ol className="mt-4 flex flex-col gap-4">
-            {values.lines.map((l, i) => {
-              const le = errors.line[l.key] ?? {}
-              return (
-                <li
-                  key={l.key}
-                  className="rounded-md border border-outline-variant p-4"
-                  aria-label={`Line ${i + 1}`}
-                >
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="text-label-md font-semibold text-on-surface-variant">
-                      Line {i + 1}
-                      {l.productId ? ' · catalogue product' : ''}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={`Remove line ${i + 1}`}
-                      onClick={() =>
-                        set(
-                          'lines',
-                          values.lines.filter((x) => x.key !== l.key),
-                        )
-                      }
-                      className="rounded-md p-2 text-on-surface-variant hover:bg-surface-container hover:text-error"
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_9rem]">
-                    <Input
-                      id={`line-${l.key}-description`}
-                      label="Description"
-                      value={l.description}
-                      onChange={(e) => setLine(l.key, { description: e.target.value })}
-                      error={le.description}
-                    />
-                    <Input
-                      id={`line-${l.key}-quantity`}
-                      label="Quantity"
-                      inputMode="numeric"
-                      value={l.quantity}
-                      onChange={(e) => setLine(l.key, { quantity: e.target.value })}
-                      error={le.quantity}
-                    />
-                    <Input
-                      id={`line-${l.key}-unitPrice`}
-                      label="Unit price (R)"
-                      inputMode="decimal"
-                      value={l.unitPrice}
-                      onChange={(e) => setLine(l.key, { unitPrice: e.target.value })}
-                      error={le.unitPrice}
-                    />
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => addLine()}>
-              <Plus size={16} aria-hidden="true" /> Add line
-            </Button>
-            <Button
-              variant="secondary"
-              aria-expanded={choosing}
-              onClick={() => setChoosing((c) => !c)}
-            >
-              <PackagePlus size={16} aria-hidden="true" /> Add from catalogue
-            </Button>
-          </div>
-          {choosing && (
-            <div className="mt-4">
-              <OptionPicker<ProductOption>
-                id="order-product"
-                label="Product"
-                noun="products"
-                placeholder="Search by name or SKU"
-                selected={null}
-                search={(text) => searchProducts(text)}
-                title={(p) => p.name}
-                detail={(p) => `${p.sku} · ${formatRand(p.unitPrice, { cents: true })}`}
-                onSelect={chooseProduct}
-              />
-            </div>
-          )}
-        </section>
+        <LineItemsEditor
+          lines={values.lines}
+          errors={errors}
+          onChange={(lines) => setValues((v) => ({ ...v, lines }))}
+          onEdited={(key, fields) => setErrors((e) => clearLineErrors(e, key, fields))}
+        />
 
         <FormSection title="Discount, VAT and notes">
           <Input

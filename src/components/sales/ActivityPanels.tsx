@@ -11,6 +11,7 @@ import {
   LEAD_STATUSES,
   ORDER_STATUSES,
   type ActivitySubject,
+  type HistorySubject,
   type SalesActivity,
 } from '@/types/sales'
 import { formatDate, formatDateTime, humanize } from '@/utils/format'
@@ -20,8 +21,22 @@ const kindLabel = (kind: string) =>
   ACTIVITY_KINDS.find((k) => k.value === kind)?.label ?? humanize(kind)
 const statusLabel = (s: string) =>
   [...LEAD_STATUSES, ...ORDER_STATUSES].find((x) => x.value === s)?.label ?? humanize(s)
-const subjectKey = (s: ActivitySubject) =>
-  'leadId' in s ? `lead-${s.leadId}` : `order-${s.orderId}`
+const subjectKey = (s: HistorySubject) =>
+  'leadId' in s
+    ? `lead-${s.leadId}`
+    : 'orderId' in s
+      ? `order-${s.orderId}`
+      : `invoice-${s.invoiceId}`
+
+/** One history entry as a sentence. Payments carry their amount in the note. */
+function describe(e: { fromStatus: string | null; toStatus: string; note: string | null }) {
+  if (e.fromStatus === 'payment') return `Payment received: ${e.note ?? ''}`
+  if (e.fromStatus === 'payment_removed') return `Payment removed: ${e.note ?? ''}`
+  const what = e.fromStatus
+    ? `${statusLabel(e.fromStatus)} to ${statusLabel(e.toStatus)}`
+    : 'Created'
+  return e.note ? `${what}: ${e.note}` : what
+}
 
 function ActivityRow({
   activity: a,
@@ -168,7 +183,7 @@ export function OpenActivitiesPanel({ profileId }: { profileId: string }) {
 }
 
 /** Every status change, newest first. `version` changes when the record is saved. */
-export function TimelinePanel({ subject, version }: { subject: ActivitySubject; version: number }) {
+export function TimelinePanel({ subject, version }: { subject: HistorySubject; version: number }) {
   const state = useResource(
     () => getTimeline(subject),
     `timeline-${subjectKey(subject)}-${version}`,
@@ -184,12 +199,7 @@ export function TimelinePanel({ subject, version }: { subject: ActivitySubject; 
           <ol className="flex flex-col gap-3 border-l-2 border-outline-variant pl-4">
             {rows.map((e) => (
               <li key={e.id}>
-                <p className="text-body-md text-on-surface">
-                  {e.fromStatus
-                    ? `${statusLabel(e.fromStatus)} to ${statusLabel(e.toStatus)}`
-                    : 'Created'}
-                  {e.note ? `: ${e.note}` : ''}
-                </p>
+                <p className="text-body-md text-on-surface">{describe(e)}</p>
                 <p className="text-label-md text-on-surface-variant">
                   {formatDateTime(e.createdAt)} · {e.actorName ?? 'The system'}
                 </p>

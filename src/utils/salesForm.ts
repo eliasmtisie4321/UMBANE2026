@@ -180,10 +180,27 @@ export function validateOrderForm(v: OrderFormValues, today = businessToday()): 
   if (parsePercent(v.discountPercent.trim() || '0') === null)
     e.discountPercent = 'Enter a discount from 0 to 100.'
   if (v.notes.length > 2000) e.notes = 'Keep the notes under 2,000 characters.'
+  Object.assign(e, validateLines(v))
+  return e
+}
+
+export interface LineErrors {
+  lines?: string
+  /** Per line key. */
+  line: Record<number, Partial<Record<'description' | 'quantity' | 'unitPrice', string>>>
+}
+
+/** The lines of an order or invoice, and whether their total fits the database. */
+export function validateLines(v: {
+  lines: OrderLine[]
+  discountPercent: string
+  vatRate: string
+}): LineErrors {
+  const e: LineErrors = { line: {} }
   if (v.lines.length === 0) e.lines = 'Add at least one product or service.'
-  else if (v.lines.length > 100) e.lines = 'An order can have at most 100 lines.'
+  else if (v.lines.length > 100) e.lines = 'At most 100 lines are allowed.'
   for (const l of v.lines) {
-    const le: OrderFormErrors['line'][number] = {}
+    const le: LineErrors['line'][number] = {}
     const text = l.description.trim()
     if (text.length < 2) le.description = 'Describe the product or service.'
     else if (text.length > 300) le.description = 'Keep this under 300 characters.'
@@ -193,16 +210,20 @@ export function validateOrderForm(v: OrderFormValues, today = businessToday()): 
     if (Object.keys(le).length > 0) e.line[l.key] = le
   }
   if (Object.keys(e.line).length === 0 && !e.lines && totalsOf(v).total > 9_999_999_999.99)
-    e.lines = 'The order total is too large.'
+    e.lines = 'The total is too large.'
   return e
 }
 
-export const hasOrderErrors = (e: OrderFormErrors): boolean =>
+export const hasOrderErrors = (e: LineErrors & object): boolean =>
   Object.keys(e.line).length > 0 ||
   Object.entries(e).some(([k, x]) => k !== 'line' && x !== undefined)
 
 /** Live totals while typing; lines that are not complete yet count as nothing. */
-export function totalsOf(v: OrderFormValues): OrderTotals {
+export function totalsOf(v: {
+  lines: OrderLine[]
+  discountPercent: string
+  vatRate: string
+}): OrderTotals {
   const lines = v.lines.flatMap((l) => {
     const quantity = parseQuantity(l.quantity)
     const unitCents = parseCents(l.unitPrice)
@@ -221,13 +242,34 @@ export const toOrderInput = (v: OrderFormValues): OrderInput => ({
   discountPercent: centsToRand(parsePercent(v.discountPercent.trim() || '0') ?? 0n),
   vatRate: Number(v.vatRate),
   notes: orNull(v.notes),
-  items: v.lines.map((l) => ({
+  items: toItems(v.lines),
+})
+
+export const toItems = (lines: OrderLine[]) =>
+  lines.map((l) => ({
     productId: l.productId,
     description: l.description.trim(),
     quantity: parseQuantity(l.quantity) ?? 0,
     unitPrice: centsToRand(parseCents(l.unitPrice) ?? 0n),
-  })),
-})
+  }))
+
+export const toDiscount = (text: string) => centsToRand(parsePercent(text.trim() || '0') ?? 0n)
+
+export const itemsToLines = (
+  items: Array<{
+    productId: string | null
+    description: string
+    quantity: number
+    unitPrice: number
+  }>,
+): OrderLine[] =>
+  items.map((i, n) => ({
+    key: n + 1,
+    productId: i.productId,
+    description: i.description,
+    quantity: String(i.quantity),
+    unitPrice: String(i.unitPrice),
+  }))
 
 export const orderToForm = (o: Order): OrderFormValues => ({
   customerId: o.customerId,
@@ -294,3 +336,21 @@ export const activityToForm = (a: SalesActivity): ActivityFormValues => ({
   outcome: a.outcome ?? '',
   done: a.completedAt !== null,
 })
+
+/** Clears the errors of edited line fields; lines added or removed clear the list-level error. */
+export function clearLineErrors<E extends LineErrors>(
+  e: E,
+  key: number | null,
+  fields: string[],
+): E {
+  if (key === null) return { ...e, lines: undefined }
+  const line = { ...e.line, [key]: { ...e.line[key] } }
+  for (const f of fields) delete line[key][f as keyof (typeof line)[number]]
+  return { ...e, line, lines: undefined }
+}
+
+/** The element id of the first line field with an error, for focusing. */
+export function firstLineErrorId(lines: OrderLine[], errors: LineErrors): string | null {
+  const bad = lines.find((l) => errors.line[l.key])
+  return bad ? `line-${bad.key}-${Object.keys(errors.line[bad.key])[0]}` : null
+}

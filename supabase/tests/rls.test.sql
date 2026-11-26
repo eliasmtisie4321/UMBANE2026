@@ -383,6 +383,110 @@ select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
 delete from public.orders where id = (select id from ref where k = 'o2');
 select pg_temp.expect(not exists (select 1 from public.order_items where order_id = (select id from ref where k = 'o2')), 'a manager can delete an order and its lines go with it');
 
+-- Invoices and payments (Phase 6) ----------------------------------------------------------------
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select status = 'partially_paid' and invoice_number = 'INV-0001' from public.invoices where id = 'a0100000-0000-0000-0000-000000000001'), 'existing invoices keep their status and number');
+select pg_temp.expect((select invoice_number is null from public.invoices where id = 'a0100000-0000-0000-0000-000000000002'), 'a draft has no number');
+
+-- Drafts and totals
+insert into ref select 'inv', public.save_invoice(null, (select id from ref where k = 'cust'),
+  '[{"description":"CT meter","quantity":2,"unit_price":120000},{"description":"Installation","quantity":1,"unit_price":46000}]'::jsonb,
+  p_discount_percent => 5, p_payment_terms => 'net14');
+select pg_temp.expect((select status = 'draft' and subtotal = 286000 and discount = 14300 and tax = 40755 and total = 312455 and invoice_number is null and created_by = 'a3000000-0000-0000-0000-000000000001' from public.invoices where id = (select id from ref where k = 'inv')), 'draft totals: 286000 less 5% plus 15% VAT = 312455');
+update public.invoices set total = 1, subtotal = 1 where id = (select id from ref where k = 'inv');
+select pg_temp.expect((select total = 312455 from public.invoices where id = (select id from ref where k = 'inv')), 'a total sent by the caller is ignored');
+select public.save_invoice((select id from ref where k = 'inv'), (select id from ref where k = 'cust'), '[{"description":"CT meter","quantity":2,"unit_price":100000}]'::jsonb, p_payment_terms => 'net14');
+select pg_temp.expect((select total = 230000 from public.invoices where id = (select id from ref where k = 'inv')) and (select count(*) from public.invoice_items where invoice_id = (select id from ref where k = 'inv')) = 1, 'editing a draft replaces its lines');
+select pg_temp.expect_error_like($$select public.save_invoice(null, (select id from ref where k = 'cust'), '[]'::jsonb)$$, 'invoice_empty', 'an invoice needs a line');
+select pg_temp.expect_error_like($$select public.save_invoice(null, (select id from ref where k = 'cust'), '[{"description":"X1","quantity":1,"unit_price":1}]'::jsonb, p_property_id => 'd1000000-0000-0000-0000-000000000001')$$, 'invoice_property_mismatch', 'the property must belong to the customer');
+select pg_temp.expect_error_like($$select public.save_invoice(null, 'c1000000-0000-0000-0000-000000000001', '[{"description":"X1","quantity":1,"unit_price":1}]'::jsonb, p_order_id => (select id from ref where k = 'order'))$$, 'invoice_order_mismatch', 'the order must belong to the customer');
+select pg_temp.expect_error_like($$insert into public.invoices (customer_id, status, total) values ('c1000000-0000-0000-0000-000000000001', 'paid', 10)$$, 'invoice_transition', 'an invoice cannot be created already paid');
+select pg_temp.expect_error_like($$update public.invoices set status = 'paid' where id = (select id from ref where k = 'inv')$$, 'invoice_transition', 'a draft cannot jump to paid');
+
+-- Issuing
+select pg_temp.expect_error_like($$update public.invoices set status = 'sent', issue_date = public.business_today() + 1 where id = (select id from ref where k = 'inv')$$, 'invoice_date_future', 'an invoice cannot be issued with a future date');
+update public.invoices set status = 'sent' where id = (select id from ref where k = 'inv');
+select pg_temp.expect((select invoice_number = 'INV-' || extract(year from public.business_today()) || '-00001' and issue_date = public.business_today() and due_date = public.business_today() + 14 and sent_at is not null and issued_by = 'a3000000-0000-0000-0000-000000000001' from public.invoices where id = (select id from ref where k = 'inv')), 'issuing numbers the invoice and sets its dates from the terms');
+insert into ref select 'inv2', public.save_invoice(null, (select id from ref where k = 'cust'), '[{"description":"Callout","quantity":1,"unit_price":100}]'::jsonb, p_vat_rate => 0);
+update public.invoices set status = 'sent' where id = (select id from ref where k = 'inv2');
+select pg_temp.expect((select invoice_number like '%-00002' from public.invoices where id = (select id from ref where k = 'inv2')), 'numbers follow on without gaps');
+select pg_temp.expect_error_like($$select public.save_invoice((select id from ref where k = 'inv'), (select id from ref where k = 'cust'), '[{"description":"Cheaper","quantity":1,"unit_price":1}]'::jsonb)$$, 'invoice_locked', 'an issued invoice cannot be edited');
+select pg_temp.expect_error_like($$update public.invoices set due_date = due_date + 30 where id = (select id from ref where k = 'inv')$$, 'invoice_locked', 'nor its due date');
+select pg_temp.expect_error_like($$update public.invoices set invoice_number = 'INV-1' where id = (select id from ref where k = 'inv')$$, 'invoice_locked', 'nor its number');
+select pg_temp.expect_error_like($$insert into public.invoice_items (invoice_id, description, quantity, unit_price) values ((select id from ref where k = 'inv'), 'Extra', 1, 1)$$, 'invoice_locked', 'nor lines added');
+delete from public.invoice_items where invoice_id = (select id from ref where k = 'inv');
+select pg_temp.expect((select count(*) from public.invoice_items where invoice_id = (select id from ref where k = 'inv')) = 1, 'nor lines removed');
+update public.invoices set status = 'paid' where id = (select id from ref where k = 'inv');
+select pg_temp.expect((select status = 'sent' from public.invoices where id = (select id from ref where k = 'inv')), 'it cannot be marked paid without payments');
+
+-- Payments
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount) values ('a0100000-0000-0000-0000-000000000002', 10)$$, 'invoice_not_payable', 'a draft cannot be paid');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount) values ((select id from ref where k = 'inv'), 230000.01)$$, 'payment_exceeds_balance', 'a payment cannot exceed the balance');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount) values ((select id from ref where k = 'inv'), 0)$$, 'payments_amount_check', 'a payment must be positive');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount, paid_at) values ((select id from ref where k = 'inv'), 1, now() + interval '2 days')$$, 'payment_in_future', 'a payment cannot be in the future');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount, paid_at) values ((select id from ref where k = 'inv'), 1, now() - interval '30 days')$$, 'payment_before_issue', 'a payment cannot predate the invoice');
+insert into public.payments (invoice_id, amount, reference, method, recorded_by) values ((select id from ref where k = 'inv'), 100000, 'FNB-1', 'eft', 'a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select status = 'partially_paid' and paid = 100000 and balance = 130000 and display_status = 'partially_paid' from public.invoice_list where id = (select id from ref where k = 'inv')), 'a part payment leaves a balance and marks it partially paid');
+select pg_temp.expect((select recorded_by = 'a3000000-0000-0000-0000-000000000001' from public.payments where reference = 'FNB-1'), 'who recorded a payment is the database''s to say');
+select pg_temp.expect((select amount = 100000 from public.payments where reference = 'FNB-1'), 'a payment amount cannot be changed');
+insert into public.payments (invoice_id, amount, reference) values ((select id from ref where k = 'inv'), 130000, 'FNB-2');
+select pg_temp.expect((select status = 'paid' and balance = 0 from public.invoice_list where id = (select id from ref where k = 'inv')), 'paying the rest marks it paid');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount) values ((select id from ref where k = 'inv'), 1)$$, 'invoice_not_payable', 'a paid invoice takes no more payments');
+select pg_temp.expect((select count(*) = 6 and array_agg(coalesce(from_status, '-') || '>' || to_status) @> array['->draft', 'draft>sent', 'sent>partially_paid', 'payment>partially_paid', 'partially_paid>paid', 'payment>paid'] from public.sales_timeline where invoice_id = (select id from ref where k = 'inv')), 'history: created, issued, each payment and each status change');
+delete from public.payments where reference = 'FNB-2';
+select pg_temp.expect((select count(*) from public.payments where reference = 'FNB-2') = 1, 'staff cannot remove a payment');
+
+-- Overdue
+select pg_temp.expect((select display_status = 'overdue' and is_overdue and balance = 300 from public.invoice_list where invoice_number = 'INV-0003'), 'unpaid past its due date shows as overdue');
+insert into ref select 'old', public.save_invoice(null, (select id from ref where k = 'cust'), '[{"description":"Old work","quantity":1,"unit_price":50}]'::jsonb, p_vat_rate => 0);
+update public.invoices set status = 'sent', issue_date = public.business_today() - 40 where id = (select id from ref where k = 'old');
+select pg_temp.expect((select display_status = 'overdue' and due_date = public.business_today() - 10 from public.invoice_list where id = (select id from ref where k = 'old')), 'a backdated issue takes its due date from the terms, and is overdue');
+insert into public.payments (invoice_id, amount, paid_at) values ((select id from ref where k = 'old'), 50, now() - interval '1 day');
+select pg_temp.expect((select display_status = 'paid' and not is_overdue from public.invoice_list where id = (select id from ref where k = 'old')), 'once paid, a past-due invoice is no longer overdue');
+select pg_temp.expect((select overdue = 1 and overdue_amount = 300 and drafts = 1 and paid = 2 and outstanding = 250 + 300 + 100 from public.invoice_status_summary), 'summary: drafts, paid, overdue and outstanding');
+
+-- Cancelling
+select pg_temp.expect_error_like($$update public.invoices set status = 'cancelled', cancel_reason = 'Wrong customer' where id = (select id from ref where k = 'inv2')$$, 'invoice_cancel_manager', 'staff cannot cancel an issued invoice');
+update public.invoices set status = 'cancelled', cancel_reason = 'Duplicate' where id = 'a0100000-0000-0000-0000-000000000002';
+select pg_temp.expect((select status = 'cancelled' from public.invoices where id = 'a0100000-0000-0000-0000-000000000002'), 'staff can cancel a draft');
+
+-- From an order
+select pg_temp.expect_error_like($$select public.invoice_order((select id from public.orders where customer_id = 'c1000000-0000-0000-0000-000000000001'))$$, 'order_not_invoiceable', 'a pending order cannot be invoiced');
+insert into ref select 'oinv', public.invoice_order((select id from ref where k = 'order'));
+select pg_temp.expect((select total = 312455 and order_id = (select id from ref where k = 'order') and status = 'draft' from public.invoices where id = (select id from ref where k = 'oinv')) and (select count(*) from public.invoice_items where invoice_id = (select id from ref where k = 'oinv')) = 2, 'invoicing an order copies its lines, discount and VAT');
+select pg_temp.expect_error_like($$select public.invoice_order((select id from ref where k = 'order'))$$, 'order_already_invoiced', 'an order is invoiced once');
+
+-- Manager
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect_error_like($$update public.invoices set status = 'cancelled', cancel_reason = 'Mistake' where id = (select id from ref where k = 'inv')$$, 'invoice_has_payments', 'an invoice with payments cannot be cancelled');
+delete from public.payments where reference = 'FNB-2';
+select pg_temp.expect((select status = 'partially_paid' and balance = 130000 from public.invoice_list where id = (select id from ref where k = 'inv')), 'removing a payment reopens the balance');
+select pg_temp.expect((select details ->> 'amount' = '130000.00' from public.audit_logs where table_name = 'payments' and action = 'DELETE'), 'the audit keeps a removed payment''s amount');
+update public.invoices set status = 'cancelled', cancel_reason = 'Customer disputes the work' where id = (select id from ref where k = 'inv2');
+select pg_temp.expect((select status = 'cancelled' and invoice_number like '%-00002' from public.invoices where id = (select id from ref where k = 'inv2')), 'a manager can cancel an unpaid issued invoice; its number stays used');
+select pg_temp.expect_error_like($$update public.invoices set status = 'sent' where id = (select id from ref where k = 'inv2')$$, 'invoice_transition', 'a cancelled invoice is final');
+
+-- Isolation
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client 1
+select pg_temp.expect((select count(*) from public.invoice_list) = 1 and (select count(*) from public.invoice_list where status = 'draft') = 0, 'client sees only their own issued invoices');
+select pg_temp.expect((select count(*) from public.payment_list) = 3, 'and only their own payments');
+select pg_temp.expect((select name = 'Umbane Energy (Demo)' from public.billing_profile()), 'client can read the supplier details to pay');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount) values ('a0100000-0000-0000-0000-000000000001', 1)$$, 'permission denied', 'client cannot record a payment');
+select pg_temp.expect_error_like($$select public.save_invoice(null, 'c1000000-0000-0000-0000-000000000001', '[{"description":"X1","quantity":1,"unit_price":1}]'::jsonb)$$, 'permission denied', 'client cannot create an invoice');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
+select pg_temp.expect((select count(*) from public.invoice_list) + (select count(*) from public.payment_list) + (select count(*) from public.invoice_status_summary) + (select count(*) from public.invoice_items) = 0, 'another business sees no invoices, lines or payments');
+select pg_temp.expect((select name = 'Other Business (Demo)' from public.billing_profile()), 'and only its own supplier details');
+select pg_temp.expect_error_like($$insert into public.payments (invoice_id, amount) values ('a0100000-0000-0000-0000-000000000003', 1)$$, 'payment_invoice_not_found', 'nor pay our invoices');
+select pg_temp.expect_error_like($$select public.save_invoice(null, 'c1000000-0000-0000-0000-000000000001', '[{"description":"X1","quantity":1,"unit_price":1}]'::jsonb)$$, 'invoices_customer_id_fkey', 'nor invoice our customers');
+select pg_temp.expect_error_like($$select public.invoice_order((select id from ref where k = 'order'))$$, 'order_not_found', 'nor invoice our orders');
+update public.businesses set vat_registered = false;
+select pg_temp.expect_error_like($$select public.save_invoice(null, 'c2000000-0000-0000-0000-000000000001', '[{"description":"X1","quantity":1,"unit_price":1}]'::jsonb)$$, 'invoice_vat_not_registered', 'a business that is not VAT registered cannot charge VAT');
+select pg_temp.expect(public.save_invoice(null, 'c2000000-0000-0000-0000-000000000001', '[{"description":"X1","quantity":1,"unit_price":1}]'::jsonb, p_vat_rate => 0) is not null, 'but can invoice without it');
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$set local role anon; select * from public.invoice_list$$, 'permission denied', 'anonymous cannot read invoices');
+select pg_temp.expect_error_like($$set local role anon; select * from public.billing_profile()$$, 'permission denied', 'anonymous cannot read supplier details');
+select pg_temp.expect_error_like($$set local role anon; select * from public.invoice_counters$$, 'permission denied', 'nobody reads the counters directly');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

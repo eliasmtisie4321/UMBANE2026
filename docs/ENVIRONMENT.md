@@ -79,3 +79,8 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
 - `20261125000007_sales.sql`: lead and order fields, the rules for stages, conversion, order totals and
   status, sales history and activities (see `docs/SALES.md`). **Run it after 0006.** It renames unknown
   lead sources to "other". Run it before using the Leads and Sales & Orders screens.
+
+- `20261126000008_invoices.sql`: invoice lines, numbering, statuses, payments rules, billing details on the
+  business and the invoice views (see `docs/INVOICES.md`). **Run it after 0007.** Existing invoices with the
+  status "overdue" become "sent" (overdue is now worked out from the due date). After running it, an
+  administrator should fill in Invoices → Settings (VAT number, bank details) before issuing invoices.
