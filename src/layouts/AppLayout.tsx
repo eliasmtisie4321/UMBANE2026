@@ -44,6 +44,7 @@ export function AppLayout({
           onOpenNotifications={() => onNavigate?.('/notifications')}
           unread={unread}
           onSignOut={onSignOut}
+          onOpenSecurity={() => onNavigate?.('/account/security')}
           userName={userName}
           roleLabel={roleLabel}
         />

@@ -191,33 +191,34 @@ describe('getRecentPayments', () => {
 })
 
 describe('getRecentActivity', () => {
-  it('maps the actor name and tolerates a missing actor', async () => {
-    const { client } = fake({
-      audit_logs: {
+  it('reads the managers activity feed and tolerates a missing actor', async () => {
+    const { client, log } = fake({
+      'rpc:recent_activity': {
         data: [
           {
             id: '1',
             action: 'INSERT',
             table_name: 'payments',
+            actor_name: 'Sam Staff',
             created_at: '2026-11-10T10:00:00Z',
-            profiles: { full_name: 'Sam Staff' },
           },
           {
             id: '2',
             action: 'DELETE',
             table_name: 'customers',
+            actor_name: null,
             created_at: '2026-11-09T10:00:00Z',
-            profiles: null,
           },
         ],
       },
     })
     const r = await getRecentActivity(client)
     expect(r.ok && r.data.map((a) => a.actorName)).toEqual(['Sam Staff', null])
+    expect(log[0].table).toBe('rpc:recent_activity')
   })
 
-  it('surfaces a permission error for roles that cannot read the audit log', async () => {
-    const { client } = fake({ audit_logs: { error: { code: '42501' } } })
+  it('surfaces a permission error', async () => {
+    const { client } = fake({ 'rpc:recent_activity': { error: { code: '42501' } } })
     const r = await getRecentActivity(client)
     expect(!r.ok && r.error.code).toBe('forbidden')
   })

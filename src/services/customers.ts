@@ -40,6 +40,7 @@ function fromRow(r: Row): Customer {
     status: String(r.status) as CustomerStatus,
     createdAt: String(r.created_at),
     updatedAt: String(r.updated_at),
+    erasedAt: str(r.erased_at),
   }
 }
 

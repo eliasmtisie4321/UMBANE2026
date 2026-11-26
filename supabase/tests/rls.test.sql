@@ -51,6 +51,9 @@ begin
   raise exception 'FAILED: % (statement succeeded but should have been blocked)', msg;
 end $$;
 
+-- The audit log, read as the database owner (people other than administrators cannot read it).
+create function pg_temp.audit_rows() returns setof public.audit_logs language sql security definer as $$ select * from public.audit_logs $$;
+
 -- Tenant isolation ----------------------------------------------------------------------------
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff, business 1
 select pg_temp.expect((select count(*) from public.customers) = 2, 'staff sees only business 1 customers');
@@ -188,7 +191,7 @@ update public.meter_readings set reading_value = 1 where reading_date = '2026-11
 select pg_temp.expect((select reading_value from public.meter_readings where reading_date = '2026-11-20') = 2785.25, 'readings cannot be edited');
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
 delete from public.meter_readings where reading_date = '2026-11-20';
-select pg_temp.expect((select details ->> 'reading_value' from public.audit_logs where table_name = 'meter_readings' and action = 'DELETE') = '2785.250', 'a manager can remove a reading and the audit keeps its value');
+select pg_temp.expect((select details ->> 'reading_value' from pg_temp.audit_rows() where table_name = 'meter_readings' and action = 'DELETE') = '2785.250', 'a manager can remove a reading and the audit keeps its value');
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
 insert into public.meter_readings (meter_id, reading_date, reading_value) values ('e1000000-0000-0000-0000-000000000001', '2026-11-20', 1790.250);
 select pg_temp.expect((select flag from public.meter_readings where reading_date = '2026-11-20') = 'low', 'under a fifth of normal use is flagged low');
@@ -461,7 +464,7 @@ select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
 select pg_temp.expect_error_like($$update public.invoices set status = 'cancelled', cancel_reason = 'Mistake' where id = (select id from ref where k = 'inv')$$, 'invoice_has_payments', 'an invoice with payments cannot be cancelled');
 delete from public.payments where reference = 'FNB-2';
 select pg_temp.expect((select status = 'partially_paid' and balance = 130000 from public.invoice_list where id = (select id from ref where k = 'inv')), 'removing a payment reopens the balance');
-select pg_temp.expect((select details ->> 'amount' = '130000.00' from public.audit_logs where table_name = 'payments' and action = 'DELETE'), 'the audit keeps a removed payment''s amount');
+select pg_temp.expect((select details ->> 'amount' = '130000.00' from pg_temp.audit_rows() where table_name = 'payments' and action = 'DELETE'), 'the audit keeps a removed payment''s amount');
 update public.invoices set status = 'cancelled', cancel_reason = 'Customer disputes the work' where id = (select id from ref where k = 'inv2');
 select pg_temp.expect((select status = 'cancelled' and invoice_number like '%-00002' from public.invoices where id = (select id from ref where k = 'inv2')), 'a manager can cancel an unpaid issued invoice; its number stays used');
 select pg_temp.expect_error_like($$update public.invoices set status = 'sent' where id = (select id from ref where k = 'inv2')$$, 'invoice_transition', 'a cancelled invoice is final');
@@ -573,7 +576,7 @@ select pg_temp.expect((select number from public.support_tickets where id = (sel
 select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description) values ('No details', '   ')$$, 'ticket_description_required', 'a ticket needs a description');
 select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, property_id) values ('Not mine', 'x', 'd1000000-0000-0000-0000-000000000002')$$, 'ticket_property_mismatch', 'a client cannot link another customer''s property');
 select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, meter_id) values ('Not mine', 'x', 'e1000000-0000-0000-0000-000000000002')$$, 'ticket_meter_mismatch', 'or another customer''s meter');
-select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, category) values ('Odd', 'x', 'gossip')$$, 'tickets_category_check', 'unknown categories are refused');
+select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description, category) values ('Odd', 'x', 'gossip')$$, 'ticket_category_unknown', 'unknown categories are refused');
 select pg_temp.expect_error_like($$insert into public.support_tickets (subject, description) values (repeat('x', 151), 'x')$$, 'tickets_subject_length', 'a subject is at most 150 characters');
 select pg_temp.expect_error_like($$insert into public.support_tickets (business_id, customer_id, subject, description) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', 'Theirs', 'x')$$, 'permission denied', 'a client cannot open a ticket for another customer');
 update public.support_tickets set status = 'closed', resolution = 'Sorted it myself' where id = (select id from ref where k = 'tk');
@@ -690,7 +693,7 @@ select pg_temp.expect_error_like($$insert into storage.objects (bucket_id, name)
 
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
 delete from public.ticket_messages where ticket_id = (select id from ref where k = 'tk') and is_internal;
-select pg_temp.expect((select count(*) = 3 from public.ticket_messages where ticket_id = (select id from ref where k = 'tk')) and exists (select 1 from public.audit_logs where table_name = 'ticket_messages' and action = 'DELETE'), 'a manager can remove a message, and it is in the audit log');
+select pg_temp.expect((select count(*) = 3 from public.ticket_messages where ticket_id = (select id from ref where k = 'tk')) and exists (select 1 from pg_temp.audit_rows() where table_name = 'ticket_messages' and action = 'DELETE'), 'a manager can remove a message, and it is in the audit log');
 
 -- Isolation
 select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- admin of business 2
@@ -851,7 +854,7 @@ select pg_temp.expect((select overdue_tasks = 1 and active_tasks = 2 from public
 update public.staff_tasks set status = 'cancelled', cancel_reason = 'Customer moved out' where id = (select id from ref where k = 'late');
 select pg_temp.expect((select not is_overdue and display_status = 'cancelled' from public.task_list where id = (select id from ref where k = 'late')), 'a cancelled task is not overdue');
 delete from public.staff_tasks where id = (select id from ref where k = 'task2');
-select pg_temp.expect(exists (select 1 from public.audit_logs where table_name = 'staff_tasks' and action = 'DELETE'), 'a manager can delete a task, and it is in the audit log');
+select pg_temp.expect(exists (select 1 from pg_temp.audit_rows() where table_name = 'staff_tasks' and action = 'DELETE'), 'a manager can delete a task, and it is in the audit log');
 with t as (
   insert into public.staff_tasks (title, assigned_to, due_date, status) values ('Late job', 'a3000000-0000-0000-0000-000000000001', public.business_today() - 1, 'in_progress') returning id)
 insert into ref select 'late2', id from t;
@@ -1510,12 +1513,179 @@ select public.run_automations();
 select pg_temp.as_owner();
 select pg_temp.expect((select count(*) = 3 from public.automation_runs where business_id = '11111111-0000-0000-0000-000000000002'), 'the daily run covers every business (with its own switched-on automations)');
 
+-- Settings, administration and audit (Phase 13) -------------------------------------------------------
+-- Business profile: administrators edit, everyone on the team reads
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+update public.businesses set description = 'Electricity sub-metering and billing.', website = 'https://umbane.test', city = 'Johannesburg', province = 'Gauteng', postal_code = '2196' where id = '11111111-0000-0000-0000-000000000001';
+select pg_temp.expect((select city = 'Johannesburg' and province = 'Gauteng' and postal_code = '2196' from public.businesses), 'an administrator updates the business profile');
+select pg_temp.expect_error_like($$update public.businesses set website = 'umbane.test'$$, 'businesses_website_check', 'a website starts with http:// or https://');
+select pg_temp.expect_error_like($$update public.businesses set postal_code = '219'$$, 'businesses_postal_code_check', 'a postal code has four digits');
+select pg_temp.expect_error_like($$update public.businesses set province = 'Gauteng North'$$, 'businesses_province_check', 'provinces come from the list');
+select pg_temp.expect_error_like($$update public.businesses set email = 'not an email'$$, 'businesses_email_check', 'the business email must look like an email address');
+select pg_temp.expect(exists (select 1 from public.audit_logs where table_name = 'businesses' and action = 'UPDATE' and actor_name = 'Ada Admin' and details -> 'changes' -> 'city' = '[null, "Johannesburg"]'), 'the change is in the audit log: who, and what changed from what to what');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.businesses set city = 'Pretoria';
+select pg_temp.expect((select city = 'Johannesburg' from public.businesses), 'a manager cannot change the business profile');
+
+-- The audit log: what changed, who, when; only administrators read it
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.customers set phone = '+27 82 000 0222' where id = 'c1000000-0000-0000-0000-000000000002';
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select count(*) = 1 and bool_and(actor_id = 'a3000000-0000-0000-0000-000000000001' and actor_name = 'Sam Staff' and created_at is not null and details -> 'changes' ? 'phone' and not (details -> 'changes' ? 'updated_at')) from public.audit_logs where table_name = 'customers' and record_id = 'c1000000-0000-0000-0000-000000000002' and action = 'UPDATE' and details -> 'changes' ? 'phone'), 'a change records who made it, when, and only the fields that changed');
+update public.customers set id_number = '8001015009087' where id = 'c1000000-0000-0000-0000-000000000002';
+select pg_temp.expect((select details -> 'changes' -> 'id_number' ->> 1 = '•••087' from public.audit_logs where table_name = 'customers' and details -> 'changes' ? 'id_number' order by created_at desc limit 1), 'ID numbers are masked in the log');
+create temp table p13_audit as select count(*) as n from pg_temp.audit_rows();
+grant all on p13_audit to authenticated;
+update public.customers set updated_at = now() where id = 'c1000000-0000-0000-0000-000000000002';
+select pg_temp.expect((select count(*) from pg_temp.audit_rows()) = (select n from p13_audit), 'an update that changes nothing anyone made is not logged');
+select pg_temp.expect(exists (select 1 from pg_temp.audit_rows() where table_name = 'automations' and details -> 'changes' ? 'enabled') and not exists (select 1 from pg_temp.audit_rows() where table_name = 'automations' and details -> 'changes' ? 'last_run_at'), 'switching an automation is logged; its runs are not');
+select pg_temp.expect_error_like($$update public.audit_logs set action = 'forged'$$, 'permission denied', 'nobody can change the audit log');
+select pg_temp.expect_error_like($$delete from public.audit_logs$$, 'permission denied', 'or delete from it');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- business 2 administrator
+select pg_temp.expect(not exists (select 1 from public.audit_logs where business_id = '11111111-0000-0000-0000-000000000001'), 'administrators see only their own business''s log');
+
+-- Recent activity for managers: everyday records, nothing about people, settings or security
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect((select count(*) > 0 and bool_and(table_name not in ('profiles', 'businesses', 'automations', 'staff_invitations', 'message_templates')) from public.recent_activity(50)), 'managers see recent everyday activity without the sensitive parts');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) = 0 from public.recent_activity(50)), 'staff see none of it');
+
+-- Security events
+select public.log_security_event('password_changed');
+select pg_temp.expect_error_like($$select public.log_security_event('deleted_everything')$$, 'security_event_unknown', 'only known security events can be logged');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select count(*) = 1 and bool_and(actor_id = 'a3000000-0000-0000-0000-000000000001' and record_id = 'a3000000-0000-0000-0000-000000000001' and details ->> 'event' = 'password_changed') from public.audit_logs where action = 'SECURITY'), 'a password change is logged for the person who made it');
+select pg_temp.as_owner();
+select pg_temp.expect_error($$set local role anon; select public.log_security_event('password_changed')$$, 'visitors cannot log security events');
+reset role;
+
+-- Ticket categories
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect((select array_agg(key order by position) = array['meter_fault', 'prepaid_token', 'billing', 'telemetry', 'installation', 'general'] from public.ticket_categories), 'every business starts with the six ticket categories');
+insert into public.ticket_categories (key, label, position) values ('solar', 'Solar installations', 70);
+select pg_temp.expect_error_like($$insert into public.ticket_categories (key, label) values ('solar_2', ' solar INSTALLATIONS ')$$, 'ticket_categories_label_uniq', 'two categories cannot share a name');
+select pg_temp.expect_error_like($$insert into public.ticket_categories (key, label) values ('Bad Key', 'Bad')$$, 'ticket_categories_key_check', 'keys are lower-case words');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+with t as (insert into public.support_tickets (customer_id, subject, description, category) values ('c1000000-0000-0000-0000-000000000002', 'Panel output low', 'Inverter shows low output', 'solar') returning id)
+insert into ref select 'p13solar', id from t;
+select pg_temp.expect((select category = 'solar' from public.support_tickets where id = (select id from ref where k = 'p13solar')), 'a new category can be used straight away');
+select pg_temp.expect_error_like($$insert into public.ticket_categories (key, label) values ('x_staff', 'Staff made')$$, 'row-level security', 'staff cannot manage categories');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+update public.ticket_categories set is_active = false where key = 'solar';
+select pg_temp.expect_error_like($$insert into public.support_tickets (customer_id, subject, description, category) values ('c1000000-0000-0000-0000-000000000002', 'More solar', 'x', 'solar')$$, 'ticket_category_unknown', 'a switched-off category cannot be chosen');
+update public.support_tickets set priority = 'high' where id = (select id from ref where k = 'p13solar');
+select pg_temp.expect((select category = 'solar' and priority = 'high' from public.support_tickets where id = (select id from ref where k = 'p13solar')), 'tickets already in it keep it');
+update public.support_tickets set category = 'solar', subject = 'Panel output low (checked)' where id = (select id from ref where k = 'p13solar');
+select pg_temp.expect((select category = 'solar' and subject = 'Panel output low (checked)' from public.support_tickets where id = (select id from ref where k = 'p13solar')), 'and can still be edited, the form sending the same category again');
+select pg_temp.expect_error_like($$update public.ticket_categories set key = 'pv' where key = 'solar'$$, 'category_key_fixed', 'a category''s key never changes');
+select pg_temp.expect_error_like($$delete from public.ticket_categories where key = 'solar'$$, 'category_in_use', 'a category in use cannot be deleted');
+insert into public.ticket_categories (key, label) values ('unused', 'Never used');
+delete from public.ticket_categories where key = 'unused';
+select pg_temp.expect(not exists (select 1 from public.ticket_categories where key = 'unused'), 'an unused one can');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect((select count(*) = 6 and bool_and(is_active) from public.ticket_categories), 'clients see the switched-on categories to choose from');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- business 2 administrator
+select pg_temp.expect((select count(*) = 6 from public.ticket_categories), 'another business has its own categories');
+
+-- Product categories
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect(exists (select 1 from public.product_categories where name = 'Commercial CT'), 'categories in use are on the list');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into ref select 'p13prod', public.create_product('P13-CT', 'Another CT', 100, 0, p_category => '  commercial ct ');
+select pg_temp.expect((select category = 'Commercial CT' from public.products where id = (select id from ref where k = 'p13prod')), 'a category typed differently is matched to the list');
+insert into ref select 'p13new', public.create_product('P13-NEW', 'Cable gland', 12, 0, p_category => 'Glands & fittings');
+select pg_temp.expect(exists (select 1 from public.product_categories where name = 'Glands & fittings'), 'a new category typed on a product joins the list');
+update public.product_categories set name = 'Renamed by staff' where name = 'Commercial CT';
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect(exists (select 1 from public.product_categories where name = 'Commercial CT'), 'staff cannot rename categories');
+update public.product_categories set name = 'Commercial CTs' where name = 'Commercial CT';
+select pg_temp.expect((select count(*) >= 2 and bool_and(category = 'Commercial CTs') from public.products where id in ((select id from ref where k = 'p13prod'), (select id from ref where k = 'prod'))), 'renaming a category renames it on its products');
+update public.product_categories set is_active = false where name = 'Glands & fittings';
+select pg_temp.expect_error_like($$update public.products set category = 'glands & fittings' where id = (select id from ref where k = 'p13prod')$$, 'product_category_inactive', 'a switched-off category cannot be given to a product');
+select pg_temp.expect_error_like($$delete from public.product_categories where name = 'Glands & fittings'$$, 'category_in_use', 'a product category in use cannot be deleted');
+
+-- Deactivation tells the managers what is still assigned
+select pg_temp.as_owner();
+set local session_replication_role = replica;
+insert into auth.users (id, email) values ('a9100000-0000-0000-0000-000000000001', 'temp.tech@umbane.test');
+insert into public.profiles (id, business_id, role, full_name, email) values ('a9100000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'staff', 'Temp Tech', 'temp.tech@umbane.test');
+insert into public.staff_tasks (business_id, title, status, assigned_to) values ('11111111-0000-0000-0000-000000000001', 'Temp task', 'todo', 'a9100000-0000-0000-0000-000000000001');
+insert into public.support_tickets (business_id, customer_id, reference, subject, category, status, assigned_to) values ('11111111-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002', 'P13-TEMP', 'Temp ticket', 'general', 'assigned', 'a9100000-0000-0000-0000-000000000001');
+set local session_replication_role = origin;
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+update public.profiles set is_active = false where id = 'a9100000-0000-0000-0000-000000000001';
+select pg_temp.as_owner();
+select pg_temp.expect((select count(*) = pg_temp.mgrs() - 1 and bool_and(body = 'Still assigned to them: 1 open ticket, 1 open task. Hand it on to someone else.' and link = '/team/a9100000-0000-0000-0000-000000000001') from public.notifications where title = 'Temp Tech was deactivated'), 'deactivating someone tells the other managers what work they still had');
+select pg_temp.expect((select count(*) = 1 from pg_temp.audit_rows() where table_name = 'profiles' and record_id = 'a9100000-0000-0000-0000-000000000001' and details -> 'changes' -> 'is_active' = '[true, false]'), 'and the deactivation is in the audit log');
+
+-- Erasing a customer's personal details
+set local session_replication_role = replica;
+insert into auth.users (id, email) values ('a9200000-0000-0000-0000-000000000001', 'erase.me@example.test');
+insert into public.profiles (id, business_id, role, full_name, email) values ('a9200000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'client', 'Erase Me', 'erase.me@example.test');
+insert into public.customers (id, business_id, profile_id, name, email, phone, id_number, street_address, city, notes) values
+  ('e5000000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'a9200000-0000-0000-0000-000000000001', 'Erase Me', 'erase.me@example.test', '+27 82 000 0099', '9002025009088', '5 Erase Street', 'Durban', 'Prefers mornings'),
+  ('e5000000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', null, 'Still Owes', 'owes@example.test', null, null, null, null, null);
+insert into public.invoices (id, business_id, customer_id, invoice_number, status, issue_date, due_date, total) values
+  ('e5100000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000001', 'P13-PAID', 'paid', '2026-01-10', '2026-02-09', 500),
+  ('e5100000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000002', 'P13-OWED', 'sent', '2026-01-10', '2026-02-09', 500);
+insert into public.payments (business_id, invoice_id, amount, method) values ('11111111-0000-0000-0000-000000000001', 'e5100000-0000-0000-0000-000000000001', 500, 'eft');
+insert into public.support_tickets (id, business_id, customer_id, reference, subject, description, category, status, resolution) values
+  ('e5200000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000001', 'P13-ERASE', 'Meter at home', 'My ID is 8001015009087, call me on 082 000 0099', 'general', 'closed', 'Called Erase Me back');
+insert into public.ticket_messages (business_id, ticket_id, author_id, body) values ('11111111-0000-0000-0000-000000000001', 'e5200000-0000-0000-0000-000000000001', 'a9200000-0000-0000-0000-000000000001', 'I live at 5 Erase Street');
+insert into public.communication_logs (business_id, customer_id, channel, direction, subject, body, status, recipient) values ('11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000001', 'email', 'outbound', 'Invoice P13-PAID', 'Good day Erase Me', 'delivered', 'erase.me@example.test');
+insert into public.audit_logs (business_id, action, table_name, record_id, details) values ('11111111-0000-0000-0000-000000000001', 'UPDATE', 'customers', 'e5000000-0000-0000-0000-000000000001', '{"changes": {"phone": [null, "+27 82 000 0099"]}}');
+set local session_replication_role = origin;
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+select pg_temp.expect_error_like($$select public.erase_customer('e5000000-0000-0000-0000-000000000001', 'Asked by email')$$, 'permission denied', 'only an administrator can erase a customer');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect_error_like($$select public.erase_customer('e5000000-0000-0000-0000-000000000001', ' ')$$, 'erase_reason_required', 'the reason is recorded');
+select pg_temp.expect_error_like($$select public.erase_customer('e5000000-0000-0000-0000-000000000002', 'Asked by email')$$, 'customer_has_balance', 'not while they owe money');
+select pg_temp.expect_error_like($$select public.erase_customer('c1000000-0000-0000-0000-000000000002', 'Asked by email')$$, 'customer_has_open_tickets|customer_has_balance', 'nor while they have open tickets');
+select public.erase_customer('e5000000-0000-0000-0000-000000000001', 'Asked by email on 26 Nov');
+select pg_temp.as_owner();
+select pg_temp.expect((select name = 'Erased customer E5000000' and email is null and phone is null and id_number is null and street_address is null and city is null and notes is null and profile_id is null and status = 'inactive' and email_opt_out and erased_at is not null and erased_by = 'a1000000-0000-0000-0000-000000000001' and erase_reason = 'Asked by email on 26 Nov' from public.customers where id = 'e5000000-0000-0000-0000-000000000001'), 'the customer''s name, contact and identity details are removed');
+select pg_temp.expect((select count(*) = 1 from public.invoices where customer_id = 'e5000000-0000-0000-0000-000000000001') and (select count(*) = 1 from public.payments where invoice_id = 'e5100000-0000-0000-0000-000000000001'), 'their invoices and payments are kept for tax');
+select pg_temp.expect((select description = '[erased]' and resolution = '[erased]' and status = 'closed' from public.support_tickets where id = 'e5200000-0000-0000-0000-000000000001') and (select bool_and(body = '[erased]') from public.ticket_messages where ticket_id = 'e5200000-0000-0000-0000-000000000001'), 'their ticket text is removed, closed tickets included');
+select pg_temp.expect((select bool_and(subject = '[erased]' and body = '[erased]' and recipient = 'erased@erased.invalid') from public.communication_logs where customer_id = 'e5000000-0000-0000-0000-000000000001'), 'and their emails');
+select pg_temp.expect((select not is_active and full_name = 'Erased customer E5000000' from public.profiles where id = 'a9200000-0000-0000-0000-000000000001'), 'their sign-in stops working');
+select pg_temp.expect(not exists (select 1 from public.audit_logs where record_id in ('e5000000-0000-0000-0000-000000000001', 'a9200000-0000-0000-0000-000000000001') and action <> 'ERASE' and details::text ~ '(Erase Me|erase\.me@|0099|Erase Street|Prefers)'), 'no audit entry still holds their details, including those the erasure itself made');
+select pg_temp.expect((select bool_and(details = '{"erased": true}') from public.audit_logs where table_name = 'customers' and record_id = 'e5000000-0000-0000-0000-000000000001' and action <> 'ERASE') and (select count(*) = 1 and bool_and(actor_id = 'a1000000-0000-0000-0000-000000000001' and details ->> 'reason' = 'Asked by email on 26 Nov') from public.audit_logs where action = 'ERASE'), 'old log entries are cleared, and the erasure itself is logged with its reason');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect_error_like($$update public.customers set name = 'Erase Me', email = 'erase.me@example.test' where id = 'e5000000-0000-0000-0000-000000000001'$$, 'customer_erased', 'an erased customer''s details cannot be typed back in');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect_error_like($$select public.erase_customer('e5000000-0000-0000-0000-000000000001', 'Again')$$, 'customer_already_erased', 'a customer is erased once');
+
+-- Retention
+select pg_temp.as_owner();
+insert into public.notifications (business_id, user_id, title, is_read, created_at) values
+  ('11111111-0000-0000-0000-000000000001', 'a3000000-0000-0000-0000-000000000001', 'P13 old read', true, now() - interval '400 days'),
+  ('11111111-0000-0000-0000-000000000001', 'a3000000-0000-0000-0000-000000000001', 'P13 old unread', false, now() - interval '400 days'),
+  ('11111111-0000-0000-0000-000000000001', 'a3000000-0000-0000-0000-000000000001', 'P13 ancient', false, now() - interval '800 days'),
+  ('11111111-0000-0000-0000-000000000001', 'a3000000-0000-0000-0000-000000000001', 'P13 recent read', true, now() - interval '10 days');
+insert into public.automation_runs (business_id, automation_key, trigger, started_at) values ('11111111-0000-0000-0000-000000000001', 'overdue_invoices', 'schedule', now() - interval '800 days');
+insert into public.access_requests (business_id, full_name, email, status, created_at) values
+  ('11111111-0000-0000-0000-000000000001', 'Old Applicant', 'old.applicant@example.test', 'declined', now() - interval '400 days'),
+  ('11111111-0000-0000-0000-000000000001', 'Waiting Applicant', 'waiting@example.test', 'pending', now() - interval '400 days');
+insert into public.audit_logs (business_id, action, table_name, created_at) values ('11111111-0000-0000-0000-000000000001', 'UPDATE', 'customers', now() - interval '8 years');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect_error_like($$select public.apply_retention()$$, 'permission denied', 'only the server runs the clean-up');
+select pg_temp.as_service();
+select public.apply_retention();
+select pg_temp.as_owner();
+select pg_temp.expect((select array_agg(title order by title) = array['P13 old unread', 'P13 recent read'] from public.notifications where title like 'P13 %'), 'read notifications go after a year, all of them after two');
+select pg_temp.expect(not exists (select 1 from public.automation_runs where started_at < now() - interval '730 days'), 'automation history goes after two years');
+select pg_temp.expect(not exists (select 1 from public.access_requests where email = 'old.applicant@example.test') and exists (select 1 from public.access_requests where email = 'waiting@example.test'), 'answered account requests go after a year; waiting ones stay');
+select pg_temp.expect(not exists (select 1 from public.audit_logs where table_name = 'access_requests' and details::text like '%old.applicant@%'), 'and the audit log keeps no copy of them');
+delete from public.access_requests where email = 'waiting@example.test';  -- later sections count requests
+select pg_temp.expect(not exists (select 1 from public.audit_logs where created_at < now() - interval '7 years'), 'audit entries go after seven years');
+select pg_temp.expect((select count(*) = 1 and bool_and((details ->> 'notifications')::int = 2 and (details ->> 'access_requests')::int = 1 and (details ->> 'audit_logs')::int = 1) from public.audit_logs where action = 'RETENTION' and business_id = '11111111-0000-0000-0000-000000000001'), 'the clean-up is itself logged, with what it removed');
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';
 select pg_temp.expect((select count(*) from public.customers where name = 'Staff-created customer') = 0, 'manager can delete');
-select pg_temp.expect((select count(*) from public.audit_logs) >= 1, 'manager can read audit logs');
-select pg_temp.expect((select count(*) from public.audit_logs where table_name = 'properties' and action = 'INSERT') >= 2, 'property changes are in the audit trail');
+select pg_temp.expect((select count(*) from public.audit_logs) = 0, 'managers cannot read the audit log (administrators only)');
+select pg_temp.expect((select count(*) from pg_temp.audit_rows() where table_name = 'properties' and action = 'INSERT') >= 2, 'property changes are in the audit trail');
 update public.profiles set role = 'administrator' where id = 'a3000000-0000-0000-0000-000000000001';
 select pg_temp.expect((select role from public.profiles where id = 'a3000000-0000-0000-0000-000000000001') = 'staff', 'manager cannot change roles (update matched no rows)');
 

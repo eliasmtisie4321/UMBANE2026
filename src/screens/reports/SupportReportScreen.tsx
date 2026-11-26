@@ -15,12 +15,14 @@ import { useReportParams } from '@/hooks/useReportParams'
 import { useResource } from '@/hooks/useResource'
 import { getSupportReport } from '@/services/reports'
 import type { SupportReport, TicketReportRow } from '@/types/reports'
-import { TICKET_CATEGORIES, TICKET_PRIORITIES, TICKET_STATUSES } from '@/types/support'
+import { useTicketCategories, type CategoryOption } from '@/hooks/useTicketCategories'
+import { TICKET_PRIORITIES, TICKET_STATUSES } from '@/types/support'
 import { formatDateTime, formatNumber, monthLabel } from '@/utils/format'
 import { countShare, duration, filterNote, keyLabel, pickOption } from '@/utils/reportFormat'
 import type { ReportSection } from '@/utils/reportPdf'
 
-const COLUMNS: ReportColumn<TicketReportRow>[] = [
+// Category names come from the business's own list (Settings → Categories).
+const columnsFor = (categories: readonly CategoryOption[]): ReportColumn<TicketReportRow>[] => [
   {
     label: 'Ticket',
     weight: 1.3,
@@ -37,7 +39,7 @@ const COLUMNS: ReportColumn<TicketReportRow>[] = [
   {
     label: 'Category',
     weight: 1.2,
-    text: (r) => keyLabel(TICKET_CATEGORIES, r.category),
+    text: (r) => keyLabel(categories, r.category),
     csv: (r) => r.category,
   },
   {
@@ -99,75 +101,77 @@ function figures(r: SupportReport) {
   ]
 }
 
-function sections(r: SupportReport): ReportSection[] {
-  return [
-    { kind: 'figures', heading: 'Summary', items: figures(r) },
-    {
-      kind: 'table',
-      heading: 'By month',
-      columns: [
-        { label: 'Month' },
-        { label: 'Opened', align: 'right' },
-        { label: 'Resolved', align: 'right' },
-      ],
-      rows: r.months.map((m) => [
-        monthLabel(m.month, 'long'),
-        formatNumber(m.opened),
-        formatNumber(m.resolved),
-      ]),
-    },
-    {
-      kind: 'table',
-      heading: 'By category',
-      columns: [
-        { label: 'Category', weight: 2 },
-        { label: 'Tickets', align: 'right' },
-      ],
-      rows: r.byCategory.map((s) => [
-        keyLabel(TICKET_CATEGORIES, s.key),
-        countShare(s.count, r.opened),
-      ]),
-    },
-    {
-      kind: 'table',
-      heading: 'By priority',
-      columns: [
-        { label: 'Priority', weight: 2 },
-        { label: 'Tickets', align: 'right' },
-      ],
-      rows: r.byPriority.map((s) => [
-        keyLabel(TICKET_PRIORITIES, s.key),
-        countShare(s.count, r.opened),
-      ]),
-    },
-    {
-      kind: 'table',
-      heading: 'By person',
-      columns: [
-        { label: 'Assigned to', weight: 2 },
-        { label: 'Tickets', align: 'right' },
-        { label: 'Resolved', align: 'right' },
-        { label: 'Average time to resolve', align: 'right', weight: 1.5 },
-      ],
-      rows: r.byAssignee.map((a) => [
-        a.name ?? 'Not assigned',
-        formatNumber(a.tickets),
-        formatNumber(a.resolved),
-        duration(a.avgResolutionHours),
-      ]),
-    },
-    {
-      kind: 'table',
-      heading: 'Tickets opened',
-      columns: COLUMNS.map((c) => ({ label: c.label, align: c.align, weight: c.weight })),
-      rows: r.rows.map((row) => COLUMNS.map((c) => c.text(row))),
-    },
-  ]
-}
+const sectionsFor =
+  (categories: readonly CategoryOption[]) =>
+  (r: SupportReport): ReportSection[] => {
+    const columns = columnsFor(categories)
+    return [
+      { kind: 'figures', heading: 'Summary', items: figures(r) },
+      {
+        kind: 'table',
+        heading: 'By month',
+        columns: [
+          { label: 'Month' },
+          { label: 'Opened', align: 'right' },
+          { label: 'Resolved', align: 'right' },
+        ],
+        rows: r.months.map((m) => [
+          monthLabel(m.month, 'long'),
+          formatNumber(m.opened),
+          formatNumber(m.resolved),
+        ]),
+      },
+      {
+        kind: 'table',
+        heading: 'By category',
+        columns: [
+          { label: 'Category', weight: 2 },
+          { label: 'Tickets', align: 'right' },
+        ],
+        rows: r.byCategory.map((s) => [keyLabel(categories, s.key), countShare(s.count, r.opened)]),
+      },
+      {
+        kind: 'table',
+        heading: 'By priority',
+        columns: [
+          { label: 'Priority', weight: 2 },
+          { label: 'Tickets', align: 'right' },
+        ],
+        rows: r.byPriority.map((s) => [
+          keyLabel(TICKET_PRIORITIES, s.key),
+          countShare(s.count, r.opened),
+        ]),
+      },
+      {
+        kind: 'table',
+        heading: 'By person',
+        columns: [
+          { label: 'Assigned to', weight: 2 },
+          { label: 'Tickets', align: 'right' },
+          { label: 'Resolved', align: 'right' },
+          { label: 'Average time to resolve', align: 'right', weight: 1.5 },
+        ],
+        rows: r.byAssignee.map((a) => [
+          a.name ?? 'Not assigned',
+          formatNumber(a.tickets),
+          formatNumber(a.resolved),
+          duration(a.avgResolutionHours),
+        ]),
+      },
+      {
+        kind: 'table',
+        heading: 'Tickets opened',
+        columns: columns.map((c) => ({ label: c.label, align: c.align, weight: c.weight })),
+        rows: r.rows.map((row) => columns.map((c) => c.text(row))),
+      },
+    ]
+  }
 
 export default function SupportReportScreen() {
+  const cats = useTicketCategories()
+  const COLUMNS = columnsFor(cats.every)
   const p = useReportParams()
-  const category = pickOption(p.filter('category'), TICKET_CATEGORIES)
+  const category = pickOption(p.filter('category'), cats.every)
   const priority = pickOption(p.filter('priority'), TICKET_PRIORITIES)
   const state = useResource(
     () => getSupportReport(p.range, { category, priority }),
@@ -185,7 +189,7 @@ export default function SupportReportScreen() {
             id="category"
             label="Category"
             value={category}
-            options={TICKET_CATEGORIES}
+            options={cats.every}
             onChange={(v) => p.update({ category: v })}
           />
           <FilterSelect
@@ -198,10 +202,10 @@ export default function SupportReportScreen() {
         </>
       }
       filterSummary={[
-        ...filterNote('Category', category, TICKET_CATEGORIES),
+        ...filterNote('Category', category, cats.every),
         ...filterNote('Priority', priority, TICKET_PRIORITIES),
       ]}
-      exports={{ columns: COLUMNS, rows: (r) => r.rows, sections }}
+      exports={{ columns: COLUMNS, rows: (r) => r.rows, sections: sectionsFor(cats.every) }}
     >
       {(r) => (
         <>
@@ -226,7 +230,7 @@ export default function SupportReportScreen() {
             <Panel title="By category">
               <BarList
                 items={r.byCategory.map((s) => ({
-                  label: keyLabel(TICKET_CATEGORIES, s.key),
+                  label: keyLabel(cats.every, s.key),
                   value: s.count,
                   display: countShare(s.count, r.opened),
                 }))}

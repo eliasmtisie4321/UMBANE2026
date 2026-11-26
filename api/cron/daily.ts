@@ -19,7 +19,7 @@ interface Deps {
 /**
  * GET /api/cron/daily
  * Vercel Cron calls this each morning with "Authorization: Bearer <CRON_SECRET>". It runs every
- * business's switched-on automations, then sends the notification and customer emails waiting in
+ * business's switched-on automations and the data-retention clean-up, then sends the notification and customer emails waiting in
  * the queues (including any the automations just queued). Each step is reported separately, so
  * one failing does not hide the others.
  */
@@ -34,6 +34,11 @@ export function createDailyHandler(deps: Deps) {
 
     const run = await admin.rpc('run_automations', {})
     report.automations = run.error ? { error: run.error.message } : run.data
+
+    // The data-retention clean-up (docs/SETTINGS.md): old notifications, automation history, answered
+    // account requests and audit entries past their keeping period.
+    const retention = await admin.rpc('apply_retention', {})
+    report.retention = retention.error ? { error: retention.error.message } : retention.data
 
     const missing = missingForEmail(deps.env)
     if (missing.length > 0) {
@@ -56,7 +61,7 @@ export function createDailyHandler(deps: Deps) {
         report.customerEmails = { error: (e as Error).message }
       }
     }
-    return json(report, run.error ? 500 : 200)
+    return json(report, run.error || retention.error ? 500 : 200)
   }
 }
 

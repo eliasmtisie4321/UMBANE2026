@@ -118,3 +118,7 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
   automations (see `docs/AUTOMATIONS.md`). **Run it after 0013, and after 0012** (it uses the email queue and
   templates from 0012). Every business gets the automations with team alerts on and customer emails off,
   and a fifth email template, "Invoice overdue".
+
+- `20261129000015_settings_admin_audit.sql`: business profile fields, ticket and product categories, the
+  fuller audit log (administrators only), customer erasure and the daily retention clean-up (see
+  `docs/SETTINGS.md`). **Run it after 0014.** No new Vercel settings.

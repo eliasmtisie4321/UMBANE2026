@@ -411,15 +411,15 @@ Ticket statuses:
 
 **Goal:** Administrators can manage the system and review important activity.
 
-- [ ] Create business profile settings.
-- [ ] Manage user accounts, roles and permissions.
-- [ ] Configure notification preferences.
-- [ ] Manage ticket and product categories.
-- [ ] Configure relevant business settings.
-- [ ] Record important actions in audit logs.
-- [ ] Record who performed an action and when.
-- [ ] Restrict audit log access to authorized roles.
-- [ ] Add account deactivation and appropriate data-retention handling.
+- [x] Create business profile settings.
+- [x] Manage user accounts, roles and permissions. _(Team page since Phase 9; Settings → Roles and permissions shows what each role can do. Roles are fixed.)_
+- [x] Configure notification preferences. _(Since Phase 12; linked from Settings.)_
+- [x] Manage ticket and product categories.
+- [x] Configure relevant business settings. _(Business profile, invoice and tax settings, categories, automations.)_
+- [x] Record important actions in audit logs. _(What changed from what to what; settings, people, security events, erasures.)_
+- [x] Record who performed an action and when.
+- [x] Restrict audit log access to authorized roles. _(Administrators only; managers get a limited activity feed.)_
+- [x] Add account deactivation and appropriate data-retention handling. _(Deactivation tells managers about open work; daily clean-up; erase a customer on request.)_
 
 **Done when:** Administrators can manage permitted settings and review important activity.
 

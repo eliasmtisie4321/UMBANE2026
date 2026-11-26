@@ -80,16 +80,17 @@ export const getStockAlerts = (client?: DbClient) =>
     return ok((data ?? []).map(fromRow))
   })
 
+/** The switched-on product categories (Settings → Categories), suggested when filling in a product. */
 export const getCategories = (client?: DbClient) =>
   guarded<string[]>('Categories', client, async (c) => {
     const { data, error } = await c
-      .from('products')
-      .select('category')
-      .not('category', 'is', null)
-      .order('category')
+      .from('product_categories')
+      .select('name')
+      .eq('is_active', true)
+      .order('name')
       .limit(500)
     if (error) return err(mapReadError(error, 'Categories'))
-    return ok([...new Set((data ?? []).map((r: Row) => String(r.category)))])
+    return ok((data ?? []).map((r: Row) => String(r.name)))
   })
 
 export const getInventorySummary = (client?: DbClient) =>

@@ -23,7 +23,8 @@ export const TICKET_CATEGORIES = [
   { value: 'installation', label: 'Installation' },
   { value: 'general', label: 'General question' },
 ] as const
-export type TicketCategory = (typeof TICKET_CATEGORIES)[number]['value']
+/** The standard categories; each business manages its own list (Settings → Categories). */
+export type TicketCategory = string
 
 export const labelOf = (
   list: readonly { value: string; label: string }[],

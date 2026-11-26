@@ -158,6 +158,7 @@ describe('the daily run', () => {
     })
     expect(a.calls.map(([fn]) => fn)).toEqual([
       'run_automations',
+      'apply_retention',
       'claim_notification_emails',
       'due_messages',
     ])
@@ -169,7 +170,7 @@ describe('the daily run', () => {
     expect(await res.json()).toMatchObject({
       email: { status: 'not_configured', missing: ['RESEND_API_KEY'] },
     })
-    expect(a.calls.map(([fn]) => fn)).toEqual(['run_automations'])
+    expect(a.calls.map(([fn]) => fn)).toEqual(['run_automations', 'apply_retention'])
   })
 
   it('reports a failed run but still sends email', async () => {

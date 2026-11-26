@@ -193,32 +193,22 @@ export const getRecentInvoices = (client?: DashboardClient) =>
     )
   })
 
-/** Audit trail entries. Row Level Security limits this to managers and administrators. */
+/**
+ * Recent everyday activity (customers, meters, sales, invoices, stock, tickets, tasks) for managers
+ * and administrators. The full audit log is for administrators; this feed leaves out people,
+ * settings and security (recent_activity in the Phase 13 migration).
+ */
 export const getRecentActivity = (client?: DashboardClient) =>
   guard<ActivityEntry[]>('Recent activity', client, async (c) => {
-    const { data, error } = await c
-      .from('audit_logs')
-      .select('id, action, table_name, created_at, profiles(full_name)')
-      .order('created_at', { ascending: false })
-      .limit(8)
+    const { data, error } = await c.rpc('recent_activity', { p_limit: 8 })
     if (error) return err(mapQueryError(error, 'Recent activity'))
     return ok(
-      (data ?? []).map((row) => {
-        const r = row as unknown as {
-          id: string
-          action: string
-          table_name: string | null
-          created_at: string
-          profiles: unknown
-        }
-        const actor = one(r.profiles as { full_name?: string } | null)
-        return {
-          id: String(r.id),
-          action: String(r.action),
-          table: r.table_name ?? null,
-          actorName: actor?.full_name || null,
-          createdAt: String(r.created_at),
-        }
-      }),
+      ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
+        id: String(r.id),
+        action: String(r.action),
+        table: (r.table_name as string | null) ?? null,
+        actorName: (r.actor_name as string | null) || null,
+        createdAt: String(r.created_at),
+      })),
     )
   })
