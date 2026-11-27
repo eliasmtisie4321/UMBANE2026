@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { canAccess, navFor } from '@/auth/permissions'
 import { useAuth } from '@/auth/useAuth'
 import { FullPageSpinner } from '@/components/FullPageSpinner'
+import { Spinner } from '@/components/ui/Spinner'
 import { useResource } from '@/hooks/useResource'
 import { flushNotificationEmails, getUnreadCount } from '@/services/notifications'
 import { ROLE_LABEL, type Profile } from '@/types/auth'
@@ -46,7 +47,23 @@ function SignedInShell({ profile }: { profile: Profile }) {
       roleLabel={ROLE_LABEL[profile.role]}
       unread={unread.data ?? 0}
     >
-      {canAccess(profile.role, location.pathname) ? <Outlet /> : <ForbiddenScreen />}
+      {canAccess(profile.role, location.pathname) ? (
+        // Each screen is its own download (src/App.tsx), so a page shows this while it arrives.
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
+      ) : (
+        <ForbiddenScreen />
+      )}
     </AppLayout>
+  )
+}
+
+function PageLoading() {
+  return (
+    <div className="flex items-center justify-center gap-2 py-16 text-sm text-on-surface-variant">
+      <Spinner size={20} label="Loading page" />
+      <span aria-hidden="true">Loading…</span>
+    </div>
   )
 }

@@ -380,7 +380,8 @@ describe('meter details', () => {
       newSerialNumber: 'MTR-0200',
       newInitialReading: 0,
     })
-    expect(m.getMeter).toHaveBeenLastCalledWith('m2')
+    // The notice shows as soon as the page changes; the new meter is fetched just after.
+    await waitFor(() => expect(m.getMeter).toHaveBeenLastCalledWith('m2'))
   })
 
   it('shows a low final reading on that field', async () => {

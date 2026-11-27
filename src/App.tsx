@@ -1,3 +1,4 @@
+import { lazyScreen } from '@/utils/lazyScreen'
 import { Route, Routes } from 'react-router-dom'
 import { ProtectedShell } from '@/layouts/ProtectedShell'
 import { NAV_ITEMS } from '@/layouts/navItems'
@@ -6,66 +7,121 @@ import CreateAccountScreen from '@/screens/CreateAccountScreen'
 import ForgotPasswordScreen from '@/screens/ForgotPasswordScreen'
 import LoginScreen from '@/screens/LoginScreen'
 import NotFoundScreen from '@/screens/NotFoundScreen'
-import NotificationSettingsScreen from '@/screens/NotificationSettingsScreen'
-import NotificationsScreen from '@/screens/NotificationsScreen'
-import AutomationDetailScreen from '@/screens/automations/AutomationDetailScreen'
-import AutomationsScreen from '@/screens/automations/AutomationsScreen'
-import OverviewScreen from '@/screens/OverviewScreen'
 import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
-import CustomerReportScreen from '@/screens/reports/CustomerReportScreen'
-import ElectricityReportScreen from '@/screens/reports/ElectricityReportScreen'
-import InventoryReportScreen from '@/screens/reports/InventoryReportScreen'
-import PropertyReportScreen from '@/screens/reports/PropertyReportScreen'
-import ReportsScreen from '@/screens/reports/ReportsScreen'
-import RevenueReportScreen from '@/screens/reports/RevenueReportScreen'
-import SalesReportScreen from '@/screens/reports/SalesReportScreen'
-import SupportReportScreen from '@/screens/reports/SupportReportScreen'
-import TeamReportScreen from '@/screens/reports/TeamReportScreen'
-import CommunicationsScreen from '@/screens/communications/CommunicationsScreen'
-import MessageDetailScreen from '@/screens/communications/MessageDetailScreen'
-import TemplatesScreen from '@/screens/communications/TemplatesScreen'
-import CustomerProfileScreen from '@/screens/customers/CustomerProfileScreen'
-import { EditCustomerScreen, NewCustomerScreen } from '@/screens/customers/CustomerFormScreen'
-import CustomersScreen from '@/screens/customers/CustomersScreen'
-import { EditInvoiceScreen, NewInvoiceScreen } from '@/screens/invoices/InvoiceFormScreen'
-import InvoiceDetailScreen from '@/screens/invoices/InvoiceDetailScreen'
-import InvoicesScreen from '@/screens/invoices/InvoicesScreen'
-import PaymentsScreen from '@/screens/invoices/PaymentsScreen'
-import InvoiceSettingsScreen from '@/screens/settings/InvoiceSettingsScreen'
-import AccountSecurityScreen from '@/screens/account/AccountSecurityScreen'
-import AuditLogScreen from '@/screens/settings/AuditLogScreen'
-import BusinessProfileScreen from '@/screens/settings/BusinessProfileScreen'
-import CategoriesScreen from '@/screens/settings/CategoriesScreen'
-import PrivacyScreen from '@/screens/settings/PrivacyScreen'
-import RolesScreen from '@/screens/settings/RolesScreen'
-import SettingsScreen from '@/screens/settings/SettingsScreen'
-import InventoryHistoryScreen from '@/screens/inventory/InventoryHistoryScreen'
-import InventoryScreen from '@/screens/inventory/InventoryScreen'
-import ProductDetailScreen from '@/screens/inventory/ProductDetailScreen'
-import { EditProductScreen, NewProductScreen } from '@/screens/inventory/ProductFormScreen'
-import LeadDetailScreen from '@/screens/leads/LeadDetailScreen'
-import { EditLeadScreen, NewLeadScreen } from '@/screens/leads/LeadFormScreen'
-import LeadsScreen from '@/screens/leads/LeadsScreen'
-import OrderDetailScreen from '@/screens/orders/OrderDetailScreen'
-import { EditOrderScreen, NewOrderScreen } from '@/screens/orders/OrderFormScreen'
-import OrdersScreen from '@/screens/orders/OrdersScreen'
-import MaintenanceScreen from '@/screens/meters/MaintenanceScreen'
-import MeterDetailScreen from '@/screens/meters/MeterDetailScreen'
-import { EditMeterScreen, NewMeterScreen } from '@/screens/meters/MeterFormScreen'
-import MetersScreen from '@/screens/meters/MetersScreen'
-import RecordReadingScreen from '@/screens/meters/RecordReadingScreen'
-import PropertiesScreen from '@/screens/properties/PropertiesScreen'
-import SupportTicketsScreen from '@/screens/support/SupportTicketsScreen'
-import TicketDetailScreen from '@/screens/support/TicketDetailScreen'
-import { EditTicketScreen, NewTicketScreen } from '@/screens/support/TicketFormScreen'
-import TaskDetailScreen from '@/screens/tasks/TaskDetailScreen'
-import { EditTaskScreen, NewTaskScreen } from '@/screens/tasks/TaskFormScreen'
-import TasksScreen from '@/screens/tasks/TasksScreen'
-import EmployeeProfileScreen from '@/screens/team/EmployeeProfileScreen'
-import { EditEmployeeScreen, NewEmployeeScreen } from '@/screens/team/EmployeeFormScreen'
-import TeamScreen from '@/screens/team/TeamScreen'
-import PropertyDetailScreen from '@/screens/properties/PropertyDetailScreen'
-import { EditPropertyScreen, NewPropertyScreen } from '@/screens/properties/PropertyFormScreen'
+
+// Each signed-in screen is its own chunk, loaded the first time it is opened, so the app starts
+// with only what the sign-in page and the shell need (see docs/QA.md).
+const NotificationSettingsScreen = lazyScreen(() => import('@/screens/NotificationSettingsScreen'))
+const NotificationsScreen = lazyScreen(() => import('@/screens/NotificationsScreen'))
+const AutomationDetailScreen = lazyScreen(() => import('@/screens/automations/AutomationDetailScreen'))
+const AutomationsScreen = lazyScreen(() => import('@/screens/automations/AutomationsScreen'))
+const OverviewScreen = lazyScreen(() => import('@/screens/OverviewScreen'))
+const CustomerReportScreen = lazyScreen(() => import('@/screens/reports/CustomerReportScreen'))
+const ElectricityReportScreen = lazyScreen(() => import('@/screens/reports/ElectricityReportScreen'))
+const InventoryReportScreen = lazyScreen(() => import('@/screens/reports/InventoryReportScreen'))
+const PropertyReportScreen = lazyScreen(() => import('@/screens/reports/PropertyReportScreen'))
+const ReportsScreen = lazyScreen(() => import('@/screens/reports/ReportsScreen'))
+const RevenueReportScreen = lazyScreen(() => import('@/screens/reports/RevenueReportScreen'))
+const SalesReportScreen = lazyScreen(() => import('@/screens/reports/SalesReportScreen'))
+const SupportReportScreen = lazyScreen(() => import('@/screens/reports/SupportReportScreen'))
+const TeamReportScreen = lazyScreen(() => import('@/screens/reports/TeamReportScreen'))
+const CommunicationsScreen = lazyScreen(() => import('@/screens/communications/CommunicationsScreen'))
+const MessageDetailScreen = lazyScreen(() => import('@/screens/communications/MessageDetailScreen'))
+const TemplatesScreen = lazyScreen(() => import('@/screens/communications/TemplatesScreen'))
+const CustomerProfileScreen = lazyScreen(() => import('@/screens/customers/CustomerProfileScreen'))
+const EditCustomerScreen = lazyScreen(() =>
+  import('@/screens/customers/CustomerFormScreen').then((m) => ({ default: m.EditCustomerScreen })),
+)
+const NewCustomerScreen = lazyScreen(() =>
+  import('@/screens/customers/CustomerFormScreen').then((m) => ({ default: m.NewCustomerScreen })),
+)
+const CustomersScreen = lazyScreen(() => import('@/screens/customers/CustomersScreen'))
+const EditInvoiceScreen = lazyScreen(() =>
+  import('@/screens/invoices/InvoiceFormScreen').then((m) => ({ default: m.EditInvoiceScreen })),
+)
+const NewInvoiceScreen = lazyScreen(() =>
+  import('@/screens/invoices/InvoiceFormScreen').then((m) => ({ default: m.NewInvoiceScreen })),
+)
+const InvoiceDetailScreen = lazyScreen(() => import('@/screens/invoices/InvoiceDetailScreen'))
+const InvoicesScreen = lazyScreen(() => import('@/screens/invoices/InvoicesScreen'))
+const PaymentsScreen = lazyScreen(() => import('@/screens/invoices/PaymentsScreen'))
+const InvoiceSettingsScreen = lazyScreen(() => import('@/screens/settings/InvoiceSettingsScreen'))
+const AccountSecurityScreen = lazyScreen(() => import('@/screens/account/AccountSecurityScreen'))
+const AuditLogScreen = lazyScreen(() => import('@/screens/settings/AuditLogScreen'))
+const BusinessProfileScreen = lazyScreen(() => import('@/screens/settings/BusinessProfileScreen'))
+const CategoriesScreen = lazyScreen(() => import('@/screens/settings/CategoriesScreen'))
+const PrivacyScreen = lazyScreen(() => import('@/screens/settings/PrivacyScreen'))
+const RolesScreen = lazyScreen(() => import('@/screens/settings/RolesScreen'))
+const SettingsScreen = lazyScreen(() => import('@/screens/settings/SettingsScreen'))
+const InventoryHistoryScreen = lazyScreen(() => import('@/screens/inventory/InventoryHistoryScreen'))
+const InventoryScreen = lazyScreen(() => import('@/screens/inventory/InventoryScreen'))
+const ProductDetailScreen = lazyScreen(() => import('@/screens/inventory/ProductDetailScreen'))
+const EditProductScreen = lazyScreen(() =>
+  import('@/screens/inventory/ProductFormScreen').then((m) => ({ default: m.EditProductScreen })),
+)
+const NewProductScreen = lazyScreen(() =>
+  import('@/screens/inventory/ProductFormScreen').then((m) => ({ default: m.NewProductScreen })),
+)
+const LeadDetailScreen = lazyScreen(() => import('@/screens/leads/LeadDetailScreen'))
+const EditLeadScreen = lazyScreen(() =>
+  import('@/screens/leads/LeadFormScreen').then((m) => ({ default: m.EditLeadScreen })),
+)
+const NewLeadScreen = lazyScreen(() =>
+  import('@/screens/leads/LeadFormScreen').then((m) => ({ default: m.NewLeadScreen })),
+)
+const LeadsScreen = lazyScreen(() => import('@/screens/leads/LeadsScreen'))
+const OrderDetailScreen = lazyScreen(() => import('@/screens/orders/OrderDetailScreen'))
+const EditOrderScreen = lazyScreen(() =>
+  import('@/screens/orders/OrderFormScreen').then((m) => ({ default: m.EditOrderScreen })),
+)
+const NewOrderScreen = lazyScreen(() =>
+  import('@/screens/orders/OrderFormScreen').then((m) => ({ default: m.NewOrderScreen })),
+)
+const OrdersScreen = lazyScreen(() => import('@/screens/orders/OrdersScreen'))
+const MaintenanceScreen = lazyScreen(() => import('@/screens/meters/MaintenanceScreen'))
+const MeterDetailScreen = lazyScreen(() => import('@/screens/meters/MeterDetailScreen'))
+const EditMeterScreen = lazyScreen(() =>
+  import('@/screens/meters/MeterFormScreen').then((m) => ({ default: m.EditMeterScreen })),
+)
+const NewMeterScreen = lazyScreen(() =>
+  import('@/screens/meters/MeterFormScreen').then((m) => ({ default: m.NewMeterScreen })),
+)
+const MetersScreen = lazyScreen(() => import('@/screens/meters/MetersScreen'))
+const RecordReadingScreen = lazyScreen(() => import('@/screens/meters/RecordReadingScreen'))
+const PropertiesScreen = lazyScreen(() => import('@/screens/properties/PropertiesScreen'))
+const SupportTicketsScreen = lazyScreen(() => import('@/screens/support/SupportTicketsScreen'))
+const TicketDetailScreen = lazyScreen(() => import('@/screens/support/TicketDetailScreen'))
+const EditTicketScreen = lazyScreen(() =>
+  import('@/screens/support/TicketFormScreen').then((m) => ({ default: m.EditTicketScreen })),
+)
+const NewTicketScreen = lazyScreen(() =>
+  import('@/screens/support/TicketFormScreen').then((m) => ({ default: m.NewTicketScreen })),
+)
+const TaskDetailScreen = lazyScreen(() => import('@/screens/tasks/TaskDetailScreen'))
+const EditTaskScreen = lazyScreen(() =>
+  import('@/screens/tasks/TaskFormScreen').then((m) => ({ default: m.EditTaskScreen })),
+)
+const NewTaskScreen = lazyScreen(() =>
+  import('@/screens/tasks/TaskFormScreen').then((m) => ({ default: m.NewTaskScreen })),
+)
+const TasksScreen = lazyScreen(() => import('@/screens/tasks/TasksScreen'))
+const EmployeeProfileScreen = lazyScreen(() => import('@/screens/team/EmployeeProfileScreen'))
+const EditEmployeeScreen = lazyScreen(() =>
+  import('@/screens/team/EmployeeFormScreen').then((m) => ({ default: m.EditEmployeeScreen })),
+)
+const NewEmployeeScreen = lazyScreen(() =>
+  import('@/screens/team/EmployeeFormScreen').then((m) => ({ default: m.NewEmployeeScreen })),
+)
+const TeamScreen = lazyScreen(() => import('@/screens/team/TeamScreen'))
+const PropertyDetailScreen = lazyScreen(() => import('@/screens/properties/PropertyDetailScreen'))
+const EditPropertyScreen = lazyScreen(() =>
+  import('@/screens/properties/PropertyFormScreen').then((m) => ({
+    default: m.EditPropertyScreen,
+  })),
+)
+const NewPropertyScreen = lazyScreen(() =>
+  import('@/screens/properties/PropertyFormScreen').then((m) => ({ default: m.NewPropertyScreen })),
+)
 
 // Sections that have real screens; every other nav item still shows the placeholder.
 const BUILT = [

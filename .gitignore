@@ -28,3 +28,6 @@ dist-ssr
 !.env.example
 playwright-report
 test-results
+
+# End-to-end build (playwright.config.ts)
+dist-e2e

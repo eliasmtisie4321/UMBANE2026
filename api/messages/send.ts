@@ -13,6 +13,9 @@ import {
   readEnv,
   staffCaller,
   type ServerEnv,
+  RATE_LIMITS,
+  tooManyRequests,
+  withinRateLimit,
 } from '../_lib/server.js'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -38,6 +41,8 @@ export function createSendHandler(deps: Deps) {
     const admin = deps.admin()
     const caller = await staffCaller(admin, request)
     if (!caller) return json({ error: 'unauthorized' }, 401)
+    if (!(await withinRateLimit(admin, 'send:' + caller.id, RATE_LIMITS.send)))
+      return tooManyRequests()
 
     let messageId: string
     try {

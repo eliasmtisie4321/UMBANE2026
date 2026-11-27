@@ -9,6 +9,9 @@ import {
   readEnv,
   signedInCaller,
   type ServerEnv,
+  RATE_LIMITS,
+  tooManyRequests,
+  withinRateLimit,
 } from '../_lib/server.js'
 
 interface Deps {
@@ -31,6 +34,8 @@ export function createFlushHandler(deps: Deps) {
     const client = deps.admin()
     const caller = await signedInCaller(client, request)
     if (!caller) return json({ error: 'unauthorized' }, 401)
+    if (!(await withinRateLimit(client, 'flush:' + caller.id, RATE_LIMITS.flush)))
+      return tooManyRequests()
     const admin = client as unknown as AdminClient
     const config = deps.config(deps.env)
 

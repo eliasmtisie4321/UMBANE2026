@@ -6,6 +6,9 @@ import {
   readEnv,
   staffCaller,
   type ServerEnv,
+  RATE_LIMITS,
+  tooManyRequests,
+  withinRateLimit,
 } from '../_lib/server.js'
 
 /**
@@ -16,8 +19,12 @@ export function createStatusHandler(env: ServerEnv, admin: () => SupabaseClient)
   return async function handle(request: Request): Promise<Response> {
     const missing = missingForEmail(env)
     if (env.supabaseUrl && env.serviceKey) {
-      const caller = await staffCaller(admin(), request)
+      const client = admin()
+      const caller = await staffCaller(client, request)
       if (!caller) return json({ error: 'unauthorized' }, 401)
+      if (!(await withinRateLimit(client, 'status:' + caller.id, RATE_LIMITS.status))) {
+        return tooManyRequests()
+      }
     }
     return json({
       email: missing.length === 0,
