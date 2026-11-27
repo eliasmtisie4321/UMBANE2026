@@ -160,6 +160,7 @@ async function functions() {
     ],
     ['Email status needs a signed-in team member', `${APP}/api/messages/status`, {}],
     ['Integrations need a signed-in team member', `${APP}/api/integrations`, {}],
+    ['The calendar needs a signed-in team member', `${APP}/api/calendar`, {}],
     [
       'Invitations need an administrator',
       `${APP}/api/team/invitations`,
@@ -208,6 +209,7 @@ const MIGRATIONS = [
   ['20261129000015 settings and audit', 'ticket_categories?select=key&limit=0'],
   ['20261130000016 rate limits', 'api_rate_limits?select=key&limit=0'],
   ['20261201000017 integrations', 'integrations?select=id&limit=0'],
+  ['20261202000018 search and calendar', 'calendar_events?select=id&limit=0'],
 ]
 
 const rest = (path) =>
@@ -256,6 +258,7 @@ async function database() {
     'support_tickets',
     'communication_logs',
     'audit_logs',
+    'calendar_events',
   ]) {
     const r = await rest(`${table}?select=id&limit=1`)
     if (missing(r)) continue

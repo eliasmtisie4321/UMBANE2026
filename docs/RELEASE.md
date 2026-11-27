@@ -93,3 +93,15 @@ results:
 
 Apply any migrations not yet run, in filename order (`verify:prod` lists them), set any new Vercel
 settings named in `docs/ENVIRONMENT.md`, redeploy, and run `npm run verify:prod`.
+
+## Since 1.0
+
+- **Search, Quick Add, a clock, and a calendar with Google Calendar** (#55). Search in the top bar
+  finds any record the person may see; Quick Add opens the create pages their role allows; the clock
+  shows South African time. The Calendar page shows appointments, task due dates, maintenance and
+  invoice due dates, and each person can connect their own Google Calendar (`docs/CALENDAR.md`).
+  - Needs migration `20261202000018_search_calendar.sql`.
+  - Google Calendar uses the same Google app as Gmail, with the Google Calendar API enabled and the
+    `calendar.events` scope added (Google verifies that scope before outside users can connect).
+  - Not built: changes made in Google coming back into Umbane, and calendars other than each
+    person's primary one.
