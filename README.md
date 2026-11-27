@@ -37,13 +37,302 @@ Four roles: administrator, manager, staff and client, each limited by the databa
 
 ## Screenshots
 
-|                                                                |                                                         |
-| -------------------------------------------------------------- | ------------------------------------------------------- |
-| ![Customer profile](docs/screenshots/crm-customer-profile.png) | ![Invoice](docs/screenshots/invoice-detail.png)         |
-| ![Reports](docs/screenshots/reports.png)                       | ![On a phone](docs/screenshots/dash-manager-mobile.png) |
+Every screen, filled with made-up example records: none of them are real customers. Desktop pictures
+show the whole page at 1440 pixels wide; phone pictures show the first screen at 390. Select a picture
+to see it full size.
 
-More in [`docs/screenshots/`](docs/screenshots/). The designs the screens follow (Google Stitch) are in
-[`docs/designs/`](docs/designs/).
+[Signing in and your account](#signing-in-and-your-account) · [Dashboard](#dashboard) · [Search, Quick Add and the clock](#search-quick-add-and-the-clock) · [Customers and properties](#customers-and-properties) · [Electricity and meters](#electricity-and-meters) · [Leads, sales and orders](#leads-sales-and-orders) · [Invoices and payments](#invoices-and-payments) · [Inventory](#inventory) · [Support tickets](#support-tickets) · [Team and tasks](#team-and-tasks) · [Calendar](#calendar) · [Communications, sharing and integrations](#communications-sharing-and-integrations) · [Reports](#reports) · [Notifications and automations](#notifications-and-automations) · [Settings and audit](#settings-and-audit) · [On a phone](#on-a-phone)
+
+### Signing in and your account
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/login-desktop.png" width="280" alt="Sign in"><br>Sign in</td>
+    <td valign="top"><img src="docs/screenshots/create-account.png" width="280" alt="Asking for an account"><br>Asking for an account</td>
+    <td valign="top"><img src="docs/screenshots/forgot-desktop.png" width="280" alt="Forgotten password"><br>Forgotten password</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/reset-password.png" width="280" alt="Choosing a new password"><br>Choosing a new password</td>
+    <td valign="top"><img src="docs/screenshots/welcome.png" width="280" alt="Accepting an invitation"><br>Accepting an invitation</td>
+    <td valign="top"><img src="docs/screenshots/account-security.png" width="280" alt="Account security"><br>Account security</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/not-found.png" width="280" alt="A page that does not exist"><br>A page that does not exist</td>
+  </tr>
+</table>
+
+### Dashboard
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/dash-manager-desktop.png" width="280" alt="Manager dashboard"><br>Manager dashboard</td>
+    <td valign="top"><img src="docs/screenshots/dash-client-desktop.png" width="280" alt="Client dashboard"><br>Client dashboard</td>
+  </tr>
+</table>
+
+### Search, Quick Add and the clock
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/search.png" width="280" alt="Searching everything from the top bar"><br>Searching everything from the top bar</td>
+    <td valign="top"><img src="docs/screenshots/quick-add.png" width="280" alt="Quick Add"><br>Quick Add</td>
+  </tr>
+</table>
+
+### Customers and properties
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/crm-customers.png" width="280" alt="Customers"><br>Customers</td>
+    <td valign="top"><img src="docs/screenshots/crm-customer-profile.png" width="280" alt="Customer profile"><br>Customer profile</td>
+    <td valign="top"><img src="docs/screenshots/crm-customer-new.png" width="280" alt="New customer, with its checks"><br>New customer, with its checks</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/crm-customer-confirm.png" width="280" alt="Confirming changes to a customer"><br>Confirming changes to a customer</td>
+    <td valign="top"><img src="docs/screenshots/crm-properties.png" width="280" alt="Properties"><br>Properties</td>
+    <td valign="top"><img src="docs/screenshots/crm-property-detail.png" width="280" alt="Property"><br>Property</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/crm-property-new.png" width="280" alt="New property"><br>New property</td>
+  </tr>
+</table>
+
+### Electricity and meters
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/meters.png" width="280" alt="Meters"><br>Meters</td>
+    <td valign="top"><img src="docs/screenshots/meter-detail.png" width="280" alt="Meter, with consumption and readings"><br>Meter, with consumption and readings</td>
+    <td valign="top"><img src="docs/screenshots/meter-new.png" width="280" alt="New meter"><br>New meter</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/meter-reading.png" width="280" alt="Recording a reading"><br>Recording a reading</td>
+    <td valign="top"><img src="docs/screenshots/maintenance.png" width="280" alt="Maintenance work orders"><br>Maintenance work orders</td>
+    <td valign="top"><img src="docs/screenshots/maintenance-dialog.png" width="280" alt="Updating a work order"><br>Updating a work order</td>
+  </tr>
+</table>
+
+### Leads, sales and orders
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/leads.png" width="280" alt="Lead pipeline"><br>Lead pipeline</td>
+    <td valign="top"><img src="docs/screenshots/lead-detail.png" width="280" alt="Lead"><br>Lead</td>
+    <td valign="top"><img src="docs/screenshots/lead-new.png" width="280" alt="New lead"><br>New lead</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/lead-convert.png" width="280" alt="Converting a lead to a customer"><br>Converting a lead to a customer</td>
+    <td valign="top"><img src="docs/screenshots/orders.png" width="280" alt="Sales orders"><br>Sales orders</td>
+    <td valign="top"><img src="docs/screenshots/order-new.png" width="280" alt="New order"><br>New order</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/order-detail.png" width="280" alt="Order"><br>Order</td>
+  </tr>
+</table>
+
+### Invoices and payments
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/invoices.png" width="280" alt="Invoices"><br>Invoices</td>
+    <td valign="top"><img src="docs/screenshots/invoice-detail.png" width="280" alt="Invoice"><br>Invoice</td>
+    <td valign="top"><img src="docs/screenshots/invoice-new.png" width="280" alt="New invoice"><br>New invoice</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/invoice-pay.png" width="280" alt="Recording a payment"><br>Recording a payment</td>
+    <td valign="top"><img src="docs/screenshots/invoice-pdf.png" width="280" alt="Invoice PDF"><br>Invoice PDF</td>
+    <td valign="top"><img src="docs/screenshots/payments.png" width="280" alt="Payment history"><br>Payment history</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/invoice-settings.png" width="280" alt="Invoice and tax settings"><br>Invoice and tax settings</td>
+  </tr>
+</table>
+
+### Inventory
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/inventory.png" width="280" alt="Products and stock"><br>Products and stock</td>
+    <td valign="top"><img src="docs/screenshots/product-detail.png" width="280" alt="Product"><br>Product</td>
+    <td valign="top"><img src="docs/screenshots/product-new.png" width="280" alt="New product"><br>New product</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/stock-movement.png" width="280" alt="Recording a stock movement"><br>Recording a stock movement</td>
+    <td valign="top"><img src="docs/screenshots/inventory-history.png" width="280" alt="Stock history"><br>Stock history</td>
+  </tr>
+</table>
+
+### Support tickets
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/support-tickets.png" width="280" alt="Support tickets"><br>Support tickets</td>
+    <td valign="top"><img src="docs/screenshots/support-ticket-detail.png" width="280" alt="Ticket, with the conversation"><br>Ticket, with the conversation</td>
+    <td valign="top"><img src="docs/screenshots/support-ticket-new.png" width="280" alt="New ticket"><br>New ticket</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/support-ticket-assign.png" width="280" alt="Assigning a ticket"><br>Assigning a ticket</td>
+    <td valign="top"><img src="docs/screenshots/support-ticket-resolve.png" width="280" alt="Resolving a ticket"><br>Resolving a ticket</td>
+    <td valign="top"><img src="docs/screenshots/support-client-tickets.png" width="280" alt="Client portal: their tickets"><br>Client portal: their tickets</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/support-client-detail.png" width="280" alt="Client portal: a ticket"><br>Client portal: a ticket</td>
+  </tr>
+</table>
+
+### Team and tasks
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/team-team.png" width="280" alt="Team, with invitations waiting"><br>Team, with invitations waiting</td>
+    <td valign="top"><img src="docs/screenshots/team-employee.png" width="280" alt="Employee"><br>Employee</td>
+    <td valign="top"><img src="docs/screenshots/team-employee-new.png" width="280" alt="New employee"><br>New employee</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/team-employee-invited.png" width="280" alt="Invitation emailed"><br>Invitation emailed</td>
+    <td valign="top"><img src="docs/screenshots/team-tasks.png" width="280" alt="Tasks"><br>Tasks</td>
+    <td valign="top"><img src="docs/screenshots/team-task-detail.png" width="280" alt="Task, with updates and proof of work"><br>Task, with updates and proof of work</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/team-task-new.png" width="280" alt="New task"><br>New task</td>
+  </tr>
+</table>
+
+### Calendar
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/calendar.png" width="280" alt="Month, with Google Calendar"><br>Month, with Google Calendar</td>
+    <td valign="top"><img src="docs/screenshots/calendar-agenda.png" width="280" alt="Agenda"><br>Agenda</td>
+    <td valign="top"><img src="docs/screenshots/calendar-event.png" width="280" alt="An appointment, copied to Google"><br>An appointment, copied to Google</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/calendar-new.png" width="280" alt="New appointment"><br>New appointment</td>
+    <td valign="top"><img src="docs/screenshots/calendar-connect.png" width="280" alt="Before Google Calendar is connected"><br>Before Google Calendar is connected</td>
+  </tr>
+</table>
+
+### Communications, sharing and integrations
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/comms-communications.png" width="280" alt="Message history"><br>Message history</td>
+    <td valign="top"><img src="docs/screenshots/comms-message-failed.png" width="280" alt="A failed message and its retries"><br>A failed message and its retries</td>
+    <td valign="top"><img src="docs/screenshots/comms-customer.png" width="280" alt="A customer’s messages and consent"><br>A customer’s messages and consent</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/comms-compose.png" width="280" alt="Sending a message on several channels"><br>Sending a message on several channels</td>
+    <td valign="top"><img src="docs/screenshots/comms-templates.png" width="280" alt="Templates"><br>Templates</td>
+    <td valign="top"><img src="docs/screenshots/comms-template-edit.png" width="280" alt="Editing a template"><br>Editing a template</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/comms-communications-not-set-up.png" width="280" alt="When email is not set up yet"><br>When email is not set up yet</td>
+    <td valign="top"><img src="docs/screenshots/marketing.png" width="280" alt="Marketing posts"><br>Marketing posts</td>
+    <td valign="top"><img src="docs/screenshots/marketing-share.png" width="280" alt="Posting to several platforms at once"><br>Posting to several platforms at once</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/settings-integrations.png" width="280" alt="Settings → Integrations"><br>Settings → Integrations</td>
+  </tr>
+</table>
+
+### Reports
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/reports.png" width="280" alt="Reports overview"><br>Reports overview</td>
+    <td valign="top"><img src="docs/screenshots/reports-revenue.png" width="280" alt="Revenue"><br>Revenue</td>
+    <td valign="top"><img src="docs/screenshots/reports-sales.png" width="280" alt="Sales"><br>Sales</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/reports-customers.png" width="280" alt="Customers"><br>Customers</td>
+    <td valign="top"><img src="docs/screenshots/reports-properties.png" width="280" alt="Properties"><br>Properties</td>
+    <td valign="top"><img src="docs/screenshots/reports-electricity.png" width="280" alt="Electricity"><br>Electricity</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/reports-inventory.png" width="280" alt="Inventory"><br>Inventory</td>
+    <td valign="top"><img src="docs/screenshots/reports-support.png" width="280" alt="Support"><br>Support</td>
+    <td valign="top"><img src="docs/screenshots/reports-team.png" width="280" alt="Team"><br>Team</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/reports-custom-range.png" width="280" alt="A custom period, checked"><br>A custom period, checked</td>
+  </tr>
+</table>
+
+### Notifications and automations
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/notifications.png" width="280" alt="Notifications"><br>Notifications</td>
+    <td valign="top"><img src="docs/screenshots/notification-settings.png" width="280" alt="Notification settings"><br>Notification settings</td>
+    <td valign="top"><img src="docs/screenshots/automations.png" width="280" alt="Automations"><br>Automations</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/automation-detail.png" width="280" alt="An automation and its history"><br>An automation and its history</td>
+  </tr>
+</table>
+
+### Settings and audit
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/settings.png" width="280" alt="Settings"><br>Settings</td>
+    <td valign="top"><img src="docs/screenshots/settings-business.png" width="280" alt="Business profile"><br>Business profile</td>
+    <td valign="top"><img src="docs/screenshots/settings-categories.png" width="280" alt="Categories"><br>Categories</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/settings-roles.png" width="280" alt="Roles and what each can do"><br>Roles and what each can do</td>
+    <td valign="top"><img src="docs/screenshots/settings-privacy.png" width="280" alt="Data and privacy"><br>Data and privacy</td>
+    <td valign="top"><img src="docs/screenshots/settings-audit.png" width="280" alt="Audit log"><br>Audit log</td>
+  </tr>
+</table>
+
+### On a phone
+
+<table>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/login-mobile.png" width="150" alt="Sign in"><br>Sign in</td>
+    <td valign="top"><img src="docs/screenshots/dash-manager-mobile.png" width="150" alt="Dashboard"><br>Dashboard</td>
+    <td valign="top"><img src="docs/screenshots/crm-customers-mobile.png" width="150" alt="Customers"><br>Customers</td>
+    <td valign="top"><img src="docs/screenshots/meters-mobile.png" width="150" alt="Meters"><br>Meters</td>
+    <td valign="top"><img src="docs/screenshots/meter-detail-mobile.png" width="150" alt="Meter"><br>Meter</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/meter-reading-mobile.png" width="150" alt="Recording a reading"><br>Recording a reading</td>
+    <td valign="top"><img src="docs/screenshots/meter-retire-mobile.png" width="150" alt="Retiring a meter"><br>Retiring a meter</td>
+    <td valign="top"><img src="docs/screenshots/maintenance-mobile.png" width="150" alt="Maintenance"><br>Maintenance</td>
+    <td valign="top"><img src="docs/screenshots/leads-mobile.png" width="150" alt="Leads"><br>Leads</td>
+    <td valign="top"><img src="docs/screenshots/lead-detail-mobile.png" width="150" alt="Lead"><br>Lead</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/orders-mobile.png" width="150" alt="Orders"><br>Orders</td>
+    <td valign="top"><img src="docs/screenshots/order-new-mobile.png" width="150" alt="New order"><br>New order</td>
+    <td valign="top"><img src="docs/screenshots/order-detail-mobile.png" width="150" alt="Order"><br>Order</td>
+    <td valign="top"><img src="docs/screenshots/invoices-mobile.png" width="150" alt="Invoices"><br>Invoices</td>
+    <td valign="top"><img src="docs/screenshots/invoice-detail-mobile.png" width="150" alt="Invoice"><br>Invoice</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/inventory-mobile.png" width="150" alt="Inventory"><br>Inventory</td>
+    <td valign="top"><img src="docs/screenshots/support-tickets-mobile.png" width="150" alt="Support tickets"><br>Support tickets</td>
+    <td valign="top"><img src="docs/screenshots/support-ticket-detail-mobile.png" width="150" alt="Ticket"><br>Ticket</td>
+    <td valign="top"><img src="docs/screenshots/support-client-new.png" width="150" alt="Client: reporting a problem"><br>Client: reporting a problem</td>
+    <td valign="top"><img src="docs/screenshots/team-team-mobile.png" width="150" alt="Team"><br>Team</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/team-tasks-staff-mobile.png" width="150" alt="Staff: their tasks"><br>Staff: their tasks</td>
+    <td valign="top"><img src="docs/screenshots/team-task-detail-staff-mobile.png" width="150" alt="Staff: a task"><br>Staff: a task</td>
+    <td valign="top"><img src="docs/screenshots/calendar-mobile.png" width="150" alt="Calendar"><br>Calendar</td>
+    <td valign="top"><img src="docs/screenshots/comms-communications-mobile.png" width="150" alt="Communications"><br>Communications</td>
+    <td valign="top"><img src="docs/screenshots/reports-mobile.png" width="150" alt="Reports"><br>Reports</td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/reports-revenue-mobile.png" width="150" alt="Revenue report"><br>Revenue report</td>
+    <td valign="top"><img src="docs/screenshots/automations-mobile.png" width="150" alt="Automations"><br>Automations</td>
+    <td valign="top"><img src="docs/screenshots/settings-audit-mobile.png" width="150" alt="Audit log"><br>Audit log</td>
+    <td valign="top"><img src="docs/screenshots/create-account-mobile.png" width="150" alt="Asking for an account"><br>Asking for an account</td>
+  </tr>
+</table>
+
+The designs the screens follow (Google Stitch) are in [`docs/designs/`](docs/designs/).
 
 ## How it is built
 
