@@ -1889,7 +1889,10 @@ select pg_temp.expect(exists (select 1 from public.search_everything('MTR-0001')
 select pg_temp.expect(exists (select 1 from public.search_everything('INV-0001') where kind = 'invoice'), 'and an invoice by number');
 select pg_temp.expect(exists (select 1 from public.search_everything('display is blank') where kind = 'ticket'), 'and a ticket by subject');
 select pg_temp.expect(exists (select 1 from public.search_everything('mtr-prepaid') where kind = 'product'), 'and a product by SKU, whatever the case');
-select pg_temp.expect(exists (select 1 from public.search_everything('082 000 0002') where kind = 'customer' and title = 'Thabo Mokoena'), 'a phone number typed the local way finds the customer');
+-- The audit checks above changed Thabo's number to +27 82 000 0222.
+select pg_temp.expect(exists (select 1 from public.search_everything('082 000 0222') where kind = 'customer' and title = 'Thabo Mokoena'), 'a phone number typed the local way finds the customer');
+select pg_temp.expect(exists (select 1 from public.search_everything('+27820000222') where kind = 'customer' and title = 'Thabo Mokoena'), 'and typed the international way');
+select pg_temp.expect(not exists (select 1 from public.search_everything('082 000 0002') where kind = 'customer' and title = 'Thabo Mokoena'), 'but not by the number they had before');
 select pg_temp.expect(not exists (select 1 from public.search_everything('Other Business')), 'another business''s records are never found');
 select pg_temp.expect(not exists (select 1 from public.search_everything('t')), 'one character finds nothing');
 select pg_temp.expect(not exists (select 1 from public.search_everything('%%')), 'wildcards are matched literally');
@@ -1910,6 +1913,10 @@ select pg_temp.expect_error_like($$insert into public.calendar_events (title, st
 insert into public.calendar_events (title, kind, starts_at, ends_at, all_day) values ('Stocktake', 'reminder', '2026-12-05 14:00+02', '2026-12-05 15:00+02', true);
 insert into p18 select 'allday', id from public.calendar_events where title = 'Stocktake';
 select pg_temp.expect((select starts_at = '2026-12-05 00:00+02' and ends_at = '2026-12-06 00:00+02' from public.calendar_events where id = (select id from p18 where k = 'allday')), 'an all-day event covers the whole South African day');
+update public.calendar_events set ends_at = '2026-12-06 15:00+02' where id = (select id from p18 where k = 'allday');
+select pg_temp.expect((select ends_at = '2026-12-07 00:00+02' from public.calendar_events where id = (select id from p18 where k = 'allday')), 'and every day it touches, up to the midnight after');
+update public.calendar_events set ends_at = '2026-12-08 00:00+02' where id = (select id from p18 where k = 'allday');
+select pg_temp.expect((select ends_at = '2026-12-08 00:00+02' from public.calendar_events where id = (select id from p18 where k = 'allday')), 'an end already at midnight stays where it is');
 update public.calendar_events set google_event_id = 'forged', google_calendar_owner = 'a3000000-0000-0000-0000-000000000001' where id = (select id from p18 where k = 'visit');
 select pg_temp.expect((select google_event_id is null and google_calendar_owner is null from public.calendar_events where id = (select id from p18 where k = 'visit')), 'only the server records the Google copy');
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
@@ -1936,6 +1943,7 @@ insert into public.staff_tasks (id, business_id, title, due_date, assigned_to, c
 select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
 select pg_temp.expect((select count(*) from public.calendar_feed('2026-12-01 00:00+02', '2026-12-08 00:00+02') where source = 'event') = 3, 'the feed has the events in the period');
 select pg_temp.expect(exists (select 1 from public.calendar_feed('2026-12-01 00:00+02', '2026-12-08 00:00+02') where source = 'task' and all_day and link = '/tasks/f1800000-0000-0000-0000-000000000001'), 'and tasks on their due date');
+select pg_temp.expect(not exists (select 1 from public.calendar_feed('2026-11-27 00:00+02', '2026-12-04 00:00+02') where source = 'task' and id = 'f1800000-0000-0000-0000-000000000001'), 'but not a task due the day after the period ends');
 select pg_temp.expect(exists (select 1 from public.calendar_feed('2019-12-20 00:00+02', '2020-01-10 00:00+02') where source = 'invoice' and title = 'INV-0003 due'), 'and unpaid invoices on their due date');
 select pg_temp.expect(not exists (select 1 from public.calendar_feed('2026-11-01 00:00+02', '2026-11-08 00:00+02') where source = 'event'), 'and nothing outside the period');
 select pg_temp.expect_error_like($$select * from public.calendar_feed('2026-01-01', '2026-06-01')$$, 'calendar_range', 'at most about three months at a time');

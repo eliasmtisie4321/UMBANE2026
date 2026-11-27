@@ -244,12 +244,14 @@ begin
     end if;
     new.customer_id := coalesce(new.customer_id, tk.customer_id);
   end if;
-  -- An all-day event covers whole South African days.
+  -- An all-day event covers every South African day it touches: from the midnight it starts on
+  -- to the midnight after its last moment (the end is exclusive, as Google's is).
   if new.all_day then
     new.starts_at := ((new.starts_at at time zone 'Africa/Johannesburg')::date)::timestamp
       at time zone 'Africa/Johannesburg';
     new.ends_at := greatest(
-      ((new.ends_at at time zone 'Africa/Johannesburg')::date)::timestamp at time zone 'Africa/Johannesburg',
+      (((new.ends_at - interval '1 microsecond') at time zone 'Africa/Johannesburg')::date + 1)::timestamp
+        at time zone 'Africa/Johannesburg',
       new.starts_at + interval '1 day');
   end if;
   return new;
@@ -284,8 +286,9 @@ returns table (source text, id uuid, title text, starts_at timestamptz, ends_at 
   google_html_link text, google_error text)
 language plpgsql stable security invoker set search_path = public as $$
 declare
+  -- Dated items (due dates, scheduled days) on the days the period touches; p_to is exclusive.
   first_day date := (p_from at time zone 'Africa/Johannesburg')::date;
-  last_day date := (p_to at time zone 'Africa/Johannesburg')::date;
+  last_day date := ((p_to - interval '1 microsecond') at time zone 'Africa/Johannesburg')::date;
 begin
   if p_from is null or p_to is null or p_to <= p_from or p_to - p_from > interval '93 days' then
     raise exception 'calendar_range' using errcode = '23514';
