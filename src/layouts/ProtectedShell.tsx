@@ -45,6 +45,7 @@ function SignedInShell({ profile }: { profile: Profile }) {
       onSignOut={() => void signOut()}
       userName={profile.full_name || profile.email || undefined}
       roleLabel={ROLE_LABEL[profile.role]}
+      role={profile.role}
       unread={unread.data ?? 0}
     >
       {canAccess(profile.role, location.pathname) ? (

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import migration from '../../supabase/migrations/20261201000017_integrations.sql?raw'
+import integrations from '../../supabase/migrations/20261201000017_integrations.sql?raw'
+import calendar from '../../supabase/migrations/20261202000018_search_calendar.sql?raw'
 import {
   CAPABILITIES,
   CONNECTABLE,
@@ -29,6 +30,8 @@ const server = (
 
 describe('the provider registry', () => {
   it('matches the providers and capabilities the database allows', () => {
+    // The latest definitions of the provider and capability checks.
+    const migration = integrations + calendar
     for (const key of CONNECTABLE) expect(migration).toContain(`'${key}'`)
     for (const c of CAPABILITIES) expect(migration).toContain(`'${c}'`)
     expect(migration).not.toMatch(/provider in \([^)]*'tiktok'/)

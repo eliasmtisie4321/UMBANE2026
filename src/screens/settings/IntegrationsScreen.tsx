@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   CAPABILITY_LABEL,
   CHANNEL_LABEL,
@@ -33,7 +33,7 @@ import type {
   ProviderReadiness,
 } from '@/types/integrations'
 
-const GROUPS: ProviderGroup[] = ['email', 'messaging', 'social']
+const GROUPS: ProviderGroup[] = ['email', 'messaging', 'social', 'calendar']
 
 /**
  * Settings → Integrations: every outside service Umbane uses, in one place. Administrators connect
@@ -286,7 +286,17 @@ function ProviderCard({
       )}
       {error && <FormError>{error}</FormError>}
 
-      {info.connect !== 'unavailable' && (
+      {info.personal && (
+        <p className="text-body-md text-on-surface-variant">
+          Each person connects their own {info.label}, from the{' '}
+          <Link to="/calendar" className="text-primary underline">
+            Calendar
+          </Link>{' '}
+          page.
+        </p>
+      )}
+
+      {info.connect !== 'unavailable' && !info.personal && (
         <div className="mt-auto flex flex-wrap gap-2">
           {!connection && (
             <Button

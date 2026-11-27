@@ -55,6 +55,7 @@ Provider webhooks ──► /api/webhooks/resend | /api/webhooks/messaging ─�
 | Facebook Page            | Facebook  | Sign in with Facebook          | Public posts (text, link, image)                                                               | Umbane's Meta app with `pages_manage_posts` approved by Meta App Review                                              |
 | Instagram                | Instagram | Sign in with Facebook          | Public posts; each needs an image at a public https address                                    | A professional account linked to a Page; `instagram_content_publish` approved                                        |
 | LinkedIn                 | LinkedIn  | Sign in with LinkedIn          | Public posts on the profile of the person who connects                                         | Umbane's LinkedIn app with "Share on LinkedIn" and "Sign In with LinkedIn using OpenID Connect"                      |
+| Google Calendar | Calendar (personal) | Sign in with Google | Each person’s own calendar: their events beside Umbane’s, and copies of Umbane appointments | The same Google app as Gmail, with the Calendar API on and the `calendar.events` scope (`docs/CALENDAR.md`) |
 | TikTok                   | –         | Not available                  | Listed so people know: TikTok's posting API only takes video and photo posts from audited apps | –                                                                                                                    |
 
 Some things the providers do not allow, so Umbane does not offer them:
@@ -201,3 +202,11 @@ Not yet exercised against the real providers (needs their accounts and approvals
 - A Twilio account with a South African-capable sender.
 
 Until a provider is connected and verified, Umbane shows it as not connected and never offers it.
+
+## Personal connections
+
+Most connections belong to the business and only administrators manage them. **Google Calendar** is
+personal: each person connects their own from the Calendar page, and only they (or an administrator)
+can see or disconnect it. It uses the same registry, adapters, encrypted credentials and sign-in flow
+as every other provider; the connection simply records whose it is (`integrations.profile_id`).
+Details: `docs/CALENDAR.md`.

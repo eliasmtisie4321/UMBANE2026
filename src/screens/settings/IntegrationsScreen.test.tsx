@@ -95,6 +95,16 @@ describe('Settings → Integrations', () => {
     ).toBeInTheDocument()
     expect(within(microsoft).getByRole('button', { name: 'Connect' })).toBeDisabled()
 
+    const calendar = await card('Google Calendar')
+    expect(
+      within(calendar).getByText(/Each person connects their own Google Calendar/),
+    ).toBeInTheDocument()
+    expect(within(calendar).getByRole('link', { name: 'Calendar' })).toHaveAttribute(
+      'href',
+      '/calendar',
+    )
+    expect(within(calendar).queryByRole('button', { name: 'Connect' })).toBeNull()
+
     const tiktok = await card('TikTok')
     expect(within(tiktok).getByText('Not available')).toBeInTheDocument()
     expect(within(tiktok).queryByRole('button')).toBeNull()
@@ -118,7 +128,9 @@ describe('Settings → Integrations', () => {
     expect(s.connectWithKeys).not.toHaveBeenCalled()
 
     await userEvent.type(within(dialog).getByLabelText('Phone number ID'), '1234567890')
-    await userEvent.type(within(dialog).getByLabelText('Access token'), 'EAAG' + 'a'.repeat(60))
+    // Pasted, as people do with tokens (and much faster than typing 64 characters).
+    await userEvent.click(within(dialog).getByLabelText('Access token'))
+    await userEvent.paste('EAAG' + 'a'.repeat(60))
     expect(within(dialog).getByLabelText('Access token')).toHaveAttribute('type', 'password')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Check and Connect' }))
     expect(

@@ -14,6 +14,7 @@ const PAGES = [
   ['/automations', 'Automations'],
   ['/settings', 'Settings'],
   ['/settings/audit', 'Audit log'],
+  ['/calendar', 'Calendar'],
 ] as const
 
 for (const [path, title] of PAGES) {

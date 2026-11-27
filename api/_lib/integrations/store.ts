@@ -22,6 +22,8 @@ export interface IntegrationRow {
   connected_at: string | null
   last_checked_at: string | null
   last_error: string | null
+  /** Set for a personal connection (a person's own calendar). */
+  profile_id?: string | null
 }
 
 export const toConnection = (row: IntegrationRow): Connection => ({

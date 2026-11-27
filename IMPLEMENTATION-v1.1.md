@@ -495,6 +495,19 @@ Ticket statuses:
 
 ---
 
+## Top Bar and Calendar
+
+**Goal:** A working search and Quick Add in the top bar, the current time, and a calendar that connects to each person's Google Calendar. Details: `docs/CALENDAR.md`.
+
+- [x] Search across customers, properties, meters, leads, orders, invoices, tickets, products, tasks and team, as the signed-in person (row security), grouped, keyboard friendly ("/" or Ctrl+K), on phones too.
+- [x] Quick Add menu of the create pages each role may open; Report a Problem for clients.
+- [x] South African time and date in the top bar, updating each minute.
+- [x] Calendar page: month and agenda views of appointments, task due dates, maintenance and invoice due dates; create, edit and delete appointments linked to customers.
+- [x] Google Calendar as a personal connection (same integrations system): each person's events shown live; Umbane appointments copied to it, kept up to date and removed with them.
+- [ ] Google app: enable the Calendar API and the `calendar.events` scope, and Google's verification for use outside your Workspace.
+
+---
+
 ## Phase 15: Launch and Handover
 
 **Goal:** Release a stable version of Umbane CRM and document how to run and maintain it.

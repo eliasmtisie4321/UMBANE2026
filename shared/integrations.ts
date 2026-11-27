@@ -23,6 +23,8 @@ export type Capability =
   | 'receive_messages'
   /** Reports delivered, failed or bounced after sending. */
   | 'delivery_tracking'
+  /** Reads and writes events on a person's own calendar. */
+  | 'calendar_events'
 
 export const CAPABILITIES: readonly Capability[] = [
   'send_email',
@@ -32,6 +34,7 @@ export const CAPABILITIES: readonly Capability[] = [
   'publish_social',
   'receive_messages',
   'delivery_tracking',
+  'calendar_events',
 ]
 
 export const CAPABILITY_LABEL: Record<Capability, string> = {
@@ -42,11 +45,20 @@ export const CAPABILITY_LABEL: Record<Capability, string> = {
   publish_social: 'Public posts',
   receive_messages: 'Receives replies',
   delivery_tracking: 'Delivery reports',
+  calendar_events: 'Calendar events',
 }
 
 /** Where a message goes. Direct channels reach one person; social channels publish publicly. */
 export type Channel =
-  'email' | 'sms' | 'whatsapp' | 'facebook' | 'instagram' | 'linkedin' | 'tiktok'
+  | 'email'
+  | 'sms'
+  | 'whatsapp'
+  | 'facebook'
+  | 'instagram'
+  | 'linkedin'
+  | 'tiktok'
+  /** Not a messaging channel: a person's own calendar. */
+  | 'calendar'
 export const DIRECT_CHANNELS: readonly Channel[] = ['email', 'sms', 'whatsapp']
 export const SOCIAL_CHANNELS: readonly Channel[] = ['facebook', 'instagram', 'linkedin', 'tiktok']
 export const isSocialChannel = (c: Channel) => SOCIAL_CHANNELS.includes(c)
@@ -59,6 +71,7 @@ export const CHANNEL_LABEL: Record<Channel, string> = {
   instagram: 'Instagram',
   linkedin: 'LinkedIn',
   tiktok: 'TikTok',
+  calendar: 'Calendar',
 }
 
 export type ProviderKey =
@@ -71,13 +84,15 @@ export type ProviderKey =
   | 'instagram'
   | 'linkedin'
   | 'tiktok'
+  | 'google_calendar'
 
-export type ProviderGroup = 'email' | 'messaging' | 'social'
+export type ProviderGroup = 'email' | 'messaging' | 'social' | 'calendar'
 
 export const GROUP_LABEL: Record<ProviderGroup, string> = {
   email: 'Email',
   messaging: 'SMS and WhatsApp',
   social: 'Social media',
+  calendar: 'Calendars',
 }
 
 /** A value the administrator types when connecting (api_key) or changes later (settings). */
@@ -105,6 +120,11 @@ export interface ProviderInfo {
    * unavailable: listed so people know, but the provider's API cannot do what Umbane needs.
    */
   connect: 'api_key' | 'oauth' | 'unavailable'
+  /**
+   * Personal: each team member connects their own account (a calendar), from the page that uses it.
+   * Otherwise the connection belongs to the business and only administrators manage it.
+   */
+  personal?: boolean
   capabilities: readonly Capability[]
   /** What the business needs to have before it can connect. */
   requirements: string[]
@@ -386,6 +406,21 @@ export const PROVIDERS: readonly ProviderInfo[] = [
     maxLength: 3000,
     docsUrl:
       'https://learn.microsoft.com/linkedin/consumer/integrations/self-serve/share-on-linkedin',
+  },
+  {
+    key: 'google_calendar',
+    label: 'Google Calendar',
+    group: 'calendar',
+    channel: 'calendar',
+    connect: 'oauth',
+    personal: true,
+    capabilities: ['calendar_events'],
+    requirements: [
+      'A Google account with Google Calendar. Each person connects their own, from the Calendar page.',
+      'Umbane’s Google app (set up once on the server, the same one as Gmail) with the Google Calendar API turned on and the calendar.events permission approved.',
+    ],
+    serverEnv: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+    docsUrl: 'https://developers.google.com/calendar/api/guides/overview',
   },
   {
     key: 'tiktok',

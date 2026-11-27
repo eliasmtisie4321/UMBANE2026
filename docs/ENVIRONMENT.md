@@ -149,3 +149,8 @@ secret (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `MICROSOFT_CLIENT_ID`/`MICROS
 `META_APP_ID`/`META_APP_SECRET`, `LINKEDIN_CLIENT_ID`/`LINKEDIN_CLIENT_SECRET`), and the return
 address `<APP_URL>/api/integrations/callback` registered with it. All server-only: never prefix them
 with `VITE_`. The full list is in `docs/INTEGRATIONS.md`.
+
+- `20261202000018_search_calendar.sql`: the top bar's search (`search_everything`), the calendar
+  (`calendar_events` and `calendar_feed`), and Google Calendar as a personal connection (see
+  `docs/CALENDAR.md`). **Run it after 0017.** For Google Calendar, enable the Google Calendar API and
+  add the `calendar.events` scope to the same Google app as Gmail.

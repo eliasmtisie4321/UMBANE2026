@@ -1879,6 +1879,90 @@ delete from public.integrations where id::text like 'f170%';
 delete from public.customers where id::text like 'f171%';
 delete from public.leads where id = 'f1720000-0000-0000-0000-000000000001';
 
+-- Search, calendar and personal connections --------------------------------------------------------------
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+create temp table p18 (k text primary key, id uuid);
+grant all on p18 to authenticated, service_role;
+select pg_temp.expect((select count(*) from public.search_everything('thabo') where kind = 'customer' and title = 'Thabo Mokoena') = 1, 'search finds a customer by name');
+select pg_temp.expect(exists (select 1 from public.search_everything('karoo') where kind = 'property' and link = '/properties/d1000000-0000-0000-0000-000000000002'), 'and a property, with a link to it');
+select pg_temp.expect(exists (select 1 from public.search_everything('MTR-0001') where kind = 'meter'), 'and a meter by serial number');
+select pg_temp.expect(exists (select 1 from public.search_everything('INV-0001') where kind = 'invoice'), 'and an invoice by number');
+select pg_temp.expect(exists (select 1 from public.search_everything('display is blank') where kind = 'ticket'), 'and a ticket by subject');
+select pg_temp.expect(exists (select 1 from public.search_everything('mtr-prepaid') where kind = 'product'), 'and a product by SKU, whatever the case');
+select pg_temp.expect(exists (select 1 from public.search_everything('082 000 0002') where kind = 'customer' and title = 'Thabo Mokoena'), 'a phone number typed the local way finds the customer');
+select pg_temp.expect(not exists (select 1 from public.search_everything('Other Business')), 'another business''s records are never found');
+select pg_temp.expect(not exists (select 1 from public.search_everything('t')), 'one character finds nothing');
+select pg_temp.expect(not exists (select 1 from public.search_everything('%%')), 'wildcards are matched literally');
+select pg_temp.expect(coalesce((select max(n) from (select count(*) n from public.search_everything('a') group by kind) x), 0) <= 5, 'at most five of each kind');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect(not exists (select 1 from public.search_everything('thabo')), 'a client cannot find other customers');
+select pg_temp.expect(exists (select 1 from public.search_everything('sunrise') where kind = 'property'), 'but finds their own property');
+select pg_temp.expect(not exists (select 1 from public.search_everything('INV-0003')), 'and not another customer''s invoice');
+
+-- Calendar events
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+insert into public.calendar_events (title, kind, starts_at, ends_at, property_id) values ('Site visit: Karoo Office', 'site_visit', '2026-12-03 09:00+02', '2026-12-03 10:30+02', 'd1000000-0000-0000-0000-000000000002');
+insert into p18 select 'visit', id from public.calendar_events where title = 'Site visit: Karoo Office';
+select pg_temp.expect((select owner_id = 'a3000000-0000-0000-0000-000000000001' and assigned_to = 'a3000000-0000-0000-0000-000000000001' and customer_id = 'c1000000-0000-0000-0000-000000000002' from public.calendar_events where id = (select id from p18 where k = 'visit')), 'an event belongs to whoever made it, and a property brings its customer');
+select pg_temp.expect_error_like($$insert into public.calendar_events (title, starts_at, ends_at, customer_id, property_id) values ('Mixed up', '2026-12-03 09:00+02', '2026-12-03 10:00+02', 'c1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002')$$, 'calendar_link_mismatch', 'a property of another customer is refused');
+select pg_temp.expect_error_like($$insert into public.calendar_events (title, starts_at, ends_at) values ('Backwards', '2026-12-03 10:00+02', '2026-12-03 09:00+02')$$, 'calendar_events_ends_after_start', 'an event cannot end before it starts');
+select pg_temp.expect_error_like($$insert into public.calendar_events (title, starts_at, ends_at, assigned_to) values ('For a client', '2026-12-03 09:00+02', '2026-12-03 10:00+02', 'a4000000-0000-0000-0000-000000000001')$$, 'calendar_assignee_invalid', 'events are for team members only');
+insert into public.calendar_events (title, kind, starts_at, ends_at, all_day) values ('Stocktake', 'reminder', '2026-12-05 14:00+02', '2026-12-05 15:00+02', true);
+insert into p18 select 'allday', id from public.calendar_events where title = 'Stocktake';
+select pg_temp.expect((select starts_at = '2026-12-05 00:00+02' and ends_at = '2026-12-06 00:00+02' from public.calendar_events where id = (select id from p18 where k = 'allday')), 'an all-day event covers the whole South African day');
+update public.calendar_events set google_event_id = 'forged', google_calendar_owner = 'a3000000-0000-0000-0000-000000000001' where id = (select id from p18 where k = 'visit');
+select pg_temp.expect((select google_event_id is null and google_calendar_owner is null from public.calendar_events where id = (select id from p18 where k = 'visit')), 'only the server records the Google copy');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+insert into public.calendar_events (title, starts_at, ends_at) values ('Management meeting', '2026-12-04 08:00+02', '2026-12-04 09:00+02');
+insert into p18 select 'mgr', id from public.calendar_events where title = 'Management meeting';
+update public.calendar_events set title = 'Site visit: Karoo Office (moved)' where id = (select id from p18 where k = 'visit');
+select pg_temp.expect((select title like '%(moved)' from public.calendar_events where id = (select id from p18 where k = 'visit')), 'a manager can change anyone''s event');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+update public.calendar_events set title = 'Hijacked' where id = (select id from p18 where k = 'mgr');
+delete from public.calendar_events where id = (select id from p18 where k = 'mgr');
+select pg_temp.expect((select title = 'Management meeting' from public.calendar_events where id = (select id from p18 where k = 'mgr')), 'staff cannot change or delete an event that is not theirs');
+select pg_temp.as_service();
+update public.calendar_events set google_event_id = 'umb123', google_calendar_owner = 'a3000000-0000-0000-0000-000000000001', google_synced_at = now() where id = (select id from p18 where k = 'visit');
+select pg_temp.expect((select google_event_id = 'umb123' from public.calendar_events where id = (select id from p18 where k = 'visit')), 'the server records the Google copy');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect((select count(*) from public.calendar_events) = 0, 'clients see no calendar');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- other business
+select pg_temp.expect((select count(*) from public.calendar_events) = 0, 'another business sees none of these events');
+
+-- The calendar feed
+select pg_temp.as_service();
+select pg_temp.as_owner();
+insert into public.staff_tasks (id, business_id, title, due_date, assigned_to, created_by) values ('f1800000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Replace a meter battery', '2026-12-04', 'a3000000-0000-0000-0000-000000000001', 'a2000000-0000-0000-0000-000000000001');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) from public.calendar_feed('2026-12-01 00:00+02', '2026-12-08 00:00+02') where source = 'event') = 3, 'the feed has the events in the period');
+select pg_temp.expect(exists (select 1 from public.calendar_feed('2026-12-01 00:00+02', '2026-12-08 00:00+02') where source = 'task' and all_day and link = '/tasks/f1800000-0000-0000-0000-000000000001'), 'and tasks on their due date');
+select pg_temp.expect(exists (select 1 from public.calendar_feed('2019-12-20 00:00+02', '2020-01-10 00:00+02') where source = 'invoice' and title = 'INV-0003 due'), 'and unpaid invoices on their due date');
+select pg_temp.expect(not exists (select 1 from public.calendar_feed('2026-11-01 00:00+02', '2026-11-08 00:00+02') where source = 'event'), 'and nothing outside the period');
+select pg_temp.expect_error_like($$select * from public.calendar_feed('2026-01-01', '2026-06-01')$$, 'calendar_range', 'at most about three months at a time');
+
+-- Google Calendar: a personal connection
+select pg_temp.as_service();
+select pg_temp.as_owner();
+insert into public.integrations (id, business_id, provider, profile_id, account_label, capabilities, connected_at) values
+  ('f1810000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'google_calendar', 'a3000000-0000-0000-0000-000000000001', 'staff1@gmail.test', '{calendar_events}', now()),
+  ('f1810000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'google_calendar', 'a2000000-0000-0000-0000-000000000001', 'manager1@gmail.test', '{calendar_events}', now());
+select pg_temp.expect((select channel = 'calendar' from public.integrations where id = 'f1810000-0000-0000-0000-000000000001'), 'a calendar connection is on the calendar channel');
+select pg_temp.expect_error_like($$insert into public.integrations (business_id, provider, profile_id, capabilities) values ('11111111-0000-0000-0000-000000000001', 'google_calendar', 'a3000000-0000-0000-0000-000000000001', '{calendar_events}')$$, 'integrations_one_personal', 'one calendar connection per person');
+select pg_temp.expect_error_like($$insert into public.integrations (business_id, provider, capabilities) values ('11111111-0000-0000-0000-000000000001', 'google_calendar', '{calendar_events}')$$, 'integrations_personal_owner', 'a calendar connection always belongs to a person');
+select pg_temp.expect_error_like($$insert into public.integrations (business_id, provider, profile_id, capabilities) values ('11111111-0000-0000-0000-000000000001', 'resend', 'a3000000-0000-0000-0000-000000000001', '{send_email}')$$, 'integrations_personal_owner', 'and business connections never do');
+select pg_temp.expect_error_like($$update public.integrations set is_default = true where id = 'f1810000-0000-0000-0000-000000000001'$$, 'integrations_personal_not_default', 'a personal connection is never a business default');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) from public.integrations where provider = 'google_calendar') = 1, 'people see their own calendar connection, not their colleagues''');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect((select count(*) from public.integrations where provider = 'google_calendar') = 2, 'administrators see everyone''s, to help');
+
+-- Clean up for the sections after this one
+select pg_temp.as_service();
+select pg_temp.as_owner();
+delete from public.calendar_events where id in (select id from p18);
+delete from public.staff_tasks where id = 'f1800000-0000-0000-0000-000000000001';
+delete from public.integrations where id::text like 'f181%';
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

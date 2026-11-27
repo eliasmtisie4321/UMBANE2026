@@ -28,13 +28,20 @@ interface StateRow {
   expires_at: string
 }
 
-/** Back to Settings → Integrations, saying what happened. Never echoes provider text into the page. */
-function back(appUrl: string | null, params: Record<string, string>) {
+/**
+ * Back to where the connection is managed (Settings → Integrations, or the Calendar page for a
+ * personal calendar), saying what happened. Never echoes provider text into the page.
+ */
+function back(
+  appUrl: string | null,
+  params: Record<string, string>,
+  page = '/settings/integrations',
+) {
   const base = (appUrl ?? '').replace(/\/$/, '')
   return new Response(null, {
     status: 302,
     headers: {
-      location: `${base}/settings/integrations?${new URLSearchParams(params)}`,
+      location: `${base}${page}?${new URLSearchParams(params)}`,
       'cache-control': 'no-store',
     },
   })
@@ -75,8 +82,10 @@ export function createCallbackHandler(deps: Deps) {
     const info = providerInfo(s.provider)
     const adapter = adapterFor(s.provider)
     if (!info || !adapter?.oauth) return back(env.appUrl, { error: 'invalid' })
-    if (url.searchParams.get('error'))
-      return back(env.appUrl, { error: 'denied', provider: info.key })
+    const personal = Boolean(info.personal)
+    const page = personal ? '/calendar' : '/settings/integrations'
+    const backTo = (params: Record<string, string>) => back(env.appUrl, params, page)
+    if (url.searchParams.get('error')) return backTo({ error: 'denied', provider: info.key })
 
     const person = await db
       .from('profiles')
@@ -84,8 +93,10 @@ export function createCallbackHandler(deps: Deps) {
       .eq('id', s.created_by)
       .maybeSingle()
     const p = person.data as { business_id: string; role: string; is_active: boolean } | null
-    if (!p || !p.is_active || p.role !== 'administrator' || p.business_id !== s.business_id) {
-      return back(env.appUrl, { error: 'forbidden', provider: info.key })
+    // A business connection needs an administrator; a personal one, any active team member.
+    const mayConnect = personal ? p?.role !== 'client' : p?.role === 'administrator'
+    if (!p || !p.is_active || !mayConnect || p.business_id !== s.business_id) {
+      return backTo({ error: 'forbidden', provider: info.key })
     }
 
     const ctx = adapterContext(env)
@@ -100,7 +111,7 @@ export function createCallbackHandler(deps: Deps) {
         ctx,
       )
     } catch {
-      return back(env.appUrl, { error: 'exchange', provider: info.key })
+      return backTo({ error: 'exchange', provider: info.key })
     }
 
     const existing = await db
@@ -109,8 +120,11 @@ export function createCallbackHandler(deps: Deps) {
       .eq('business_id', s.business_id)
       .eq('provider', info.key)
       .neq('status', 'disconnected')
-      .limit(1)
-    const before = ((existing.data ?? []) as IntegrationRow[])[0] ?? null
+    // A personal connection is the person's own: theirs is replaced, never a colleague's.
+    const before =
+      ((existing.data ?? []) as IntegrationRow[]).find((r) =>
+        personal ? r.profile_id === s.created_by : !r.profile_id,
+      ) ?? null
     const verified = await adapter.verify(
       grant.credentials,
       before?.settings ?? {},
@@ -119,7 +133,7 @@ export function createCallbackHandler(deps: Deps) {
     )
     if (!verified.ok) {
       // Shown on the Integrations page; the provider's text is not put into the address.
-      return back(env.appUrl, {
+      return backTo({
         error: 'verify',
         provider: info.key,
         reason: verified.error.slice(0, 200),
@@ -135,8 +149,9 @@ export function createCallbackHandler(deps: Deps) {
         provider: info.key,
         status: 'error',
         last_error: 'Saving',
+        ...(personal ? { profile_id: s.created_by } : {}),
       })
-      if (created.error) return back(env.appUrl, { error: 'save', provider: info.key })
+      if (created.error) return backTo({ error: 'save', provider: info.key })
     }
     try {
       await saveSecrets(
@@ -146,7 +161,7 @@ export function createCallbackHandler(deps: Deps) {
         key,
       )
     } catch {
-      return back(env.appUrl, { error: 'save', provider: info.key })
+      return backTo({ error: 'save', provider: info.key })
     }
     const defaults = await db
       .from('integrations')
@@ -163,7 +178,7 @@ export function createCallbackHandler(deps: Deps) {
         account_id: verified.account.accountId.slice(0, 200),
         capabilities: allowedCapabilities(info, verified.account.capabilities),
         settings: { ...(before?.settings ?? {}), ...(verified.account.settings ?? {}) },
-        is_default: before?.is_default || !(defaults.data ?? []).length,
+        is_default: !personal && (before?.is_default || !(defaults.data ?? []).length),
         connected_by: s.created_by,
         connected_at: now,
         last_checked_at: now,
@@ -175,7 +190,7 @@ export function createCallbackHandler(deps: Deps) {
       account: verified.account.accountLabel,
       scopes: grant.scopes,
     })
-    return back(env.appUrl, { connected: info.key })
+    return backTo({ connected: info.key })
   }
 }
 

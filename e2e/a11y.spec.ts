@@ -22,6 +22,7 @@ const PAGES: Array<[string, Role | undefined, string]> = [
   ['/settings/audit', 'administrator', 'Audit log'],
   ['/settings/integrations', 'administrator', 'Integrations'],
   ['/marketing', 'manager', 'Marketing'],
+  ['/calendar', 'staff', 'Calendar'],
   ['/account/security', 'client', 'password'],
 ]
 

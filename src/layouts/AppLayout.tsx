@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import type { NavItem } from './navItems'
+import type { UserRole } from '@/types/auth'
 
 interface AppLayoutProps {
   currentPath?: string
@@ -11,6 +12,8 @@ interface AppLayoutProps {
   userName?: string
   roleLabel?: string
   unread?: number
+  /** The signed-in person's role: what search and Quick Add offer. */
+  role?: UserRole
   children: ReactNode
 }
 
@@ -23,6 +26,7 @@ export function AppLayout({
   userName,
   roleLabel,
   unread,
+  role,
   children,
 }: AppLayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -45,6 +49,8 @@ export function AppLayout({
           unread={unread}
           onSignOut={onSignOut}
           onOpenSecurity={() => onNavigate?.('/account/security')}
+          onNavigate={onNavigate}
+          role={role}
           userName={userName}
           roleLabel={roleLabel}
         />

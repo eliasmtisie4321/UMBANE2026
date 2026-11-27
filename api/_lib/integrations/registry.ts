@@ -5,6 +5,7 @@ import {
   type ProviderInfo,
   type ProviderKey,
 } from '../../../shared/integrations.js'
+import { googleCalendar } from './calendar.js'
 import { google, microsoft, resend } from './email.js'
 import { twilio, whatsapp } from './messaging.js'
 import { facebook, instagram, linkedin } from './social.js'
@@ -20,6 +21,7 @@ export const ADAPTERS: Partial<Record<ProviderKey, Adapter>> = {
   facebook,
   instagram,
   linkedin,
+  google_calendar: googleCalendar,
 }
 
 export function adapterFor(provider: string): Adapter | null {
