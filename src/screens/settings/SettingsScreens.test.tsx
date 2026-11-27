@@ -136,7 +136,7 @@ describe('settings hub', () => {
       '/settings/audit',
     )
     expect(screen.getByRole('link', { name: /Data and privacy/ })).toBeInTheDocument()
-    expect(screen.getAllByRole('listitem')).toHaveLength(10)
+    expect(screen.getAllByRole('listitem')).toHaveLength(11)
   })
 
   it('leaves the audit log and privacy out for managers, and blocks them', async () => {

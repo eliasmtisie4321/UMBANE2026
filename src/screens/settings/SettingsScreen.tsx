@@ -4,6 +4,7 @@ import {
   Building2,
   FileClock,
   KeyRound,
+  Plug,
   Receipt,
   ShieldCheck,
   Tags,
@@ -76,6 +77,12 @@ const CARDS: Card[] = [
     title: 'Your password and sign-in',
     description: 'Change your password and sign out of other devices.',
     icon: KeyRound,
+  },
+  {
+    to: '/settings/integrations',
+    title: 'Integrations',
+    description: 'Email, SMS, WhatsApp and social media accounts that Share and Send use.',
+    icon: Plug,
   },
   {
     to: '/settings/audit',

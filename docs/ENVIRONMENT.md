@@ -1,14 +1,14 @@
 # Environment configuration
 
-| Variable                  | Where                                                            | Public?                                           |
-| ------------------------- | ---------------------------------------------------------------- | ------------------------------------------------- |
-| `VITE_SUPABASE_URL`       | `.env` locally; Vercel project settings for preview + production | Yes                                               |
-| `VITE_SUPABASE_ANON_KEY`  | same                                                             | Yes (protected by Row Level Security)             |
-| `SUPABASE_SERVICE_ROLE_KEY` | Vercel environment variables only, read by the `api/` functions | **Never** in the frontend, `.env.example`, or git |
-| `RESEND_API_KEY`          | Vercel only (`api/` functions)                                   | **Never**                                         |
-| `RESEND_WEBHOOK_SECRET`   | Vercel only                                                      | **Never**                                         |
-| `CRON_SECRET`             | Vercel only                                                      | **Never**                                         |
-| `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SUPABASE_URL`, `APP_URL` | Vercel only                     | Not secret, but server settings                   |
+| Variable                                                  | Where                                                            | Public?                                           |
+| --------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------- |
+| `VITE_SUPABASE_URL`                                       | `.env` locally; Vercel project settings for preview + production | Yes                                               |
+| `VITE_SUPABASE_ANON_KEY`                                  | same                                                             | Yes (protected by Row Level Security)             |
+| `SUPABASE_SERVICE_ROLE_KEY`                               | Vercel environment variables only, read by the `api/` functions  | **Never** in the frontend, `.env.example`, or git |
+| `RESEND_API_KEY`                                          | Vercel only (`api/` functions)                                   | **Never**                                         |
+| `RESEND_WEBHOOK_SECRET`                                   | Vercel only                                                      | **Never**                                         |
+| `CRON_SECRET`                                             | Vercel only                                                      | **Never**                                         |
+| `EMAIL_FROM`, `EMAIL_REPLY_TO`, `SUPABASE_URL`, `APP_URL` | Vercel only                                                      | Not secret, but server settings                   |
 
 ## Local setup
 
@@ -134,3 +134,18 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
 something from another site (an analytics script, a map, a different storage host), add that host to the
 matching directive in `vercel.json` or the browser will block it. The policy can also hide Vercel's
 preview toolbar on preview deployments; the app itself is not affected.
+
+- `20261201000017_integrations.sql`: Settings → Integrations (connections and encrypted credentials),
+  one outbox and history for email, SMS, WhatsApp and social posts, SMS and WhatsApp consent on
+  customers, private document links, and team invitations sent by email (see `docs/INTEGRATIONS.md`).
+  **Run it after 0016.**
+
+## Integrations (Vercel settings)
+
+`INTEGRATIONS_KEY` (32 random bytes, base64: `openssl rand -base64 32`) is needed before any
+connection can be made; keep a copy in a password manager. `APP_URL` is needed for sign-in with
+providers, webhooks, document links and invitation links. Each OAuth provider needs its app id and
+secret (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `MICROSOFT_CLIENT_ID`/`MICROSOFT_CLIENT_SECRET`,
+`META_APP_ID`/`META_APP_SECRET`, `LINKEDIN_CLIENT_ID`/`LINKEDIN_CLIENT_SECRET`), and the return
+address `<APP_URL>/api/integrations/callback` registered with it. All server-only: never prefix them
+with `VITE_`. The full list is in `docs/INTEGRATIONS.md`.

@@ -6,6 +6,8 @@ import { renderAt, signedInAs } from '@/auth/authTestUtils'
 import { customerFixture } from '@/test/fixtures'
 import * as customerService from '@/services/customers'
 import * as messageService from '@/services/messages'
+import * as shareService from '@/services/share'
+import { shareReady } from '@/test/share'
 import * as notificationService from '@/services/notifications'
 import * as supportService from '@/services/support'
 import * as taskService from '@/services/tasks'
@@ -14,12 +16,17 @@ import type { Message, MessageListItem, MessageTemplate } from '@/types/messages
 import { err, ok } from '@/utils/result'
 
 vi.mock('@/services/messages')
+vi.mock('@/services/share', async (real) => ({
+  ...(await real<typeof import('@/services/share')>()),
+  ...(await import('@/test/share')).shareMocks(),
+}))
 vi.mock('@/services/customers')
 vi.mock('@/services/notifications')
 vi.mock('@/services/support')
 vi.mock('@/services/tasks')
 
 const m = vi.mocked(messageService)
+const sh = vi.mocked(shareService)
 
 const item = (over: Partial<MessageListItem> = {}): MessageListItem => ({
   id: 'm1',
@@ -270,39 +277,43 @@ describe('templates', () => {
   })
 })
 
-describe('emailing a customer', () => {
+describe('messaging a customer', () => {
   it('fills the template and refuses to send until the message is written', async () => {
-    m.queueEmail.mockResolvedValue(ok({ id: 'm9' }))
-    m.sendNow.mockResolvedValue({ state: 'queued', reason: 'not_configured' })
+    shareReady(sh)
     open('/customers/c1')
-    await userEvent.click(await screen.findByRole('button', { name: /Send Email/ }))
+    await userEvent.click(await screen.findByRole('button', { name: /Send Message/ }))
     const dialog = screen.getByRole('dialog')
     const body = await within(dialog).findByLabelText('Message')
-    expect(within(dialog).getByLabelText('Subject')).toHaveValue('A message from Umbane')
+    expect(within(dialog).getByLabelText('Email subject')).toHaveValue('A message from Umbane')
     expect(body).toHaveValue(
       'Good day Naledi Dlamini,\n\n[Write your message here]\n\nKind regards\nTest User',
     )
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Send Email' }))
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Send' }))
     expect(within(dialog).getByText(/Replace “\[Write your message here\]”/)).toBeInTheDocument()
     await userEvent.clear(body)
     await userEvent.type(body, 'Your new meter is installed.')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Send Email' }))
-    expect(await screen.findByText(/It will be sent once email is set up/)).toBeInTheDocument()
-    expect(m.queueEmail.mock.calls[0][0]).toMatchObject({
-      customerId: 'c1',
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Send' }))
+    expect(await within(dialog).findByText('Sent.')).toBeInTheDocument()
+    expect(sh.queueMessage.mock.calls[0][0]).toMatchObject({
+      channel: 'email',
+      recipient: { kind: 'customer', id: 'c1' },
       body: 'Your new meter is installed.',
       templateKey: 'general',
       purpose: 'transactional',
     })
+    expect(sh.sendMessages).toHaveBeenCalledWith(['msg1'])
   })
 
-  it('will not send marketing without consent, or anything to an opted-out customer', async () => {
+  it('will not send marketing without consent', async () => {
+    shareReady(sh)
     open('/customers/c1')
-    await userEvent.click(await screen.findByRole('button', { name: /Send Email/ }))
+    await userEvent.click(await screen.findByRole('button', { name: /Send Message/ }))
     const dialog = screen.getByRole('dialog')
     await userEvent.selectOptions(await within(dialog).findByLabelText('Template'), 'winter_tips')
-    expect(within(dialog).getByText(/needs the customer’s recorded consent/)).toBeInTheDocument()
-    expect(within(dialog).getByRole('button', { name: 'Send Email' })).toBeDisabled()
+    expect(within(dialog).getByText('Email: No marketing consent')).toBeInTheDocument()
+    expect(
+      within(dialog).getByText(/only customers who agreed to receive marketing/),
+    ).toBeInTheDocument()
   })
 
   it('records consent changes and logs a call', async () => {
@@ -315,6 +326,8 @@ describe('emailing a customer', () => {
     expect(m.setCustomerPreferences).toHaveBeenCalledWith('c1', {
       emailOptOut: false,
       marketingConsent: true,
+      smsOptOut: false,
+      whatsappOptIn: false,
     })
     await userEvent.click(screen.getByRole('button', { name: /Log Contact/ }))
     const dialog = screen.getByRole('dialog')
@@ -380,22 +393,24 @@ describe('emailing a customer', () => {
         }),
       ]),
     )
-    m.queueEmail.mockResolvedValue(
+    shareReady(sh)
+    sh.queueMessage.mockResolvedValue(
       err({ code: 'validation', message: 'This customer has asked not to receive email.' }),
     )
     open('/support-tickets/t1')
-    await userEvent.click(await screen.findByRole('button', { name: /Email Customer/ }))
+    await userEvent.click(await screen.findByRole('button', { name: /Message Customer/ }))
     const dialog = screen.getByRole('dialog')
-    expect(await within(dialog).findByLabelText('Subject')).toHaveValue(
+    expect(await within(dialog).findByLabelText('Email subject')).toHaveValue(
       'Update on your support ticket TKT-2026-00418',
     )
     await userEvent.clear(within(dialog).getByLabelText('Message'))
     await userEvent.type(within(dialog).getByLabelText('Message'), 'Technician booked for Monday.')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Send Email' }))
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Send' }))
     expect(
       await within(dialog).findByText('This customer has asked not to receive email.'),
     ).toBeInTheDocument()
-    expect(m.queueEmail.mock.calls[0][0]).toMatchObject({
+    expect(within(dialog).getByText('Not sent')).toBeInTheDocument()
+    expect(sh.queueMessage.mock.calls[0][0]).toMatchObject({
       ticketId: 't1',
       templateKey: 'ticket_update',
     })

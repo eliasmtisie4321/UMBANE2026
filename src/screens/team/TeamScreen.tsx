@@ -13,11 +13,12 @@ import { EmployeeStatusBadge } from '@/components/team/TeamBadges'
 import { Select, Table, Td, Th } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
 import { getTaskSummary } from '@/services/tasks'
-import { cancelInvitation, listInvitations, listTeam } from '@/services/team'
+import { InvitationRow } from '@/components/team/InvitationRow'
+import { cancelInvitation, invitationAction, listInvitations, listTeam } from '@/services/team'
 import { ROLE_LABEL } from '@/types/auth'
 import { labelOf } from '@/types/support'
 import { DEPARTMENTS, type Invitation, type TeamMember } from '@/types/team'
-import { formatDate, formatNumber } from '@/utils/format'
+import { formatNumber } from '@/utils/format'
 import { patchParams, readEnum } from '@/utils/listParams'
 import { formatPhone } from '@/utils/phone'
 
@@ -65,7 +66,9 @@ export default function TeamScreen() {
     if (!cancelling) return
     setBusy(true)
     setError(null)
-    const result = await cancelInvitation(cancelling.id)
+    // The server also removes the unused sign-in account the invitation link made.
+    const viaServer = await invitationAction('cancel', cancelling.id)
+    const result = viaServer.ok ? viaServer : await cancelInvitation(cancelling.id)
     setBusy(false)
     if (!result.ok) return setError(result.error.message)
     setNotice(`Invitation for ${cancelling.email} cancelled.`)
@@ -165,7 +168,10 @@ export default function TeamScreen() {
           </ResourceBoundary>
         </Panel>
         {isAdmin && (
-          <Panel title="Waiting to join" subtitle="Invitations not yet accepted">
+          <Panel
+            title="Waiting to join"
+            subtitle="Invitations not yet accepted: send, resend, copy the link or cancel"
+          >
             <ResourceBoundary
               state={invites}
               isEmpty={(r) => r.length === 0}
@@ -174,27 +180,18 @@ export default function TeamScreen() {
               {(rows) => (
                 <ul className="divide-y divide-outline-variant">
                   {rows.map((i) => (
-                    <li key={i.id} className="flex items-start justify-between gap-3 py-2.5">
-                      <div className="min-w-0">
-                        <p className="text-body-md font-medium text-on-surface">{i.fullName}</p>
-                        <p className="truncate text-label-md text-on-surface-variant">
-                          {[i.email, ROLE_LABEL[i.role], `invited ${formatDate(i.createdAt)}`].join(
-                            ' · ',
-                          )}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        aria-label={`Cancel invitation for ${i.email}`}
-                        onClick={() => {
-                          setError(null)
-                          setCancelling(i)
-                        }}
-                        className="shrink-0 rounded-md px-2 py-1 text-label-md font-medium text-error hover:bg-error-container"
-                      >
-                        Cancel
-                      </button>
-                    </li>
+                    <InvitationRow
+                      key={i.id}
+                      invitation={i}
+                      onChanged={(text) => {
+                        setNotice(text)
+                        setVersion((v) => v + 1)
+                      }}
+                      onCancel={() => {
+                        setError(null)
+                        setCancelling(i)
+                      }}
+                    />
                   ))}
                 </ul>
               )}
@@ -322,8 +319,8 @@ export default function TeamScreen() {
       >
         {cancelling && (
           <p>
-            {cancelling.fullName} will not be added when they accept. If you already invited{' '}
-            {cancelling.email} in Supabase, remove that user there too.
+            {cancelling.fullName} will not be added, and the invitation link stops working. The
+            history keeps a record that it was cancelled.
           </p>
         )}
       </ConfirmDialog>

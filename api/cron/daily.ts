@@ -5,6 +5,7 @@ import {
   deliveryConfig,
   isCronRequest,
   json,
+  canSend,
   missingForEmail,
   readEnv,
   type ServerEnv,
@@ -13,7 +14,7 @@ import {
 interface Deps {
   env: ServerEnv
   admin: () => AdminClient
-  config: (env: ServerEnv) => DeliveryConfig
+  config: (env: ServerEnv, admin?: unknown) => DeliveryConfig
 }
 
 /**
@@ -40,11 +41,10 @@ export function createDailyHandler(deps: Deps) {
     const retention = await admin.rpc('apply_retention', {})
     report.retention = retention.error ? { error: retention.error.message } : retention.data
 
-    const missing = missingForEmail(deps.env)
-    if (missing.length > 0) {
-      report.email = { status: 'not_configured', missing }
+    if (!canSend(deps.env)) {
+      report.email = { status: 'not_configured', missing: missingForEmail(deps.env) }
     } else {
-      const config = deps.config(deps.env)
+      const config = deps.config(deps.env, admin)
       try {
         report.notificationEmails = await deliverNotificationEmails(
           admin,

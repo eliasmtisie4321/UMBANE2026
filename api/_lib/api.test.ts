@@ -208,6 +208,8 @@ const env = (over: Partial<ServerEnv> = {}): ServerEnv => ({
   webhookSecret: null,
   cronSecret: 'cron-secret',
   appUrl: 'https://crm.umbane.test',
+  integrationsKey: null,
+  oauth: {},
   ...over,
 })
 
@@ -248,10 +250,21 @@ function fakeSupabase(opts: {
     },
   }
   const query = (table: string) => {
+    let asked: unknown[] = []
     const q = {
       select: () => q,
       eq: () => q,
+      in: (_col: string, values: unknown[]) => {
+        asked = values
+        return q
+      },
       maybeSingle: async () => ({ data: rows[table] ?? null, error: null }),
+      // A list query (messages by id) answers with the ids it was asked for.
+      then: (resolve: (r: { data: unknown[]; error: null }) => unknown) =>
+        resolve({
+          data: rows[table] ? asked.map((id) => ({ ...(rows[table] as object), id })) : [],
+          error: null,
+        }),
     }
     return q
   }

@@ -1,7 +1,9 @@
 # Communications: email through Resend
 
 Rules live in `supabase/migrations/20261127000012_communications.sql`; sending lives in `api/` (Vercel
-functions). Email is the only channel that sends today. SMS and WhatsApp are covered at the end.
+functions). Since the integrations work, the same queue sends email, SMS, WhatsApp and social posts
+through the connections in Settings → Integrations: see `docs/INTEGRATIONS.md`. This page covers
+email and the rules every channel shares.
 
 ## How an email travels
 
@@ -20,13 +22,13 @@ Every email, call and note is in **Communications**, and on the customer's profi
 
 ## Failures and retries
 
-| What went wrong                                    | What happens                                   |
-| -------------------------------------------------- | ---------------------------------------------- |
-| Network error, Resend busy (429) or down (5xx)     | Tried again after 1, 5, 15 and 60 minutes      |
-| Resend refuses it (bad address, domain not verified, bad key) | Marked failed; waits for a person   |
-| Five attempts used                                 | Marked failed; waits for a person              |
-| Customer opted out or bounced since it was queued  | Cancelled, not sent                            |
-| The server stopped mid-send                        | Picked up again after 10 minutes               |
+| What went wrong                                               | What happens                              |
+| ------------------------------------------------------------- | ----------------------------------------- |
+| Network error, Resend busy (429) or down (5xx)                | Tried again after 1, 5, 15 and 60 minutes |
+| Resend refuses it (bad address, domain not verified, bad key) | Marked failed; waits for a person         |
+| Five attempts used                                            | Marked failed; waits for a person         |
+| Customer opted out or bounced since it was queued             | Cancelled, not sent                       |
+| The server stopped mid-send                                   | Picked up again after 10 minutes          |
 
 - **Never sent twice:** each send carries an idempotency key (the email and its address). If a retry
   follows a send that actually went through, Resend does not send it again.
@@ -70,16 +72,17 @@ You need: a Resend account, access to your domain's DNS, and access to Vercel an
 5. **Vercel → Project → Settings → Environment Variables**, for Production (and Preview if you want to
    test there):
 
-   | Name                        | Value                                                    |
-   | --------------------------- | -------------------------------------------------------- |
-   | `RESEND_API_KEY`            | the key from step 3                                      |
-   | `EMAIL_FROM`                | e.g. `Umbane <accounts@umbane.co.za>` (on your verified domain) |
-   | `EMAIL_REPLY_TO`            | optional, e.g. `support@umbane.co.za`                    |
-   | `SUPABASE_SERVICE_ROLE_KEY` | the key from step 4                                      |
-   | `CRON_SECRET`               | any long random text (for the daily run: automations and retries) |
+   | Name                        | Value                                                                                                   |
+   | --------------------------- | ------------------------------------------------------------------------------------------------------- |
+   | `RESEND_API_KEY`            | the key from step 3                                                                                     |
+   | `EMAIL_FROM`                | e.g. `Umbane <accounts@umbane.co.za>` (on your verified domain)                                         |
+   | `EMAIL_REPLY_TO`            | optional, e.g. `support@umbane.co.za`                                                                   |
+   | `SUPABASE_SERVICE_ROLE_KEY` | the key from step 4                                                                                     |
+   | `CRON_SECRET`               | any long random text (for the daily run: automations and retries)                                       |
    | `APP_URL`                   | optional, e.g. `https://crm.umbane.co.za` (links in notification emails; defaults to the Vercel domain) |
 
    `SUPABASE_URL` is optional: the server uses `VITE_SUPABASE_URL` if it is not set.
+
 6. **Delivery reports:** in Resend → **Webhooks**, add an endpoint
    `https://<your Vercel domain>/api/webhooks/resend` with the events `email.sent`, `email.delivered`,
    `email.delivery_delayed`, `email.bounced` and `email.complained`. Copy its signing secret (it starts
@@ -94,26 +97,9 @@ Resend accepts these test addresses, which simulate an outcome without emailing 
 send an email, and check Communications shows Delivered, Bounced or Marked as spam (and that the bounced
 or complaining test customer is then blocked).
 
-## SMS and WhatsApp (investigated, not built)
+## SMS, WhatsApp and other email accounts
 
-The message history already records SMS and WhatsApp as channels (staff can log them by hand). Sending
-them needs a provider module next to `api/_lib/resend.ts` and the same queue, retry and webhook steps.
-
-**SMS (South Africa):** BulkSMS, Clickatell and SMSPortal are local, pay-as-you-go and offer REST APIs
-with delivery reports; Twilio works but usually costs more per South African message. Expect to buy
-credits up front. Each needs an account, an API key in Vercel, and a sender name or number. SMS marketing
-needs the same consent as email, and every message must offer an opt-out.
-
-**WhatsApp Business Platform (Meta Cloud API):**
-
-- Meta must verify the business (company documents; days to weeks), and you need a phone number not
-  already used on WhatsApp.
-- Messages Umbane starts (invoice ready, ticket update) must use **templates approved by Meta**. Free text
-  is only allowed within 24 hours of the customer messaging you.
-- Meta charges per conversation, by category (utility, marketing, service) and country.
-- Customers must have opted in to WhatsApp messages from you.
-- Delivery and read receipts arrive by webhook, like Resend's.
-
-Recommendation: run email for a while, then add WhatsApp for ticket updates (customers in South Africa
-read WhatsApp more than email), starting Meta's business verification early because it takes the
-longest.
+Built: see `docs/INTEGRATIONS.md`. A business can connect its own Resend account, Gmail / Google
+Workspace or Outlook / Microsoft 365 for email, Twilio for SMS and the WhatsApp Business Platform.
+The keys above (`RESEND_API_KEY`, `EMAIL_FROM`) remain the built-in email, used when no email
+account is connected.

@@ -8,7 +8,7 @@ export default defineConfig({
   // Root-relative on purpose: an absolute path built from import.meta.url can differ from the
   // project root in drive-letter case on Windows (C:\ vs c:\), loading modules twice and
   // splitting React context. TypeScript resolves '@/*' separately via tsconfig paths.
-  resolve: { alias: { '@': '/src' } },
+  resolve: { alias: { '@': '/src', '@shared': '/shared' } },
   build: {
     rollupOptions: {
       output: {

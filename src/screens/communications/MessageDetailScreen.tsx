@@ -1,6 +1,7 @@
 import { Ban, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { MESSAGE_TYPE_LABEL, providerInfo, type MessageType } from '@shared/integrations'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
 import { ConfirmDialog } from '@/components/data/ConfirmDialog'
 import { DetailList } from '@/components/data/DetailList'
@@ -47,7 +48,7 @@ function Body({ m, onChanged }: { m: Message; onChanged: (n: string) => void }) 
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const isEmail = m.channel === 'email' && m.direction === 'outbound'
+  const isEmail = m.direction === 'outbound' && m.messageType !== 'logged' && m.status !== 'logged'
 
   async function retry() {
     setBusy(true)
@@ -147,7 +148,35 @@ function Body({ m, onChanged }: { m: Message; onChanged: (n: string) => void }) 
                     </Link>
                   ),
                 },
-                { label: 'To', value: m.recipient },
+                {
+                  label: 'Lead',
+                  value: m.leadId && (
+                    <Link to={`/leads/${m.leadId}`} className={inlineLink}>
+                      {m.leadName}
+                    </Link>
+                  ),
+                },
+                {
+                  label: 'To',
+                  value: [m.recipientName, m.recipient].filter(Boolean).join(' · ') || null,
+                },
+                {
+                  label: 'Type',
+                  value: m.messageType ? MESSAGE_TYPE_LABEL[m.messageType as MessageType] : null,
+                },
+                {
+                  label: 'Through',
+                  value: m.provider ? (providerInfo(m.provider)?.label ?? m.provider) : null,
+                },
+                { label: 'From', value: m.sender },
+                {
+                  label: 'Published at',
+                  value: m.externalUrl && (
+                    <a href={m.externalUrl} target="_blank" rel="noreferrer" className={inlineLink}>
+                      See the post
+                    </a>
+                  ),
+                },
                 {
                   label: 'Invoice',
                   value: m.invoiceId && (

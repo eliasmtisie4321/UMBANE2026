@@ -18,6 +18,9 @@ export const CHANNELS = [
   { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'sms', label: 'SMS' },
   { value: 'note', label: 'Note' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'linkedin', label: 'LinkedIn' },
 ] as const
 export type Channel = (typeof CHANNELS)[number]['value']
 export type Direction = 'inbound' | 'outbound'
@@ -45,6 +48,17 @@ export interface MessageListItem {
   nextAttemptAt: string | null
   willRetry: boolean
   error: string | null
+  /** email, direct_message, document_share, social_post or logged. */
+  messageType?: string
+  /** The provider it went through (resend, google, twilio, ...). */
+  provider?: string | null
+  /** The account it went from. */
+  sender?: string | null
+  recipientName?: string | null
+  leadId?: string | null
+  leadName?: string | null
+  /** Where a published post can be seen. */
+  externalUrl?: string | null
 }
 
 export interface Message extends MessageListItem {
@@ -124,4 +138,8 @@ export interface CustomerPreferences {
   consentUpdatedAt: string | null
   suppressedAt: string | null
   suppressedReason: 'bounced' | 'complained' | null
+  /** Asked for no SMS (service messages still go by other channels). */
+  smsOptOut?: boolean
+  /** Agreed to WhatsApp messages (WhatsApp needs a yes first). */
+  whatsappOptIn?: boolean
 }

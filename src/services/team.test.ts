@@ -75,10 +75,12 @@ describe('team', () => {
     expect(r.ok && r.data).toEqual({ status: 'linked', profileId: 'p9' })
     expect(linked.log[0].ops[0]).toContain('"p_email":"lerato@umbane.co.za"')
     expect(linked.log[0].ops[0]).toContain('"p_department":"customer_support"')
-    const waiting = fake({ 'rpc:invite_staff': { data: { status: 'invited' } } })
+    const waiting = fake({
+      'rpc:invite_staff': { data: { status: 'invited', invitation_id: 'i9' } },
+    })
     expect(await inviteStaff(invite, waiting.client)).toEqual({
       ok: true,
-      data: { status: 'invited' },
+      data: { status: 'invited', invitationId: 'i9' },
     })
   })
 
@@ -113,10 +115,10 @@ describe('team', () => {
     expect(r.ok ? '' : r.error.message).toMatch(/cannot deactivate yourself/)
   })
 
-  it('lists pending invitations and cancels one', async () => {
-    const list = fake({ staff_invitations: { data: [] } })
+  it('lists open invitations (not accepted or cancelled) and cancels one', async () => {
+    const list = fake({ staff_invitation_list: { data: [] } })
     await listInvitations(list.client)
-    expect(list.log[0].ops).toContain('eq("status","pending")')
+    expect(list.log[0].ops).toContain('in("state",["pending","sent","failed","expired"])')
     const c = fake({ staff_invitations: {} })
     await cancelInvitation('i1', c.client)
     expect(c.log[0].ops[0]).toBe('update({"status":"cancelled"})')

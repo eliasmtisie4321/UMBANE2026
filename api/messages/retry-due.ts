@@ -4,6 +4,7 @@ import {
   deliveryConfig,
   isCronRequest,
   json,
+  canSend,
   missingForEmail,
   readEnv,
   type ServerEnv,
@@ -19,9 +20,9 @@ export function createRetryHandler(env: ServerEnv, admin: () => AdminClient) {
     if (!isCronRequest(request, env.cronSecret)) {
       return json({ error: 'unauthorized' }, 401)
     }
-    const missing = missingForEmail(env)
-    if (missing.length > 0) return json({ error: 'not_configured', missing }, 503)
-    const outcomes = await deliverDue(admin(), deliveryConfig(env), 25)
+    if (!canSend(env)) return json({ error: 'not_configured', missing: missingForEmail(env) }, 503)
+    const client = admin()
+    const outcomes = await deliverDue(client, deliveryConfig(env, client), 25)
     return json(outcomes)
   }
 }
