@@ -5,14 +5,15 @@ the automated checks in CI (`.github/workflows/ci.yml`); the manual checks below
 
 ## Automated tests
 
-| Suite                 | Command            | What it covers                                                                                                                                                                              |
-| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lint                  | `npm run lint`     | Code style and React rules                                                                                                                                                                  |
-| Types                 | `npx tsc -b`       | The app, the server functions (`api/`) and the end-to-end tests                                                                                                                             |
-| Unit and screen tests | `npm test`         | Services, calculations, forms, permissions, every screen's loading, empty, success and error states, the server functions, the security headers                                             |
-| Database tests        | `npm run test:db`  | Every migration on an in-memory Postgres, then row security for every role, validation, invoice and stock maths, triggers, audit, retention and rate limits (`supabase/tests/rls.test.sql`) |
-| End-to-end tests      | `npm run test:e2e` | The built app in Chromium with the backend stood in (`e2e/`): journeys, layouts on desktop, tablet and phone, and accessibility                                                             |
-| Build                 | `npm run build`    | The production bundle                                                                                                                                                                       |
+| Suite                 | Command               | What it covers                                                                                                                                                                                                                |
+| --------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lint                  | `npm run lint`        | Code style and React rules                                                                                                                                                                                                    |
+| Types                 | `npx tsc -b`          | The app, the server functions (`api/`) and the end-to-end tests                                                                                                                                                               |
+| Unit and screen tests | `npm test`            | Services, calculations, forms, permissions, every screen's loading, empty, success and error states, the server functions, the security headers                                                                               |
+| Database tests        | `npm run test:db`     | Every migration on an in-memory Postgres, then row security for every role, validation, invoice and stock maths, triggers, audit, retention and rate limits (`supabase/tests/rls.test.sql`)                                   |
+| End-to-end tests      | `npm run test:e2e`    | The built app in Chromium with the backend stood in (`e2e/`): journeys, layouts on desktop, tablet and phone, and accessibility                                                                                               |
+| Build                 | `npm run build`       | The production bundle                                                                                                                                                                                                         |
+| Live check            | `npm run verify:prod` | Read-only, after each deploy: the live site and headers, no server keys in the browser code, server functions refusing anonymous calls, every migration applied, visitors seeing no data, sign-in settings (`docs/LAUNCH.md`) |
 
 The end-to-end tests need the Playwright browser once: `npx playwright install chromium`. They build the
 app into `dist-e2e/` and serve it on `127.0.0.1:4173`; no Supabase project or secrets are needed. On a

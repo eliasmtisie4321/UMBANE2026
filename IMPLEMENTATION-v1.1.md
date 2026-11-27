@@ -499,17 +499,17 @@ Ticket statuses:
 
 **Goal:** Release a stable version of Umbane CRM and document how to run and maintain it.
 
-- [ ] Configure the production Supabase project.
-- [ ] Apply and verify production database migrations.
-- [ ] Review production RLS policies.
-- [ ] Configure production environment variables.
-- [ ] Verify frontend and backend deployment.
-- [ ] Load approved pilot or realistic demo data.
-- [ ] Create production administrator access securely.
-- [ ] Verify all Must-have features on the live URL.
-- [ ] Run the final smoke test.
-- [ ] Confirm backup and recovery arrangements.
-- [ ] Complete the README with:
+- [ ] Configure the production Supabase project. (Project live; still to do: turn off open sign-up, set Site URL, redirect URLs and SMTP: docs/LAUNCH.md §2.)
+- [x] Apply and verify production database migrations. (All 17 confirmed live by `npm run verify:prod`, 27 Nov 2026.)
+- [x] Review production RLS policies. (840 database checks; live check confirms visitors see no data and secrets tables are closed.)
+- [ ] Configure production environment variables. (Server functions answer as configured; still to add: `INTEGRATIONS_KEY`, `APP_URL` and any OAuth apps: docs/LAUNCH.md §3.)
+- [x] Verify frontend and backend deployment. (`npm run verify:prod`: 44 passed, 1 warning, 0 failed.)
+- [ ] Enter the business's first real records (no demo or sample data): docs/LAUNCH.md §5.
+- [ ] Create production administrator access securely. (Once with supabase/bootstrap.sql; everyone else by invitation: docs/LAUNCH.md §4.)
+- [ ] Verify all Must-have features on the live URL. (Signed-in checklist: docs/LAUNCH.md §6.)
+- [ ] Run the final smoke test. (Automated part done with verify:prod; the signed-in part is docs/LAUNCH.md §6.)
+- [ ] Confirm backup and recovery arrangements. (Supabase Pro daily backups; confirm and test a restore: docs/LAUNCH.md §7.)
+- [x] Complete the README with:
   - Project overview and features
   - Live application URL
   - Stitch design reference
@@ -520,9 +520,9 @@ Ticket statuses:
   - Demo access instructions, if safe to publish
   - Screenshots
   - Known issues and limitations
-- [ ] Add an architecture diagram.
-- [ ] Record final test results.
-- [ ] Document deferred features.
+- [x] Add an architecture diagram. (docs/ARCHITECTURE.md)
+- [x] Record final test results. (docs/RELEASE.md)
+- [x] Document deferred features. (docs/RELEASE.md)
 
 **Done when:** The production application is accessible, core workflows work, documentation is complete and known limitations are recorded.
 
