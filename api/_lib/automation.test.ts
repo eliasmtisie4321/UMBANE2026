@@ -4,7 +4,8 @@ import { createFlushHandler } from '../notifications/flush.js'
 import type { AdminClient } from './deliver.js'
 import { deliverNotificationEmails, notificationEmail } from './notify.js'
 import type { OutgoingEmail, SendResult } from './resend.js'
-import { isCronRequest, type ServerEnv } from './server.js'
+import { createWebhookHandler } from '../webhooks/resend.js'
+import { isCronRequest, withinRateLimit, type ServerEnv } from './server.js'
 
 const env = (over: Partial<ServerEnv> = {}): ServerEnv => ({
   supabaseUrl: 'https://x.supabase.co',
@@ -208,7 +209,7 @@ describe('flushing emails from the app', () => {
     const res = await handler(a)(flushRequest())
     expect(res.status).toBe(200)
     expect(await res.json()).toMatchObject({ notifications: { sent: 1 }, customerEmails: 0 })
-    expect(a.calls[0]).toEqual(['claim_notification_emails', { p_limit: 10, p_business_id: 'b1' }])
+    expect(a.calls[1]).toEqual(['claim_notification_emails', { p_limit: 10, p_business_id: 'b1' }])
     expect(a.calls).toContainEqual(['due_messages_for', { p_business_id: 'b1', p_limit: 5 }])
   })
 
@@ -227,5 +228,60 @@ describe('flushing emails from the app', () => {
     const res = await handler(a, env({ emailFrom: null }))(flushRequest())
     expect(res.status).toBe(202)
     expect(a.calls).toEqual([])
+  })
+})
+
+describe('rate limits', () => {
+  it('allows a call within the limit and refuses one over it', async () => {
+    const allowed = fakeAdmin({ rate_limit_hit: { data: true } })
+    expect(await withinRateLimit(allowed.admin, 'send:u1', 20)).toBe(true)
+    expect(allowed.calls[0]).toEqual([
+      'rate_limit_hit',
+      { p_key: 'send:u1', p_limit: 20, p_window_seconds: 60 },
+    ])
+    expect(
+      await withinRateLimit(fakeAdmin({ rate_limit_hit: { data: false } }).admin, 'k', 1),
+    ).toBe(false)
+  })
+
+  it('lets calls through if the limiter itself is broken', async () => {
+    expect(
+      await withinRateLimit(
+        fakeAdmin({ rate_limit_hit: { error: { message: 'missing' } } }).admin,
+        'k',
+        1,
+      ),
+    ).toBe(true)
+    const throwing = { rpc: () => Promise.reject(new Error('down')) }
+    expect(await withinRateLimit(throwing, 'k', 1)).toBe(true)
+  })
+
+  it('answers 429 with a retry time once a person is over the limit', async () => {
+    const a = fakeAdmin({ rate_limit_hit: { data: false } }, { id: 'u1' })
+    const res = await createFlushHandler({
+      env: env(),
+      admin: () => a.admin as never,
+      config: () => ({ from: 'x', send: async () => ({ ok: true, id: 're' }) }),
+    })(flushRequest())
+    expect(res.status).toBe(429)
+    expect(res.headers.get('retry-after')).toBe('60')
+    expect(a.calls.map(([fn]) => fn)).toEqual(['rate_limit_hit'])
+    expect(a.calls[0][1]).toMatchObject({ p_key: 'flush:u1' })
+  })
+
+  it('limits the webhook by address before checking signatures', async () => {
+    const a = fakeAdmin({ rate_limit_hit: { data: false } })
+    const res = await createWebhookHandler(
+      env({ webhookSecret: 'whsec_dGVzdA==' }),
+      () => a.admin as unknown as AdminClient,
+    )(
+      new Request('https://umbane.test/api/webhooks/resend', {
+        method: 'POST',
+        headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' },
+        body: '{}',
+      }),
+    )
+    expect(res.status).toBe(429)
+    expect(a.calls[0][1]).toMatchObject({ p_key: 'webhook:203.0.113.9' })
   })
 })

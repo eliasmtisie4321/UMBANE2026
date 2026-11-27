@@ -22,6 +22,7 @@ describe('requestAccess', () => {
 
   it.each([
     [{ code: '23514', message: 'check' }, 'validation', /not valid/],
+    [{ code: '23514', message: 'rate_limited' }, 'unknown', /try again in an hour/],
     [{ code: 'PGRST202', message: 'missing' }, 'unknown', /not available yet/],
     [{ message: 'TypeError: Failed to fetch' }, 'network', /Cannot reach the server/],
     [{ code: 'XX000', message: 'secret internal detail' }, 'unknown', /Could not send/],

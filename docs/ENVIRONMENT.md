@@ -122,3 +122,15 @@ apply new ones by pasting the file into the Supabase SQL editor (or with the Sup
 - `20261129000015_settings_admin_audit.sql`: business profile fields, ticket and product categories, the
   fuller audit log (administrators only), customer erasure and the daily retention clean-up (see
   `docs/SETTINGS.md`). **Run it after 0014.** No new Vercel settings.
+
+- `20261130000016_rate_limits.sql`: request counters used for rate limits, and a limit on "Request
+  access" (30 requests an hour per business; see `docs/QA.md`). **Run it after 0015.** No new Vercel
+  settings.
+
+## Security headers
+
+`vercel.json` sends a Content Security Policy and the other standard headers on every page (listed in
+`docs/QA.md`). The app may only contact its own site and `*.supabase.co`. If the project later loads
+something from another site (an analytics script, a map, a different storage host), add that host to the
+matching directive in `vercel.json` or the browser will block it. The policy can also hide Vercel's
+preview toolbar on preview deployments; the app itself is not affected.

@@ -164,3 +164,13 @@ of a **development** Supabase project after applying migrations.
 - **Password and sign-in:** each person, for themselves only; the security events they report are logged
   under their own name.
 - **The daily data-retention clean-up:** the server only.
+
+## Rate limits (Phase 14)
+
+- The server functions count requests per person (per address for the email webhook) and answer
+  "429 Too many requests" past the limit: sending a message 20 a minute, notification email 10, delivery
+  status 30, the Resend webhook 600. A counter that cannot be read lets the request through, so a
+  database hiccup never blocks real work.
+- "Request access" from the sign-up page: 30 an hour per business, counted in the database.
+- The counters (`api_rate_limits`) are closed to every signed-in role; only the server's
+  `rate_limit_hit` function touches them.

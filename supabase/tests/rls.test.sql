@@ -1680,6 +1680,31 @@ delete from public.access_requests where email = 'waiting@example.test';  -- lat
 select pg_temp.expect(not exists (select 1 from public.audit_logs where created_at < now() - interval '7 years'), 'audit entries go after seven years');
 select pg_temp.expect((select count(*) = 1 and bool_and((details ->> 'notifications')::int = 2 and (details ->> 'access_requests')::int = 1 and (details ->> 'audit_logs')::int = 1) from public.audit_logs where action = 'RETENTION' and business_id = '11111111-0000-0000-0000-000000000001'), 'the clean-up is itself logged, with what it removed');
 
+-- Rate limits (Phase 14) ------------------------------------------------------------------------------
+select pg_temp.as_service();
+select pg_temp.expect(public.rate_limit_hit('p14:test', 2, 60) and public.rate_limit_hit('p14:test', 2, 60), 'calls within the limit are allowed');
+select pg_temp.expect(not public.rate_limit_hit('p14:test', 2, 60), 'one more is refused');
+select pg_temp.expect(public.rate_limit_hit('p14:other', 2, 60), 'each key has its own count');
+select pg_temp.expect_error_like($$select public.rate_limit_hit('p14:bad', 0, 60)$$, 'rate_limit_invalid', 'a limit must be at least one');
+select pg_temp.as_owner();
+select pg_temp.expect((select hits = 3 from public.api_rate_limits where key = 'p14:test'), 'refused calls still count');
+insert into public.api_rate_limits (key, window_start, hits) values ('p14:test', now() - interval '3 days', 9);
+select pg_temp.as_service();
+select public.rate_limit_hit('p14:test', 2, 60);
+select pg_temp.as_owner();
+select pg_temp.expect(not exists (select 1 from public.api_rate_limits where key = 'p14:test' and window_start < now() - interval '1 day'), 'old windows are cleared as it goes');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect_error_like($$select public.rate_limit_hit('p14:test', 100, 60)$$, 'permission denied', 'only the server uses the limiter');
+select pg_temp.expect_error_like($$select * from public.api_rate_limits$$, 'permission denied', 'nor reads its counts');
+-- The public account form: at most 30 requests an hour
+select pg_temp.as_service();
+select count(*) from (select public.rate_limit_hit('request_access:' || (select id from public.businesses order by created_at, id limit 1), 30, 3600) from generate_series(1, 30)) x;
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$set local role anon; select public.request_access('Flood Test', 'flood@example.test')$$, 'rate_limited', 'after 30 account requests in an hour, visitors are asked to try later');
+reset role;
+select pg_temp.expect(not exists (select 1 from public.access_requests where email = 'flood@example.test'), 'and nothing is stored');
+delete from public.api_rate_limits where key like 'request_access:%' or key like 'p14:%';  -- later sections use the form
+
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');
 delete from public.customers where name = 'Staff-created customer';

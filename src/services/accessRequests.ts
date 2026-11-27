@@ -30,6 +30,12 @@ export async function requestAccess(
       p_message: input.message.trim() || null,
     })
     if (!error) return ok(undefined)
+    if (/rate_limited/.test(error.message ?? '')) {
+      return err({
+        code: 'unknown',
+        message: 'We are receiving a lot of requests right now. Please try again in an hour.',
+      })
+    }
     if (error.code === '23514' || error.code === '22P02') {
       return err({
         code: 'validation',

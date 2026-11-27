@@ -379,7 +379,7 @@ describe('the other endpoints', () => {
     expect((await h(req('v1,forged'))).status).toBe(400)
     const res = await h(req(`v1,${sig}`))
     expect(await res.json()).toEqual({ recorded: true })
-    expect(calls[0]).toEqual([
+    expect(calls.find(([fn]) => fn === 'record_provider_event')).toEqual([
       'record_provider_event',
       {
         p_provider_message_id: 're_1',

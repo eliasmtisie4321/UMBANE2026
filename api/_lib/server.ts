@@ -82,6 +82,55 @@ export interface StaffCaller {
   businessId: string
 }
 
+/** How often each endpoint may be called, per key, per minute. */
+export const RATE_LIMITS = {
+  send: 20,
+  flush: 10,
+  status: 30,
+  webhook: 600,
+} as const
+
+/**
+ * Counts one call against `key` in the database (rate_limit_hit) and says whether it is allowed.
+ * If the check itself cannot run (for example the migration is missing) the call is allowed: a
+ * broken limiter must not stop email from being sent.
+ */
+export async function withinRateLimit(
+  admin: {
+    rpc: (
+      fn: string,
+      args: Record<string, unknown>,
+    ) => PromiseLike<{ data: unknown; error: unknown }>
+  },
+  key: string,
+  perMinute: number,
+): Promise<boolean> {
+  try {
+    const { data, error } = await admin.rpc('rate_limit_hit', {
+      p_key: key,
+      p_limit: perMinute,
+      p_window_seconds: 60,
+    })
+    return error ? true : data !== false
+  } catch {
+    return true
+  }
+}
+
+export const tooManyRequests = () =>
+  new Response(JSON.stringify({ error: 'rate_limited' }), {
+    status: 429,
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'no-store',
+      'retry-after': '60',
+    },
+  })
+
+/** The caller's address as Vercel reports it, for limiting unauthenticated endpoints. */
+export const clientAddress = (request: Request) =>
+  (request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'unknown'
+
 /** The signed-in person behind a request, if active (any role, clients included). */
 export async function signedInCaller(
   admin: Pick<SupabaseClient, 'auth' | 'from'>,

@@ -430,34 +430,34 @@ Ticket statuses:
 **Goal:** Make the application reliable, accessible and ready for real users.
 
 ### Testing
-- [ ] Test authentication and session handling.
-- [ ] Test role-based permissions and RLS policies.
-- [ ] Test CRUD operations for core modules.
-- [ ] Test API validation and error responses.
-- [ ] Test invoice and stock calculations.
-- [ ] Test ticket submission and status updates.
-- [ ] Add Playwright end-to-end tests for critical workflows.
-- [ ] Test mobile, tablet and desktop layouts.
-- [ ] Test loading, empty, success and error states.
+- [x] Test authentication and session handling.
+- [x] Test role-based permissions and RLS policies.
+- [x] Test CRUD operations for core modules.
+- [x] Test API validation and error responses.
+- [x] Test invoice and stock calculations.
+- [x] Test ticket submission and status updates.
+- [x] Add Playwright end-to-end tests for critical workflows.
+- [x] Test mobile, tablet and desktop layouts.
+- [x] Test loading, empty, success and error states.
 
 ### Security
-- [ ] Review RLS policies and test unauthorized access.
-- [ ] Validate and sanitize user input.
-- [ ] Validate uploaded file types and sizes.
-- [ ] Keep privileged keys and provider secrets server-side.
-- [ ] Apply appropriate API rate limits.
-- [ ] Avoid exposing sensitive customer information in logs.
-- [ ] Review authentication, authorization and session handling.
-- [ ] Check dependencies for known vulnerabilities.
+- [x] Review RLS policies and test unauthorized access.
+- [x] Validate and sanitize user input.
+- [x] Validate uploaded file types and sizes.
+- [x] Keep privileged keys and provider secrets server-side.
+- [x] Apply appropriate API rate limits.
+- [x] Avoid exposing sensitive customer information in logs.
+- [x] Review authentication, authorization and session handling.
+- [x] Check dependencies for known vulnerabilities.
 
 ### Accessibility and performance
-- [ ] Check keyboard navigation and visible focus states.
-- [ ] Add accessible labels and form error messages.
-- [ ] Check colour contrast.
-- [ ] Optimize images and assets.
-- [ ] Reduce unnecessary database requests.
-- [ ] Add pagination to large data tables.
-- [ ] Review loading performance and supported browsers.
+- [x] Check keyboard navigation and visible focus states.
+- [x] Add accessible labels and form error messages.
+- [x] Check colour contrast.
+- [x] Optimize images and assets.
+- [x] Reduce unnecessary database requests.
+- [x] Add pagination to large data tables.
+- [x] Review loading performance and supported browsers.
 
 **Done when:** Critical user journeys pass automated and manual testing, security checks are complete, and the application works reliably on mobile and desktop.
 

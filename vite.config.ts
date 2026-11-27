@@ -9,6 +9,22 @@ export default defineConfig({
   // project root in drive-letter case on Windows (C:\ vs c:\), loading modules twice and
   // splitting React context. TypeScript resolves '@/*' separately via tsconfig paths.
   resolve: { alias: { '@': '/src' } },
+  build: {
+    rollupOptions: {
+      output: {
+        // Libraries change less often than the app, so they get their own files that browsers can
+        // keep cached between releases. Each screen is already its own chunk (React.lazy in App.tsx).
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined
+          if (/[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id))
+            return 'react'
+          if (id.includes('@supabase')) return 'supabase'
+          if (id.includes('lucide-react')) return 'icons'
+          return undefined
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     testTimeout: 15_000,

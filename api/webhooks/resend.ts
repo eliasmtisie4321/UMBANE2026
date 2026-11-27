@@ -1,5 +1,14 @@
 import type { AdminClient } from '../_lib/deliver.js'
-import { adminClient, json, readEnv, type ServerEnv } from '../_lib/server.js'
+import {
+  adminClient,
+  clientAddress,
+  json,
+  RATE_LIMITS,
+  readEnv,
+  tooManyRequests,
+  withinRateLimit,
+  type ServerEnv,
+} from '../_lib/server.js'
 import { TRACKED_EVENTS, verifyWebhook } from '../_lib/webhook.js'
 
 interface ResendEvent {
@@ -17,6 +26,12 @@ export function createWebhookHandler(env: ServerEnv, admin: () => AdminClient) {
   return async function handle(request: Request): Promise<Response> {
     if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
     if (!env.webhookSecret) return json({ error: 'not_configured' }, 503)
+    // Before anything else, so a flood of forged requests costs little.
+    if (
+      !(await withinRateLimit(admin(), 'webhook:' + clientAddress(request), RATE_LIMITS.webhook))
+    ) {
+      return tooManyRequests()
+    }
     const raw = await request.text()
     const id = request.headers.get('svix-id')
     const ok = verifyWebhook(
