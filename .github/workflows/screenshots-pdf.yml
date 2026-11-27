@@ -1,0 +1,74 @@
+name: Build UMBANE2026 screenshots PDF
+on:
+  push:
+    paths:
+      - 'docs/screenshots/**'
+      - '.github/workflows/screenshots-pdf.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install reportlab pillow
+      - name: Build PDF from repository PNG screenshots
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from reportlab.lib.pagesizes import A4
+          from reportlab.lib.units import mm
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, KeepTogether
+          from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+          from reportlab.lib.enums import TA_CENTER
+          from PIL import Image as PILImage
+          import re
+          root = Path("docs/screenshots")
+          files = sorted(root.rglob("*.png"), key=lambda p: str(p).lower())
+          if not files:
+              raise SystemExit("No PNG screenshots found in docs/screenshots")
+          out = Path("UMBANE2026_All_Screenshots.pdf")
+          styles = getSampleStyleSheet()
+          styles.add(ParagraphStyle(name="CoverTitle", parent=styles["Title"], alignment=TA_CENTER, fontSize=24, leading=30, spaceAfter=12))
+          styles.add(ParagraphStyle(name="Section", parent=styles["Heading1"], fontSize=16, leading=20, spaceBefore=10, spaceAfter=8))
+          styles.add(ParagraphStyle(name="CaptionSmall", parent=styles["BodyText"], fontSize=9, leading=12, textColor="#444444"))
+          doc = SimpleDocTemplate(str(out), pagesize=A4, rightMargin=16*mm, leftMargin=16*mm, topMargin=16*mm, bottomMargin=16*mm)
+          story = [Spacer(1, 45*mm), Paragraph("UMBANE2026", styles["CoverTitle"]), Paragraph("Complete Application Screenshot Catalogue", styles["Heading2"]), Spacer(1, 8*mm), Paragraph(f"{len(files)} original PNG screenshots embedded in this PDF", styles["BodyText"]), Spacer(1, 5*mm), Paragraph("Screenshots are grouped by their repository folders and filenames. Each image is preserved as an embedded visual in the document.", styles["BodyText"]), PageBreak()]
+          def section_for(p):
+              stem = p.stem
+              prefix = stem.split("-")[0].split("_")[0]
+              if prefix in ("app","login","forgot","account","dash"): return "Application & Access"
+              mapping = {"crm":"Customers & Properties","meters":"Electricity & Meters","meter":"Electricity & Meters","maintenance":"Electricity & Meters","leads":"Leads","lead":"Leads","orders":"Sales & Orders","order":"Sales & Orders","invoices":"Invoices","invoice":"Invoices","inventory":"Inventory","product":"Inventory","stock":"Inventory","support":"Support Tickets","comms":"Communications","team":"Team & Tasks","reports":"Reports","automations":"Automations","automation":"Automations","notifications":"Notifications","notification":"Notifications","settings":"Settings"}
+              return mapping.get(prefix, "Other Screens")
+          groups = {}
+          for p in files: groups.setdefault(section_for(p), []).append(p)
+          for group, paths in groups.items():
+              story.append(Paragraph(group, styles["Section"]))
+              for p in paths:
+                  with PILImage.open(p) as im:
+                      w, h = im.size
+                  maxw, maxh = 175*mm, 220*mm
+                  scale = min(maxw/w, maxh/h, 1.0)
+                  img = Image(str(p), width=w*scale, height=h*scale)
+                  story.append(KeepTogether([Paragraph(p.name, styles["Heading3"]), img, Spacer(1, 8*mm)]))
+              story.append(PageBreak())
+          def footer(canvas, doc):
+              canvas.saveState()
+              canvas.setFont("Helvetica", 8)
+              canvas.drawString(16*mm, 9*mm, "UMBANE2026 • Repository PNG screenshots")
+              canvas.drawRightString(A4[0]-16*mm, 9*mm, f"Page {doc.page}")
+              canvas.restoreState()
+          doc.build(story, onFirstPage=footer, onLaterPages=footer)
+          print(f"Created {out} with {len(files)} PNG images")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: umbane2026-screenshots-pdf
+          path: UMBANE2026_All_Screenshots.pdf
+          if-no-files-found: error
+          retention-days: 7
