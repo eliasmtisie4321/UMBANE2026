@@ -30,6 +30,8 @@ export function createStatusHandler(env: ServerEnv, admin: () => SupabaseClient)
       email: missing.length === 0,
       missing,
       deliveryReports: Boolean(env.webhookSecret),
+      // Connections in Settings → Integrations can be used (their credentials can be decrypted).
+      integrations: Boolean(env.integrationsKey),
       retries: Boolean(env.cronSecret),
       from: env.emailFrom,
     })

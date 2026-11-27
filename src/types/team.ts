@@ -64,7 +64,11 @@ export interface InviteInput extends EmployeeInput {
   email: string
 }
 
-export type InviteResult = { status: 'linked'; profileId: string } | { status: 'invited' }
+export type InviteResult =
+  { status: 'linked'; profileId: string } | { status: 'invited'; invitationId: string }
+
+/** Where an invitation stands: not sent yet, sent, delivery failed, accepted, expired or cancelled. */
+export type InvitationState = 'pending' | 'sent' | 'failed' | 'accepted' | 'expired' | 'cancelled'
 
 export interface Invitation {
   id: string
@@ -74,6 +78,12 @@ export interface Invitation {
   department: Department | null
   jobTitle: string | null
   createdAt: string
+  state: InvitationState
+  expiresAt: string | null
+  sentAt: string | null
+  /** The email account it went through, e.g. "Gmail / Google Workspace (hr@…)". */
+  sentVia: string | null
+  lastError: string | null
 }
 
 // Tasks ------------------------------------------------------------------------------------------

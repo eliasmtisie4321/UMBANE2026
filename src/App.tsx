@@ -8,16 +8,21 @@ import ForgotPasswordScreen from '@/screens/ForgotPasswordScreen'
 import LoginScreen from '@/screens/LoginScreen'
 import NotFoundScreen from '@/screens/NotFoundScreen'
 import ResetPasswordScreen from '@/screens/ResetPasswordScreen'
+import WelcomeScreen from '@/screens/WelcomeScreen'
 
 // Each signed-in screen is its own chunk, loaded the first time it is opened, so the app starts
 // with only what the sign-in page and the shell need (see docs/QA.md).
 const NotificationSettingsScreen = lazyScreen(() => import('@/screens/NotificationSettingsScreen'))
 const NotificationsScreen = lazyScreen(() => import('@/screens/NotificationsScreen'))
-const AutomationDetailScreen = lazyScreen(() => import('@/screens/automations/AutomationDetailScreen'))
+const AutomationDetailScreen = lazyScreen(
+  () => import('@/screens/automations/AutomationDetailScreen'),
+)
 const AutomationsScreen = lazyScreen(() => import('@/screens/automations/AutomationsScreen'))
 const OverviewScreen = lazyScreen(() => import('@/screens/OverviewScreen'))
 const CustomerReportScreen = lazyScreen(() => import('@/screens/reports/CustomerReportScreen'))
-const ElectricityReportScreen = lazyScreen(() => import('@/screens/reports/ElectricityReportScreen'))
+const ElectricityReportScreen = lazyScreen(
+  () => import('@/screens/reports/ElectricityReportScreen'),
+)
 const InventoryReportScreen = lazyScreen(() => import('@/screens/reports/InventoryReportScreen'))
 const PropertyReportScreen = lazyScreen(() => import('@/screens/reports/PropertyReportScreen'))
 const ReportsScreen = lazyScreen(() => import('@/screens/reports/ReportsScreen'))
@@ -25,7 +30,9 @@ const RevenueReportScreen = lazyScreen(() => import('@/screens/reports/RevenueRe
 const SalesReportScreen = lazyScreen(() => import('@/screens/reports/SalesReportScreen'))
 const SupportReportScreen = lazyScreen(() => import('@/screens/reports/SupportReportScreen'))
 const TeamReportScreen = lazyScreen(() => import('@/screens/reports/TeamReportScreen'))
-const CommunicationsScreen = lazyScreen(() => import('@/screens/communications/CommunicationsScreen'))
+const CommunicationsScreen = lazyScreen(
+  () => import('@/screens/communications/CommunicationsScreen'),
+)
 const MessageDetailScreen = lazyScreen(() => import('@/screens/communications/MessageDetailScreen'))
 const TemplatesScreen = lazyScreen(() => import('@/screens/communications/TemplatesScreen'))
 const CustomerProfileScreen = lazyScreen(() => import('@/screens/customers/CustomerProfileScreen'))
@@ -53,7 +60,11 @@ const CategoriesScreen = lazyScreen(() => import('@/screens/settings/CategoriesS
 const PrivacyScreen = lazyScreen(() => import('@/screens/settings/PrivacyScreen'))
 const RolesScreen = lazyScreen(() => import('@/screens/settings/RolesScreen'))
 const SettingsScreen = lazyScreen(() => import('@/screens/settings/SettingsScreen'))
-const InventoryHistoryScreen = lazyScreen(() => import('@/screens/inventory/InventoryHistoryScreen'))
+const IntegrationsScreen = lazyScreen(() => import('@/screens/settings/IntegrationsScreen'))
+const MarketingScreen = lazyScreen(() => import('@/screens/marketing/MarketingScreen'))
+const InventoryHistoryScreen = lazyScreen(
+  () => import('@/screens/inventory/InventoryHistoryScreen'),
+)
 const InventoryScreen = lazyScreen(() => import('@/screens/inventory/InventoryScreen'))
 const ProductDetailScreen = lazyScreen(() => import('@/screens/inventory/ProductDetailScreen'))
 const EditProductScreen = lazyScreen(() =>
@@ -140,6 +151,7 @@ const BUILT = [
   '/reports',
   '/automations',
   '/settings',
+  '/marketing',
 ]
 
 export default function App() {
@@ -149,6 +161,7 @@ export default function App() {
       <Route path="/create-account" element={<CreateAccountScreen />} />
       <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
       <Route path="/reset-password" element={<ResetPasswordScreen />} />
+      <Route path="/welcome" element={<WelcomeScreen />} />
       <Route element={<ProtectedShell />}>
         <Route index element={<OverviewScreen />} />
         <Route path="/customers" element={<CustomersScreen />} />
@@ -218,6 +231,8 @@ export default function App() {
         <Route path="/settings/roles" element={<RolesScreen />} />
         <Route path="/settings/audit" element={<AuditLogScreen />} />
         <Route path="/settings/privacy" element={<PrivacyScreen />} />
+        <Route path="/settings/integrations" element={<IntegrationsScreen />} />
+        <Route path="/marketing" element={<MarketingScreen />} />
         <Route path="/account/security" element={<AccountSecurityScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

@@ -1,4 +1,4 @@
-import { Ban, Download, Mail, Pencil, Send, Trash2, Wallet } from 'lucide-react'
+import { Ban, Download, Pencil, Send, Share2, Trash2, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { canAccess } from '@/auth/permissions'
@@ -31,7 +31,7 @@ import { isRealDate } from '@/utils/meterForm'
 import { formatPhone } from '@/utils/phone'
 import { err, ok } from '@/utils/result'
 import type { Result } from '@/types/api'
-import { ComposeEmailDialog } from '@/components/messages/ComposeEmailDialog'
+import { ShareDialog } from '@/components/share/ShareDialog'
 
 const money = (n: number) => formatRand(n, { cents: true })
 
@@ -177,7 +177,7 @@ function InvoiceBody({
             )}
             {canWrite && inv.invoiceNumber && inv.status !== 'cancelled' && (
               <Button variant="secondary" onClick={() => setDialog('email')}>
-                <Mail size={16} aria-hidden="true" /> Email Invoice
+                <Share2 size={16} aria-hidden="true" /> Share Invoice
               </Button>
             )}
             {canWrite && payable && (
@@ -390,15 +390,19 @@ function InvoiceBody({
         </ConfirmDialog>
       )}
       {dialog === 'email' && (
-        <ComposeEmailDialog
-          customerId={inv.customerId}
-          customerName={inv.billTo.name}
-          templateKey={inv.isOverdue ? 'payment_reminder' : 'invoice_issued'}
-          values={emailValues(inv)}
-          invoiceId={inv.id}
-          attachment={{
-            label: `the invoice PDF (${inv.invoiceNumber}.pdf)`,
-            build: () => invoiceAttachment(inv),
+        <ShareDialog
+          context={{
+            title: `Share invoice ${inv.invoiceNumber}`,
+            customer: { id: inv.customerId, name: inv.billTo.name },
+            allowTeam: true,
+            allowAddress: true,
+            templateKey: inv.isOverdue ? 'payment_reminder' : 'invoice_issued',
+            values: emailValues(inv),
+            invoiceId: inv.id,
+            attachment: {
+              label: `the invoice PDF (${inv.invoiceNumber}.pdf)`,
+              build: () => invoiceAttachment(inv),
+            },
           }}
           onClose={() => setDialog(null)}
           onDone={(notice) => {

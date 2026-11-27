@@ -1,4 +1,6 @@
-import type { AdminClient, DeliveryConfig } from './deliver.js'
+import { builtInOf, type AdminClient, type DeliveryConfig } from './deliver.js'
+import { isRoute, routeFor, type NoRoute, type Route } from './integrations/sender.js'
+import type { SendResult } from './integrations/types.js'
 import { textToHtml } from './resend.js'
 
 interface ClaimedNotification {
@@ -8,6 +10,7 @@ interface ClaimedNotification {
   body: string | null
   link: string | null
   business_name: string | null
+  business_id?: string | null
 }
 
 /** Only links inside the app are turned into addresses. */
@@ -52,28 +55,67 @@ export async function deliverNotificationEmails(
   if (claim.error) throw new Error(`Could not claim notification emails: ${claim.error.message}`)
   const claimed = (Array.isArray(claim.data) ? claim.data : []) as ClaimedNotification[]
   const outcomes: NotificationOutcomes = { sent: 0, failed: 0, error: 0 }
+  const routes: Record<string, Route | NoRoute> = {}
   for (const n of claimed) {
     const email = notificationEmail(n, appUrl)
-    let result
-    try {
-      result = await config.send({
-        from: config.from,
-        to: n.recipient,
-        replyTo: config.replyTo,
-        subject: email.subject,
-        text: email.text,
-        html: email.html,
-        attachments: [],
-        idempotencyKey: `notification:${n.id}`,
-        tags: [{ name: 'notification_id', value: n.id }],
-      })
-    } catch (e) {
-      result = {
-        ok: false as const,
-        retryable: true,
-        error: `Send failed: ${(e as Error).message}`,
+    let result: SendResult | Awaited<ReturnType<DeliveryConfig['send']>>
+    // With connections, each business's notifications go out from its own email account.
+    const deps = config.integrations
+    if (deps && n.business_id) {
+      routes[n.business_id] ??= await routeFor(
+        deps,
+        builtInOf(config),
+        n.business_id,
+        'email',
+        null,
+      )
+      const route = routes[n.business_id]
+      if (!isRoute(route)) {
+        result = { ok: false, retryable: false, error: route.error }
+      } else {
+        try {
+          result = await route.send({
+            id: n.id,
+            to: n.recipient,
+            toName: null,
+            subject: email.subject,
+            text: email.text,
+            html: email.html,
+            attachments: [],
+            documentUrl: null,
+            linkUrl: null,
+            imageUrl: null,
+            idempotencyKey: `notification:${n.id}`,
+            purpose: 'transactional',
+          })
+        } catch (e) {
+          result = {
+            ok: false,
+            retryable: route.provider === 'resend',
+            error: `Send failed: ${(e as Error).message}`,
+          }
+        }
       }
-    }
+    } else
+      try {
+        result = await config.send({
+          from: config.from,
+          to: n.recipient,
+          replyTo: config.replyTo,
+          subject: email.subject,
+          text: email.text,
+          html: email.html,
+          attachments: [],
+          idempotencyKey: `notification:${n.id}`,
+          tags: [{ name: 'notification_id', value: n.id }],
+        })
+      } catch (e) {
+        result = {
+          ok: false as const,
+          retryable: true,
+          error: `Send failed: ${(e as Error).message}`,
+        }
+      }
     const recorded = await admin.rpc('record_notification_email', {
       p_id: n.id,
       p_ok: result.ok,

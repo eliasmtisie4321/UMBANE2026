@@ -30,19 +30,21 @@ Clients see nothing from the team or tasks.
 
 ## Adding someone to the team
 
-The app has no server key, so it cannot create sign-in accounts itself. Instead:
-
-1. An administrator chooses **Team → Add Employee** and enters their details and access level.
+1. An administrator chooses **Team → Add Employee** and enters their name, work email, access level
+   and optional department.
 2. If that email already has a confirmed account (and no profile), they are added at once.
-3. Otherwise the details are saved as an **invitation**. The administrator then opens Supabase →
-   **Authentication → Users → Add user → Send invitation** for the same email.
-4. When the person accepts the email and sets a password, the database creates their profile with the
-   saved details. Until then they appear under **Waiting to join**, where the invitation can be
-   cancelled.
+3. Otherwise the details are saved as an **invitation** and Umbane emails it straight away, through
+   the business's email account in Settings → Integrations (or the built-in sender). The link comes
+   from Supabase Auth, which stays the identity system.
+4. When they open the link, Supabase confirms the address, the database creates their profile with
+   the saved details, and the Welcome page asks them to choose a password.
 
+- Invitations show as Not sent, Sent, Failed, Accepted, Expired (after 7 days) or Cancelled. Under
+  **Waiting to join** an administrator can Resend, Copy Link (to share it another way) or Cancel.
+  Details: `docs/INTEGRATIONS.md`.
 - An email can only have one open invitation, across all businesses, so an account joins exactly one.
-- Only a **confirmed** email gets a profile. Someone signing up with an invited address but never
-  confirming it gets nothing.
+  An expired invitation no longer blocks inviting the same person again.
+- Only a **confirmed** email gets a profile, and only from an invitation that is still open.
 - If the profile cannot be created when they accept (rare), their sign-in still works and the invitation
   stays waiting.
 

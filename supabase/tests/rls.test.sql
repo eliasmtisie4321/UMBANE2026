@@ -1632,7 +1632,7 @@ insert into public.payments (business_id, invoice_id, amount, method) values ('1
 insert into public.support_tickets (id, business_id, customer_id, reference, subject, description, category, status, resolution) values
   ('e5200000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000001', 'P13-ERASE', 'Meter at home', 'My ID is 8001015009087, call me on 082 000 0099', 'general', 'closed', 'Called Erase Me back');
 insert into public.ticket_messages (business_id, ticket_id, author_id, body) values ('11111111-0000-0000-0000-000000000001', 'e5200000-0000-0000-0000-000000000001', 'a9200000-0000-0000-0000-000000000001', 'I live at 5 Erase Street');
-insert into public.communication_logs (business_id, customer_id, channel, direction, subject, body, status, recipient) values ('11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000001', 'email', 'outbound', 'Invoice P13-PAID', 'Good day Erase Me', 'delivered', 'erase.me@example.test');
+insert into public.communication_logs (business_id, customer_id, channel, direction, subject, body, status, recipient, message_type) values ('11111111-0000-0000-0000-000000000001', 'e5000000-0000-0000-0000-000000000001', 'email', 'outbound', 'Invoice P13-PAID', 'Good day Erase Me', 'delivered', 'erase.me@example.test', 'email');
 insert into public.audit_logs (business_id, action, table_name, record_id, details) values ('11111111-0000-0000-0000-000000000001', 'UPDATE', 'customers', 'e5000000-0000-0000-0000-000000000001', '{"changes": {"phone": [null, "+27 82 000 0099"]}}');
 set local session_replication_role = origin;
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
@@ -1704,6 +1704,180 @@ select pg_temp.expect_error_like($$set local role anon; select public.request_ac
 reset role;
 select pg_temp.expect(not exists (select 1 from public.access_requests where email = 'flood@example.test'), 'and nothing is stored');
 delete from public.api_rate_limits where key like 'request_access:%' or key like 'p14:%';  -- later sections use the form
+
+-- Integrations, sharing and invitations -----------------------------------------------------------------
+select pg_temp.as_service();
+select pg_temp.as_owner();  -- the owner, with no one signed in
+insert into public.integrations (id, business_id, provider, account_label, account_id, capabilities, connected_at, is_default) values
+  ('f1700000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'twilio', '+27870000001', 'AC00000000000000000000000000000001', '{direct_message,document_links,delivery_tracking}', now(), true),
+  ('f1700000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'facebook', 'Umbane Energy', '1234567', '{publish_social}', now(), true),
+  ('f1700000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000002', 'whatsapp', 'Other Business', '999', '{direct_message}', now(), true),
+  ('f1700000-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 'whatsapp', 'Umbane WhatsApp', '888', '{direct_message,attachments,receive_messages}', now(), true);
+insert into public.integration_secrets (integration_id, business_id, ciphertext) values ('f1700000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'v1.not-a-real-ciphertext');
+insert into public.customers (id, business_id, name, email, phone, whatsapp_opt_in) values
+  ('f1710000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Sindi Sms', 'sindi@example.test', '082 555 0101', false),
+  ('f1710000-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'Wanda Whatsapp', null, '+27 83 555 0102', true),
+  ('f1710000-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'No Phone', 'nophone@example.test', null, false);
+insert into public.leads (id, business_id, name, email, phone) values ('f1720000-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'Lindo Lead', 'lindo@example.test', '0725550103');
+insert into storage.objects (bucket_id, name, metadata) values ('message-attachments', '11111111-0000-0000-0000-000000000001/p17/INV-1.pdf', '{"size": 10, "mimetype": "application/pdf"}');
+select pg_temp.expect(public.e164_phone('082 555 0101') = '+27825550101' and public.e164_phone('27825550101') = '+27825550101' and public.e164_phone('+44 20 7946 0958') = '+442079460958' and public.e164_phone('12345') is null, 'phone numbers are read the way South Africans type them');
+
+-- Who sees connections and credentials
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select pg_temp.expect((select count(*) from public.integrations) = 3, 'staff see their business''s connections, to choose where to share');
+select pg_temp.expect((select channel from public.integrations where provider = 'twilio') = 'sms', 'each connection knows its channel');
+select pg_temp.expect_error_like($$select * from public.integration_secrets$$, 'permission denied', 'nobody signed in can read credentials');
+select pg_temp.expect_error_like($$select * from public.integration_oauth_states$$, 'permission denied', 'nor sign-in states');
+select pg_temp.expect_error_like($$select * from public.document_links$$, 'permission denied', 'nor document links');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select pg_temp.expect_error_like($$insert into public.integrations (business_id, provider, capabilities) values ('11111111-0000-0000-0000-000000000001', 'resend', '{send_email}')$$, 'permission denied', 'not even an administrator can mark a provider connected: only the server, after the provider confirms it');
+select pg_temp.expect_error_like($$update public.integrations set capabilities = '{direct_message,attachments}' where provider = 'twilio'$$, 'permission denied', 'nor add capabilities the provider did not confirm');
+select pg_temp.expect_error_like($$select * from public.integration_secrets$$, 'permission denied', 'administrators cannot read credentials either');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect((select count(*) from public.integrations) = 0, 'clients see no connections');
+select pg_temp.as_user('b1000000-0000-0000-0000-000000000001');  -- other business
+select pg_temp.expect((select count(*) from public.integrations) = 1, 'another business sees only its own');
+select pg_temp.as_service();
+select pg_temp.as_owner();
+select pg_temp.expect_error_like($$insert into public.integrations (business_id, provider, capabilities) values ('11111111-0000-0000-0000-000000000001', 'twilio', '{publish_social}')$$, 'integrations_capabilities_check|duplicate key', 'one live connection per provider');
+select pg_temp.expect_error_like($$insert into public.integrations (business_id, provider, capabilities) values ('11111111-0000-0000-0000-000000000001', 'resend', '{teleport}')$$, 'integrations_capabilities_check', 'only known capabilities');
+
+-- Sending: recipients on file, consent per channel
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+create temp table p17 (k text primary key, id uuid);
+grant all on p17 to authenticated, service_role;
+insert into p17 select 'sms', public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Your meter is booked for Tuesday.', p_idempotency_key => 'p17-sms-0001');
+select pg_temp.expect((select recipient = '+27825550101' and integration_id = 'f1700000-0000-0000-0000-000000000001' and provider = 'twilio' and sender = '+27870000001' and message_type = 'direct_message' and recipient_name = 'Sindi Sms' and status = 'queued' from public.communication_logs where id = (select id from p17 where k = 'sms')), 'an SMS goes to the customer''s number on file, through the business''s SMS connection');
+select pg_temp.expect(public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Your meter is booked for Tuesday.', p_idempotency_key => 'p17-sms-0001') = (select id from p17 where k = 'sms'), 'sending the same thing twice (a double click, a retry) queues it once');
+select pg_temp.expect((select count(*) from public.communication_logs where idempotency_key = 'p17-sms-0001') = 1, 'and there is still one message');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000003', p_body => 'Hi')$$, 'message_no_phone', 'no phone number on file, no SMS');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Winter special!', p_purpose => 'marketing')$$, 'message_no_consent', 'marketing by SMS needs marketing consent');
+select pg_temp.expect_error_like($$select public.queue_message('whatsapp', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Hi')$$, 'message_no_whatsapp_consent', 'WhatsApp needs the customer to have agreed to WhatsApp');
+insert into p17 select 'q1', public.queue_message('whatsapp', p_customer_id => 'f1710000-0000-0000-0000-000000000002', p_body => 'Your invoice is ready.');
+select pg_temp.expect((select recipient = '+27835550102' from public.communication_logs where id = (select id from p17 where k = 'q1')), 'and goes through once they have');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_lead_id => 'f1720000-0000-0000-0000-000000000001', p_body => 'Hi')$$, 'message_one_recipient', 'one recipient per message');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_address => '083 123 4567', p_body => 'Hi')$$, 'message_address_manager', 'staff cannot send to a typed number');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => repeat('x', 1501))$$, 'message_too_long', 'an SMS has a length limit');
+select pg_temp.expect_error_like($$select public.queue_message('whatsapp', p_integration_id => 'f1700000-0000-0000-0000-000000000003', p_customer_id => 'f1710000-0000-0000-0000-000000000002', p_body => 'Hi')$$, 'integration_not_connected', 'another business''s connection cannot be used');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_invoice_id => 'a0100000-0000-0000-0000-000000000001', p_body => 'Hi')$$, 'message_link_mismatch', 'an invoice goes only to its own customer');
+insert into p17 select 'q2', public.queue_message('email', p_lead_id => 'f1720000-0000-0000-0000-000000000001', p_subject => 'Your quote', p_body => 'Here is the quote you asked for.');
+select pg_temp.expect((select recipient = 'lindo@example.test' and lead_id = 'f1720000-0000-0000-0000-000000000001' and integration_id is null from public.communication_logs where id = (select id from p17 where k = 'q2')), 'a lead can be answered at their own address (email without a connection uses the built-in sender)');
+select pg_temp.expect_error_like($$select public.queue_message('email', p_lead_id => 'f1720000-0000-0000-0000-000000000001', p_subject => 'Deals', p_body => 'Winter deals', p_purpose => 'marketing')$$, 'message_no_consent', 'but not sent marketing');
+insert into p17 select 'q3', public.queue_message('email', p_profile_id => 'a2000000-0000-0000-0000-000000000001', p_subject => 'Sales report', p_body => 'This month''s sales.', p_report_key => 'sales');
+select pg_temp.expect((select recipient = 'manager1@umbane.test' and recipient_profile_id = 'a2000000-0000-0000-0000-000000000001' and report_key = 'sales' from public.communication_logs where id = (select id from p17 where k = 'q3')), 'a report can go to a team member');
+insert into p17 select 'doc', public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Your invoice:', p_attachment_path => '11111111-0000-0000-0000-000000000001/p17/INV-1.pdf', p_attachment_name => 'INV-1.pdf');
+select pg_temp.expect((select message_type = 'document_share' and document_link_id is not null from public.communication_logs where id = (select id from p17 where k = 'doc')), 'an SMS cannot carry a file, so the document goes as a private link');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'x', p_attachment_path => '11111111-0000-0000-0000-000000000002/p17/other.pdf')$$, 'attachment_not_uploaded', 'only this business''s uploaded files');
+select pg_temp.expect_error_like($$select public.queue_message('facebook', p_body => 'Winter special')$$, 'message_social_manager', 'staff cannot publish public posts');
+select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');  -- manager
+insert into p17 select 'q4', public.queue_message('sms', p_address => '083 123 4567', p_body => 'Your report is ready.');
+select pg_temp.expect((select recipient = '+27831234567' from public.communication_logs where id = (select id from p17 where k = 'q4')), 'a manager can send a service message to a typed number');
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_address => '083 123 4567', p_body => 'Deals', p_purpose => 'marketing')$$, 'message_no_consent', 'but never marketing');
+insert into p17 select 'post', public.queue_message('facebook', p_body => 'We now install smart meters in Pretoria.', p_link_url => 'https://umbane.example.com/smart-meters');
+select pg_temp.expect((select message_type = 'social_post' and recipient is null and purpose = 'marketing' and sender = 'Umbane Energy' from public.communication_logs where id = (select id from p17 where k = 'post')), 'a manager can publish a post to the business''s Facebook Page');
+select pg_temp.expect_error_like($$select public.queue_message('facebook', p_body => 'Look', p_invoice_id => 'a0100000-0000-0000-0000-000000000001')$$, 'message_social_private', 'a public post never carries an invoice');
+select pg_temp.expect_error_like($$select public.queue_message('facebook', p_body => 'Look', p_customer_id => 'f1710000-0000-0000-0000-000000000001')$$, 'message_social_private', 'or a customer');
+select pg_temp.expect_error_like($$select public.queue_message('facebook', p_body => 'Look', p_attachment_path => '11111111-0000-0000-0000-000000000001/p17/INV-1.pdf')$$, 'message_social_private', 'or a private document');
+select pg_temp.expect_error_like($$select public.queue_message('instagram', p_body => 'Look', p_image_url => 'https://umbane.example.com/a.jpg')$$, 'integration_not_connected', 'a platform that is not connected cannot be used');
+select pg_temp.expect_error_like($$select public.queue_message('whatsapp', p_integration_id => 'f1700000-0000-0000-0000-000000000002', p_customer_id => 'f1710000-0000-0000-0000-000000000002', p_body => 'Hi')$$, 'integration_not_connected', 'a connection is only used for its own channel');
+select pg_temp.as_user('a4000000-0000-0000-0000-000000000001');  -- client
+select pg_temp.expect_error_like($$select public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Hi')$$, 'permission denied', 'clients cannot send');
+
+-- The server sends, records and follows delivery
+select pg_temp.as_service();
+select pg_temp.expect((select id from p17 where k = 'sms') in (select public.due_messages(50)), 'SMS waiting to go out are on the server''s list');
+select pg_temp.expect((select status = 'sending' and attempts = 1 from public.claim_message((select id from p17 where k = 'sms'))), 'the server claims an SMS like an email');
+select public.record_message_result((select id from p17 where k = 'sms'), true, 'twilio:SM0001', null, false, p_provider => 'twilio', p_response => '{"status": "queued"}');
+select pg_temp.expect((select status = 'sent' and provider_message_id = 'twilio:SM0001' and provider_response ->> 'status' = 'queued' from public.communication_logs where id = (select id from p17 where k = 'sms')), 'the result and the provider''s answer are recorded');
+select pg_temp.expect(public.record_provider_event('twilio:SM0001', 'message.delivered', 'twilio:SM0001:delivered', '{}', now()), 'a delivery report is recorded');
+select pg_temp.expect((select status = 'delivered' and delivered_at is not null from public.communication_logs where id = (select id from p17 where k = 'sms')), 'and marks it delivered');
+select public.record_provider_event('twilio:SM0001', 'message.failed', 'twilio:SM0001:failed', '{"error": "late"}', now());
+select pg_temp.expect((select status = 'delivered' from public.communication_logs where id = (select id from p17 where k = 'sms')), 'a late failure report does not undo a delivery');
+select public.claim_message((select id from p17 where k = 'post'));
+select public.record_message_result((select id from p17 where k = 'post'), true, 'facebook:1234567_890', null, false, p_provider => 'facebook', p_external_url => 'https://www.facebook.com/1234567_890');
+select pg_temp.expect((select status = 'sent' and external_url = 'https://www.facebook.com/1234567_890' from public.communication_logs where id = (select id from p17 where k = 'post')), 'a published post keeps where it can be seen');
+select public.claim_message((select id from p17 where k = 'doc'));
+select public.record_message_result((select id from p17 where k = 'doc'), false, null, 'Twilio 400 21211: invalid number', false, p_provider => 'twilio');
+select pg_temp.expect((select status = 'failed' and next_attempt_at is null from public.communication_logs where id = (select id from p17 where k = 'doc')), 'a refused message waits for a person');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');  -- staff
+select public.retry_message((select id from p17 where k = 'doc'));
+select pg_temp.expect((select status = 'queued' and recipient = '+27825550101' from public.communication_logs where id = (select id from p17 where k = 'doc')), 'staff can try a failed SMS again, to the current number');
+select public.cancel_message((select id from p17 where k = 'doc'));
+select pg_temp.as_service();
+select pg_temp.expect((select l.revoked_at is not null from public.communication_logs m join public.document_links l on l.id = m.document_link_id where m.id = (select id from p17 where k = 'doc')), 'cancelling a document message switches its link off');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
+insert into p17 select 'optout', public.queue_message('sms', p_customer_id => 'f1710000-0000-0000-0000-000000000001', p_body => 'Reminder');
+update public.customers set sms_opt_out = true where id = 'f1710000-0000-0000-0000-000000000001';
+select pg_temp.expect((select consent_updated_by = 'a3000000-0000-0000-0000-000000000001' from public.customers where id = 'f1710000-0000-0000-0000-000000000001'), 'an SMS opt-out records who changed it');
+select pg_temp.as_service();
+select pg_temp.expect(not exists (select 1 from public.claim_message((select id from p17 where k = 'optout'))), 'an SMS to someone who opted out since it was queued is not handed over');
+select pg_temp.expect((select status = 'cancelled' and error like '%message_opted_out%' from public.communication_logs where id = (select id from p17 where k = 'optout')), 'it is cancelled with the reason');
+-- Replies on WhatsApp
+select pg_temp.expect(public.log_inbound_message('f1700000-0000-0000-0000-000000000004', '27835550102', 'Thanks, received!', 'whatsapp:wamid.IN1', now()) is not null, 'a reply on WhatsApp is recorded');
+select pg_temp.expect((select customer_id = 'f1710000-0000-0000-0000-000000000002' and direction = 'inbound' and channel = 'whatsapp' from public.communication_logs where provider_message_id = 'whatsapp:wamid.IN1'), 'against the customer with that number');
+select pg_temp.expect(public.log_inbound_message('f1700000-0000-0000-0000-000000000004', '27835550102', 'Thanks, received!', 'whatsapp:wamid.IN1', now()) is null, 'the same reply twice is recorded once');
+select public.log_inbound_message('f1700000-0000-0000-0000-000000000004', '+27 99 111 2222', 'Who is this?', 'whatsapp:wamid.IN2', now());
+select pg_temp.expect((select customer_id is null and sender = '+27991112222' from public.communication_logs where provider_message_id = 'whatsapp:wamid.IN2'), 'a reply from an unknown number is kept without a customer');
+select pg_temp.expect((select count(*) from public.notifications where dedupe_key = 'inbound:whatsapp:wamid.IN1') = pg_temp.mgrs(), 'managers are told about a customer''s reply');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select message_type = 'direct_message' and provider = 'twilio' and recipient_name = 'Sindi Sms' from public.message_list where id = (select id from p17 where k = 'sms')), 'the history shows every channel with its provider and recipient');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select count(*) from pg_temp.audit_rows() where table_name = 'integrations' and action = 'INSERT') >= 3, 'connections are in the audit log');
+
+-- Invitations by email
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');  -- administrator
+select public.invite_staff('p17.new@example.test', 'Nomvula New', 'staff');
+select pg_temp.expect((select state = 'pending' and expires_at > now() + interval '6 days' from public.staff_invitation_list where email = 'p17.new@example.test'), 'a new invitation is pending and lasts a week');
+select pg_temp.as_service();
+update public.staff_invitations set delivery_status = 'sent', sent_at = now(), send_count = 1, sent_via = 'Gmail (accounts@umbane.test)' where email = 'p17.new@example.test';
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select state = 'sent' from public.staff_invitation_list where email = 'p17.new@example.test'), 'once the server sends it, it shows as sent');
+select pg_temp.as_service();
+update public.staff_invitations set delivery_status = 'failed', last_error = 'Gmail 401' where email = 'p17.new@example.test';
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select state = 'failed' from public.staff_invitation_list where email = 'p17.new@example.test'), 'a delivery failure shows as failed');
+update public.staff_invitations set status = 'cancelled', delivery_status = 'sent' where email = 'p17.new@example.test' and status = 'pending';
+select pg_temp.expect((select state = 'cancelled' and cancelled_at is not null from public.staff_invitation_list where email = 'p17.new@example.test'), 'an administrator can cancel it');
+select pg_temp.as_service();
+select pg_temp.expect((select delivery_status = 'failed' from public.staff_invitations where email = 'p17.new@example.test'), 'but cannot rewrite how it was delivered');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select public.invite_staff('p17.late@example.test', 'Lerato Late', 'staff');
+select pg_temp.as_service();
+update public.staff_invitations set expires_at = now() - interval '1 day' where email = 'p17.late@example.test';
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select state = 'expired' from public.staff_invitation_list where email = 'p17.late@example.test'), 'an invitation past its date shows as expired');
+select pg_temp.as_service();
+select pg_temp.as_owner();
+insert into auth.users (id, email, email_confirmed_at) values ('f1730000-0000-0000-0000-000000000001', 'p17.late@example.test', now());
+select pg_temp.expect(not exists (select 1 from public.profiles where id = 'f1730000-0000-0000-0000-000000000001'), 'an expired invitation does not let anyone join');
+delete from auth.users where id = 'f1730000-0000-0000-0000-000000000001';
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect_error_like($$select public.invite_staff('staff1@umbane.test', 'Sam Again', 'manager')$$, 'staff_email_taken', 'someone already on a team is never invited again');
+select public.invite_staff('p17.again@example.test', 'Ayo Again', 'staff');
+select pg_temp.as_service();
+update public.staff_invitations set expires_at = now() - interval '1 day' where email = 'p17.again@example.test';
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((public.invite_staff('p17.again@example.test', 'Ayo Again', 'manager') ->> 'status') = 'invited', 'an expired invitation can be replaced by a new one');
+select pg_temp.expect((select count(*) = 2 and count(*) filter (where state = 'expired') = 1 from public.staff_invitation_list where email = 'p17.again@example.test'), 'the old one stays in the list as expired');
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select count(*) from public.staff_invitation_list) = 0, 'staff cannot see invitations');
+select pg_temp.as_service();
+insert into public.communication_logs (business_id, channel, direction, message_type, subject, body, status, recipient, invitation_id) select '11111111-0000-0000-0000-000000000001', 'email', 'outbound', 'email', 'You are invited', 'Accept: [invitation link]', 'sent', email, id from public.staff_invitations where email = 'p17.new@example.test';
+select pg_temp.as_user('a3000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select count(*) from public.communication_logs where invitation_id is not null) = 0, 'staff do not see invitation emails in the history');
+select pg_temp.as_user('a1000000-0000-0000-0000-000000000001');
+select pg_temp.expect((select count(*) from public.communication_logs where invitation_id is not null) = 1, 'administrators do');
+
+-- Clean up for the sections after this one
+select pg_temp.as_service();
+select pg_temp.as_owner();
+delete from public.notifications where dedupe_key like 'inbound:%';
+delete from public.communication_logs where invitation_id is not null;
+delete from public.staff_invitations where email like 'p17.%';
+delete from public.communication_logs where customer_id in (select id from public.customers where id::text like 'f171%') or lead_id = 'f1720000-0000-0000-0000-000000000001' or integration_id::text like 'f170%' or report_key = 'sales' or recipient = '+27831234567';
+delete from public.integrations where id::text like 'f170%';
+delete from public.customers where id::text like 'f171%';
+delete from public.leads where id = 'f1720000-0000-0000-0000-000000000001';
 
 -- Manager ---------------------------------------------------------------------------------------
 select pg_temp.as_user('a2000000-0000-0000-0000-000000000001');

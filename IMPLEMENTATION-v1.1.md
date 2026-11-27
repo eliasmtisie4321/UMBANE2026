@@ -463,6 +463,38 @@ Ticket statuses:
 
 ---
 
+## Integrations, Multi-Platform Sharing and Email Invitations
+
+**Goal:** Connect every outside service in one place and let people share through any connected platform, not only email. An extension of Phase 9 (team), Phase 10 (communications) and Phase 12 (notifications). Details: `docs/INTEGRATIONS.md`.
+
+### Architecture
+- [x] One provider registry (`shared/integrations.ts`) used by the app, the server and the database checks; each provider declares what its API really supports (send email, direct messages, attachments, document links, public posts, receiving replies, delivery reports).
+- [x] One adapter per provider on the server (`api/_lib/integrations/`): verify, send, and OAuth (authorize, exchange, refresh, revoke).
+- [x] Connections (`integrations`) written only by the server after the provider verifies them; capabilities limited to what the provider confirmed.
+- [x] Credentials encrypted server-side (AES-256-GCM, `INTEGRATIONS_KEY`) in a table no signed-in role can read; OAuth with single-use state and PKCE.
+- [x] One outbox and history (`communication_logs`) for every channel: provider, connection, sender, recipient, related record, message type, share group, status, provider response, errors; idempotency keys.
+
+### Settings → Integrations
+- [x] Administrators connect, test, set defaults, change settings and disconnect.
+- [x] Email: Resend, Gmail / Google Workspace, Outlook / Microsoft 365, plus the built-in Resend sender.
+- [x] Messaging: SMS (Twilio), WhatsApp Business (Cloud API) with delivery reports and customer replies.
+- [x] Social: Facebook Pages, Instagram, LinkedIn (public posts); TikTok listed as not available.
+- [ ] Provider apps and approvals: Google OAuth app and `gmail.send` verification, Microsoft app, Meta App Review and WhatsApp business verification and template, LinkedIn products, Twilio sender (see Phase 15).
+
+### Sharing
+- [x] One Share dialog: platform selection (several at once), recipients on file, message editor with templates, preview per platform, attachments or private document links, send or publish, delivery status, retry.
+- [x] In Customers, Leads, Sales orders, Invoices, Support tickets, Reports and Marketing (public posts).
+- [x] Direct messages, documents and public posts kept apart; posts never carry customer records or private files.
+- [x] Consent per channel (email, SMS opt-out, WhatsApp opt-in, marketing consent); safe retries.
+
+### Team invitations
+- [x] Add Employee sends the Supabase Auth invitation link through the business's email connection.
+- [x] Pending, Sent, Failed, Accepted, Expired and Cancelled; resend, copy link, cancel; no duplicate memberships; Welcome page to set a password.
+
+**Done when:** A business can connect its own email, messaging and social accounts in one place, share from any module to the platforms it has connected, and invite staff by email without touching Supabase. (Done in code and tests; live use waits on the provider approvals above.)
+
+---
+
 ## Phase 15: Launch and Handover
 
 **Goal:** Release a stable version of Umbane CRM and document how to run and maintain it.
@@ -503,9 +535,9 @@ Potential integrations, subject to provider availability and project requirement
 | Integration | Purpose | Suggested stage |
 |---|---|---|
 | Supabase | Database, authentication and file storage | Foundation |
-| Email provider | Invoice and ticket emails | Communication |
-| WhatsApp Business Platform | Customer communication | Communication |
-| SMS gateway | Customer notifications | Communication |
+| Email provider (Resend, Gmail, Microsoft 365) | Invoice and ticket emails, invitations | Built (Integrations) |
+| WhatsApp Business Platform | Customer communication | Built (Integrations) |
+| SMS gateway (Twilio) | Customer notifications | Built (Integrations) |
 | Google Maps Platform | Property location information | Property management |
 | PDF generation library | Invoices and report exports | Invoicing / Reports |
 

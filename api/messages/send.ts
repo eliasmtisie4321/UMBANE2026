@@ -7,6 +7,7 @@ import {
 } from '../_lib/deliver.js'
 import {
   adminClient,
+  canSend,
   deliveryConfig,
   json,
   missingForEmail,
@@ -19,24 +20,38 @@ import {
 } from '../_lib/server.js'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+/** One Share action can reach several platforms; it is sent in one call. */
+const MAX_PER_CALL = 10
 
 interface Deps {
   env: ServerEnv
   admin: () => SupabaseClient
-  config: (env: ServerEnv) => DeliveryConfig
+  config: (env: ServerEnv, admin?: unknown) => DeliveryConfig
+}
+
+function readIds(body: unknown): string[] | null {
+  const b = (body ?? {}) as { messageId?: unknown; messageIds?: unknown }
+  const raw = Array.isArray(b.messageIds)
+    ? b.messageIds
+    : b.messageId !== undefined
+      ? [b.messageId]
+      : []
+  const ids = [...new Set(raw.map((x) => String(x ?? '')))]
+  if (!ids.length || ids.length > MAX_PER_CALL || !ids.every((id) => UUID.test(id))) return null
+  return ids
 }
 
 /**
- * POST /api/messages/send  { messageId }
- * Sends an email that a staff member has just queued, then a few others that are due for a retry.
- * The caller must be active staff in the email's business.
+ * POST /api/messages/send  { messageId } or { messageIds: [...] }
+ * Sends messages a staff member has just queued (an email, or one Share to several platforms),
+ * then a few others that are due for a retry. Every message must be in the caller's business.
+ * Each goes through its own connection (Settings → Integrations), or the built-in email sender.
  */
 export function createSendHandler(deps: Deps) {
   return async function handle(request: Request): Promise<Response> {
     if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
-    const missing = missingForEmail(deps.env)
-    if (missing.includes('SUPABASE_SERVICE_ROLE_KEY') || missing.includes('SUPABASE_URL')) {
-      return json({ error: 'not_configured', missing }, 503)
+    if (!deps.env.serviceKey || !deps.env.supabaseUrl) {
+      return json({ error: 'not_configured', missing: missingForEmail(deps.env) }, 503)
     }
     const admin = deps.admin()
     const caller = await staffCaller(admin, request)
@@ -44,40 +59,60 @@ export function createSendHandler(deps: Deps) {
     if (!(await withinRateLimit(admin, 'send:' + caller.id, RATE_LIMITS.send)))
       return tooManyRequests()
 
-    let messageId: string
+    let ids: string[] | null
     try {
-      messageId = String(((await request.json()) as { messageId?: unknown }).messageId ?? '')
+      ids = readIds(await request.json())
     } catch {
       return json({ error: 'bad_request' }, 400)
     }
-    if (!UUID.test(messageId)) return json({ error: 'bad_request' }, 400)
+    if (!ids) return json({ error: 'bad_request' }, 400)
 
-    const owned = await admin
-      .from('communication_logs')
-      .select('id, business_id')
-      .eq('id', messageId)
-      .maybeSingle()
-    const row = owned.data as { business_id: string } | null
-    if (owned.error || !row || row.business_id !== caller.businessId) {
+    const owned = await admin.from('communication_logs').select('id, business_id').in('id', ids)
+    const rows = (owned.data ?? []) as { id: string; business_id: string }[]
+    if (
+      owned.error ||
+      rows.length !== ids.length ||
+      rows.some((r) => r.business_id !== caller.businessId)
+    ) {
       return json({ error: 'not_found' }, 404)
     }
-    // Queued safely; it goes out once email is set up.
-    if (missing.length > 0) return json({ status: 'queued', configured: false, missing }, 202)
+    // Queued safely; they go out once sending is set up.
+    if (!canSend(deps.env)) {
+      return json({ status: 'queued', configured: false, missing: missingForEmail(deps.env) }, 202)
+    }
 
-    const config = deps.config(deps.env)
-    const outcome = await deliverMessage(admin as unknown as AdminClient, config, messageId)
+    const config = deps.config(deps.env, admin)
+    const results: { id: string; outcome: string; status: string | null; error: string | null }[] =
+      []
+    for (const id of ids) {
+      let outcome = 'error'
+      try {
+        outcome = await deliverMessage(admin as unknown as AdminClient, config, id)
+      } catch {
+        // Left in the queue for the next try; its status says what happened.
+      }
+      results.push({ id, outcome, status: null, error: null })
+    }
     try {
       await deliverDue(admin as unknown as AdminClient, config, 5)
     } catch {
-      // Retrying others is best effort; this email's result is already recorded.
+      // Retrying others is best effort; these results are already recorded.
     }
-    const after = await admin
-      .from('communication_logs')
-      .select('status, error')
-      .eq('id', messageId)
-      .maybeSingle()
-    const final = after.data as { status: string; error: string | null } | null
-    return json({ outcome, status: final?.status ?? null, error: final?.error ?? null })
+    const after = await admin.from('communication_logs').select('id, status, error').in('id', ids)
+    for (const row of (after.data ?? []) as {
+      id: string
+      status: string
+      error: string | null
+    }[]) {
+      const r = results.find((x) => x.id === row.id)
+      if (r) Object.assign(r, { status: row.status, error: row.error })
+    }
+    // One message: the same answer as before Share existed, plus the list.
+    if (results.length === 1) {
+      const [one] = results
+      return json({ outcome: one.outcome, status: one.status, error: one.error, results })
+    }
+    return json({ results })
   }
 }
 

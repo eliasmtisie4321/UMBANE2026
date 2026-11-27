@@ -1,4 +1,6 @@
-import { Download, FileText } from 'lucide-react'
+import { Download, FileText, Share2 } from 'lucide-react'
+import { ShareDialog } from '@/components/share/ShareDialog'
+import { ok } from '@/utils/result'
 import { useState, type ReactNode } from 'react'
 import { ErrorNotice, ResourceBoundary } from '@/components/dashboard/Panel'
 import { PageHeader } from '@/components/data/PageHeader'
@@ -125,6 +127,8 @@ export function ReportFrame<T, R>({
 }: ReportFrameProps<T, R>) {
   const { profile } = useAuth()
   const [busy, setBusy] = useState<'csv' | 'pdf' | null>(null)
+  const [sharing, setSharing] = useState(false)
+  const [shared, setShared] = useState<string | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
   const name = `${fileSlug(title)}-${params.range.from}-to-${params.range.to}`
   const data = state.data
@@ -149,20 +153,25 @@ export function ReportFrame<T, R>({
     }
   }
 
+  /** The same PDF as Export PDF, for downloading or sharing. */
+  const buildPdf = async (current: T) => {
+    const business = await getBusinessName()
+    return buildReportPdf({
+      title,
+      business: business.ok && business.data ? business.data : 'Umbane CRM',
+      period: rangeLabel(params.range),
+      generated: `Generated ${formatDateTime(new Date().toISOString())}${profile ? ` by ${profile.full_name}` : ''}`,
+      filters: filterSummary,
+      sections: exports!.sections(current),
+    })
+  }
+
   const exportPdf = async () => {
     if (!exports || data === null) return
     setBusy('pdf')
     setExportError(null)
     try {
-      const business = await getBusinessName()
-      const bytes = await buildReportPdf({
-        title,
-        business: business.ok && business.data ? business.data : 'Umbane CRM',
-        period: rangeLabel(params.range),
-        generated: `Generated ${formatDateTime(new Date().toISOString())}${profile ? ` by ${profile.full_name}` : ''}`,
-        filters: filterSummary,
-        sections: exports.sections(data),
-      })
+      const bytes = await buildPdf(data)
       downloadFile(`${name}.pdf`, bytes as BlobPart, 'application/pdf')
     } catch {
       setExportError('The PDF could not be created. Please try again.')
@@ -196,6 +205,13 @@ export function ReportFrame<T, R>({
               >
                 <FileText size={16} aria-hidden="true" /> Export PDF
               </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setSharing(true)}
+                disabled={data === null || busy !== null}
+              >
+                <Share2 size={16} aria-hidden="true" /> Share
+              </Button>
             </>
           )
         }
@@ -213,6 +229,39 @@ export function ReportFrame<T, R>({
           {filterSummary.length > 0 ? ` · ${filterSummary.join(' · ')}` : ''}
         </p>
       </div>
+      {shared && (
+        <p
+          role="status"
+          className="mb-4 rounded-md bg-surface-container px-4 py-3 text-body-md text-on-surface"
+        >
+          {shared}
+        </p>
+      )}
+      {sharing && data !== null && exports && (
+        <ShareDialog
+          context={{
+            title: `Share ${title}`,
+            allowTeam: true,
+            allowAddress: true,
+            subject: `${title}: ${rangeLabel(params.range)}`,
+            body: `Attached is the ${title.toLowerCase()} for ${rangeLabel(params.range)}.`,
+            reportKey:
+              fileSlug(title)
+                .replace(/[^a-z]+/g, '_')
+                .replace(/^_+|_+$/g, '')
+                .slice(0, 40) || 'report',
+            attachment: {
+              label: `the report PDF (${name}.pdf)`,
+              build: async () => ok({ bytes: await buildPdf(data), name: `${name}.pdf` }),
+            },
+          }}
+          onClose={() => setSharing(false)}
+          onDone={(notice) => {
+            setSharing(false)
+            setShared(notice)
+          }}
+        />
+      )}
       {exportError && (
         <div className="mb-4">
           <ErrorNotice message={exportError} />

@@ -1,4 +1,5 @@
-import { Ban, CheckCheck, ClipboardCheck, FileText, Pencil } from 'lucide-react'
+import { Ban, CheckCheck, ClipboardCheck, FileText, Pencil, Share2 } from 'lucide-react'
+import { MESSAGE_PROMPT, ShareDialog } from '@/components/share/ShareDialog'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { canAccess } from '@/auth/permissions'
@@ -50,6 +51,7 @@ function OrderBody({
   const role = profile?.role ?? 'client'
   const canWrite = canAccess(role, '/sales-orders/new')
   const [step, setStep] = useState<'confirmed' | 'fulfilled' | 'cancel' | null>(null)
+  const [sharing, setSharing] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const open = order.status === 'pending' || order.status === 'confirmed'
@@ -98,6 +100,9 @@ function OrderBody({
         actions={
           canWrite && (
             <>
+              <Button variant="secondary" onClick={() => setSharing(true)}>
+                <Share2 size={16} aria-hidden="true" /> Share
+              </Button>
               {invoiceable && (
                 <Button
                   variant="secondary"
@@ -267,6 +272,23 @@ function OrderBody({
           onDone={() => {
             setStep(null)
             onChanged('Order cancelled.')
+          }}
+        />
+      )}
+      {sharing && (
+        <ShareDialog
+          context={{
+            title: `Share order ${order.reference}`,
+            customer: { id: order.customerId, name: order.customerName },
+            allowTeam: true,
+            subject: `Your order ${order.reference}`,
+            body: `Hello ${order.customerName},\n\n${MESSAGE_PROMPT}\n\nOrder ${order.reference}: ${rand(order.total)}.`,
+            orderId: order.id,
+          }}
+          onClose={() => setSharing(false)}
+          onDone={(notice) => {
+            setSharing(false)
+            onChanged(notice)
           }}
         />
       )}

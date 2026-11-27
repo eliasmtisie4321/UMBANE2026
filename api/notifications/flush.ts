@@ -5,6 +5,7 @@ import {
   adminClient,
   deliveryConfig,
   json,
+  canSend,
   missingForEmail,
   readEnv,
   signedInCaller,
@@ -17,7 +18,7 @@ import {
 interface Deps {
   env: ServerEnv
   admin: () => SupabaseClient
-  config: (env: ServerEnv) => DeliveryConfig
+  config: (env: ServerEnv, admin?: unknown) => DeliveryConfig
 }
 
 /**
@@ -29,15 +30,16 @@ interface Deps {
 export function createFlushHandler(deps: Deps) {
   return async function handle(request: Request): Promise<Response> {
     if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
-    const missing = missingForEmail(deps.env)
-    if (missing.length > 0) return json({ status: 'not_configured', missing }, 202)
+    if (!canSend(deps.env)) {
+      return json({ status: 'not_configured', missing: missingForEmail(deps.env) }, 202)
+    }
     const client = deps.admin()
     const caller = await signedInCaller(client, request)
     if (!caller) return json({ error: 'unauthorized' }, 401)
     if (!(await withinRateLimit(client, 'flush:' + caller.id, RATE_LIMITS.flush)))
       return tooManyRequests()
     const admin = client as unknown as AdminClient
-    const config = deps.config(deps.env)
+    const config = deps.config(deps.env, client)
 
     let notifications: Awaited<ReturnType<typeof deliverNotificationEmails>> | { error: string }
     try {

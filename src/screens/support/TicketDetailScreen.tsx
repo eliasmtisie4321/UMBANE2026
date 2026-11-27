@@ -1,5 +1,5 @@
-import { CheckCircle2, Mail, Pencil, RefreshCw, UserPlus } from 'lucide-react'
-import { ComposeEmailDialog } from '@/components/messages/ComposeEmailDialog'
+import { CheckCircle2, MessageSquareShare, Pencil, RefreshCw, UserPlus } from 'lucide-react'
+import { ShareDialog } from '@/components/share/ShareDialog'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { canAccess } from '@/auth/permissions'
@@ -69,7 +69,7 @@ function TicketBody({
                 <Pencil size={16} aria-hidden="true" /> Edit
               </Link>
               <Button variant="secondary" onClick={() => setDialog('email')}>
-                <Mail size={16} aria-hidden="true" /> Email Customer
+                <MessageSquareShare size={16} aria-hidden="true" /> Message Customer
               </Button>
               <Button variant="secondary" onClick={() => setDialog('assign')}>
                 <UserPlus size={16} aria-hidden="true" /> Assign Ticket
@@ -184,12 +184,14 @@ function TicketBody({
       </div>
 
       {dialog === 'email' && (
-        <ComposeEmailDialog
-          customerId={t.customerId}
-          customerName={t.customerName}
-          templateKey="ticket_update"
-          values={{ ticket_reference: t.reference, ticket_subject: t.subject }}
-          ticketId={t.id}
+        <ShareDialog
+          context={{
+            title: `Message ${t.customerName} about ${t.reference}`,
+            customer: { id: t.customerId, name: t.customerName },
+            templateKey: 'ticket_update',
+            values: { ticket_reference: t.reference, ticket_subject: t.subject },
+            ticketId: t.id,
+          }}
           onClose={() => setDialog(null)}
           onDone={done}
         />

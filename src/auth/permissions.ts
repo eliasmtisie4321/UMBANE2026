@@ -5,7 +5,7 @@ import type { UserRole } from '@/types/auth'
  * Frontend mirror of docs/PERMISSIONS.md, used only to decide which links and pages to show.
  * The database (Row Level Security) is the real enforcement; never rely on this for security.
  */
-const STAFF_BLOCKED = ['/reports', '/automations', '/settings', '/team']
+const STAFF_BLOCKED = ['/reports', '/automations', '/settings', '/team', '/marketing']
 const CLIENT_ALLOWED = [
   '/',
   '/properties',
@@ -23,8 +23,8 @@ const matches = (prefix: string, path: string) =>
 // Adding and editing employees is for administrators.
 const isEmployeeEdit = (path: string) =>
   path === '/team/new' || /^\/team\/[^/]+\/edit\/?$/.test(path)
-// The audit log and data-privacy tools are for administrators only.
-const ADMIN_ONLY = ['/settings/audit', '/settings/privacy']
+// The audit log, data-privacy tools and integrations are for administrators only.
+const ADMIN_ONLY = ['/settings/audit', '/settings/privacy', '/settings/integrations']
 // Creating and changing tasks is for managers; staff work the tasks assigned to them.
 const isTaskEdit = (path: string) => /^\/tasks\/(new|[^/]+\/edit)\/?$/.test(path)
 

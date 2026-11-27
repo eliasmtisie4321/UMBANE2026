@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle2, Clock, FileText, Send } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { providerInfo } from '@shared/integrations'
 import { StatTile } from '@/components/dashboard/StatTile'
 import { ListPanel, SearchField } from '@/components/data/ListPanel'
 import { secondaryLink } from '@/components/data/linkStyles'
@@ -183,7 +184,15 @@ export default function CommunicationsScreen() {
                       {m.subject || labelOf(CHANNELS, m.channel)}
                     </Link>
                     <span className="block text-label-md text-on-surface-variant">
-                      {[m.recipient, m.invoiceNumber, m.ticketReference, m.createdByName]
+                      {[
+                        m.recipientName && m.recipientName !== m.customerName
+                          ? m.recipientName
+                          : null,
+                        m.recipient,
+                        m.invoiceNumber,
+                        m.ticketReference,
+                        m.createdByName,
+                      ]
                         .filter(Boolean)
                         .join(' · ')}
                     </span>
@@ -191,6 +200,11 @@ export default function CommunicationsScreen() {
                   <Td>{m.customerName ?? '-'}</Td>
                   <Td className="whitespace-nowrap">
                     {labelOf(CHANNELS, m.channel)}
+                    {m.provider && m.messageType !== 'logged' && (
+                      <span className="block text-label-md text-on-surface-variant">
+                        via {providerInfo(m.provider)?.label ?? m.provider}
+                      </span>
+                    )}
                     {m.direction === 'inbound' && (
                       <span className="block text-label-md text-on-surface-variant">incoming</span>
                     )}

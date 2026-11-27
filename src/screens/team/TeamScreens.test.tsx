@@ -118,6 +118,11 @@ beforeEach(() => {
         department: 'sales_billing',
         jobTitle: null,
         createdAt: '2026-11-20T08:00:00Z',
+        state: 'sent',
+        expiresAt: '2026-11-27T08:00:00Z',
+        sentAt: '2026-11-20T08:01:00Z',
+        sentVia: 'Gmail / Google Workspace (hr@umbane.co.za)',
+        lastError: null,
       },
     ]),
   )
@@ -194,7 +199,32 @@ describe('team page', () => {
     ).toBeNull()
   })
 
-  it('cancels an invitation', async () => {
+  it('shows how each invitation was sent', async () => {
+    open('/team')
+    expect(await screen.findByText('Sent')).toBeInTheDocument()
+    expect(
+      screen.getByText('Through Gmail / Google Workspace (hr@umbane.co.za)'),
+    ).toBeInTheDocument()
+  })
+
+  it('cancels an invitation on the server, which also removes the unused sign-in', async () => {
+    team.invitationAction.mockResolvedValue(ok({ state: 'cancelled' }))
+    open('/team')
+    await userEvent.click(
+      await screen.findByRole('button', { name: /Cancel invitation for lerato@umbane.co.za/ }),
+    )
+    await userEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel invitation' }),
+    )
+    expect(
+      await screen.findByText('Invitation for lerato@umbane.co.za cancelled.'),
+    ).toBeInTheDocument()
+    expect(team.invitationAction).toHaveBeenCalledWith('cancel', 'i1')
+    expect(team.cancelInvitation).not.toHaveBeenCalled()
+  })
+
+  it('still cancels when the server cannot be reached', async () => {
+    team.invitationAction.mockResolvedValue(err({ code: 'unknown', message: 'unreachable' }))
     team.cancelInvitation.mockResolvedValue(ok({ id: 'i1' }))
     open('/team')
     await userEvent.click(
@@ -207,6 +237,22 @@ describe('team page', () => {
       await screen.findByText('Invitation for lerato@umbane.co.za cancelled.'),
     ).toBeInTheDocument()
     expect(team.cancelInvitation).toHaveBeenCalledWith('i1')
+  })
+
+  it('resends an invitation', async () => {
+    team.invitationAction.mockResolvedValue(
+      ok({ state: 'sent', via: 'Gmail / Google Workspace (hr@umbane.co.za)' }),
+    )
+    open('/team')
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Resend invitation to lerato@umbane.co.za' }),
+    )
+    expect(
+      await screen.findByText(
+        'Invitation sent to lerato@umbane.co.za through Gmail / Google Workspace (hr@umbane.co.za).',
+      ),
+    ).toBeInTheDocument()
+    expect(team.invitationAction).toHaveBeenCalledWith('resend', 'i1')
   })
 
   it('shows a manager the team without invitations or adding people', async () => {
@@ -236,13 +282,18 @@ describe('adding employees', () => {
     await userEvent.selectOptions(screen.getByLabelText('Access level'), 'manager')
   }
 
-  it('saves an invitation and explains the step in Supabase', async () => {
-    team.inviteStaff.mockResolvedValue(ok({ status: 'invited' }))
+  it('saves the invitation and emails it through the business’s email account', async () => {
+    team.inviteStaff.mockResolvedValue(ok({ status: 'invited', invitationId: 'i9' }))
+    team.invitationAction.mockResolvedValue(
+      ok({ state: 'sent', via: 'Gmail / Google Workspace (hr@umbane.co.za)' }),
+    )
     open('/team/new')
     await fill()
     await userEvent.click(screen.getByRole('button', { name: /Add Employee/ }))
-    expect(await screen.findByRole('heading', { name: 'One More Step' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Invitation' })).toBeInTheDocument()
+    expect(await screen.findByText(/through Gmail \/ Google Workspace/)).toBeInTheDocument()
     expect(screen.getByText('lerato@umbane.co.za')).toBeInTheDocument()
+    expect(team.invitationAction).toHaveBeenCalledWith('send', 'i9')
     expect(team.inviteStaff).toHaveBeenCalledWith({
       email: 'lerato@umbane.co.za',
       fullName: 'Lerato Khumalo',
@@ -253,6 +304,26 @@ describe('adding employees', () => {
       startDate: null,
       reportsTo: null,
     })
+  })
+
+  it('explains a failed invitation email and offers the link instead', async () => {
+    team.inviteStaff.mockResolvedValue(ok({ status: 'invited', invitationId: 'i9' }))
+    team.invitationAction.mockImplementation(async (action) =>
+      action === 'link'
+        ? ok({ state: 'link', link: 'https://x.supabase.co/auth/v1/verify?token=abc' })
+        : ok({ state: 'failed', error: 'No Email account is connected.' }),
+    )
+    open('/team/new')
+    await fill()
+    await userEvent.click(screen.getByRole('button', { name: /Add Employee/ }))
+    expect(
+      await screen.findByText(/could not be emailed: No Email account is connected/),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Try Again' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Copy Invitation Link' }))
+    expect(
+      await screen.findByText('https://x.supabase.co/auth/v1/verify?token=abc'),
+    ).toBeInTheDocument()
   })
 
   it('goes straight to the profile when they already have an account', async () => {

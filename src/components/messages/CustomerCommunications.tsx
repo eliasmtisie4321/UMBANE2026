@@ -1,4 +1,4 @@
-import { Mail, MessageSquarePlus } from 'lucide-react'
+import { MessageSquarePlus, MessageSquareShare } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
@@ -15,7 +15,7 @@ import {
 import { labelOf } from '@/types/support'
 import { CHANNELS, type CustomerPreferences, type Direction } from '@/types/messages'
 import { formatDate, formatDateTime } from '@/utils/format'
-import { ComposeEmailDialog } from './ComposeEmailDialog'
+import { ShareDialog } from '@/components/share/ShareDialog'
 import { MessageStatusBadge } from './MessageStatusBadge'
 
 function LogContactDialog({
@@ -67,7 +67,7 @@ function LogContactDialog({
         />
         {channel === 'email' ? (
           <p className="text-label-md text-on-surface-variant">
-            For an email the customer sent you. To send one, use Send Email.
+            For an email the customer sent you. To send one, use Send Message.
           </p>
         ) : (
           <RadioGroup
@@ -121,9 +121,15 @@ function Preferences({
 }) {
   const [optOut, setOptOut] = useState(prefs.emailOptOut)
   const [consent, setConsent] = useState(prefs.marketingConsent)
+  const [smsOff, setSmsOff] = useState(Boolean(prefs.smsOptOut))
+  const [whatsapp, setWhatsapp] = useState(Boolean(prefs.whatsappOptIn))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const changed = optOut !== prefs.emailOptOut || consent !== prefs.marketingConsent
+  const changed =
+    optOut !== prefs.emailOptOut ||
+    consent !== prefs.marketingConsent ||
+    smsOff !== Boolean(prefs.smsOptOut) ||
+    whatsapp !== Boolean(prefs.whatsappOptIn)
 
   async function save() {
     setBusy(true)
@@ -131,6 +137,8 @@ function Preferences({
     const result = await setCustomerPreferences(customerId, {
       emailOptOut: optOut,
       marketingConsent: optOut ? false : consent,
+      smsOptOut: smsOff,
+      whatsappOptIn: whatsapp,
     })
     setBusy(false)
     if (!result.ok) return setError(result.error.message)
@@ -140,7 +148,7 @@ function Preferences({
   return (
     <fieldset className="mb-4 rounded-md border border-outline-variant p-3">
       <legend className="px-1 text-label-md font-semibold text-on-surface">
-        Email preferences
+        Communication preferences
       </legend>
       {error && <FormError>{error}</FormError>}
       {prefs.suppressedAt && (
@@ -175,6 +183,29 @@ function Preferences({
           <span className="block text-label-md text-on-surface-variant">
             Only tick this when the customer has said yes; it is recorded with your name and the
             date.
+          </span>
+        </span>
+      </label>
+      <label className="mt-2 flex items-start gap-2 text-body-md">
+        <input
+          type="checkbox"
+          checked={smsOff}
+          onChange={(e) => setSmsOff(e.target.checked)}
+          className="mt-1 h-4 w-4 accent-primary"
+        />
+        <span>Does not want SMS</span>
+      </label>
+      <label className="mt-2 flex items-start gap-2 text-body-md">
+        <input
+          type="checkbox"
+          checked={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.checked)}
+          className="mt-1 h-4 w-4 accent-primary"
+        />
+        <span>
+          Agreed to WhatsApp messages
+          <span className="block text-label-md text-on-surface-variant">
+            WhatsApp needs the customer’s yes first. Recorded with your name and the date.
           </span>
         </span>
       </label>
@@ -235,7 +266,7 @@ export function CustomerCommunications({
             <MessageSquarePlus size={16} aria-hidden="true" /> Log Contact
           </Button>
           <Button variant="secondary" onClick={() => setDialog('email')}>
-            <Mail size={16} aria-hidden="true" /> Send Email
+            <MessageSquareShare size={16} aria-hidden="true" /> Send Message
           </Button>
         </div>
       }
@@ -278,9 +309,11 @@ export function CustomerCommunications({
       </ResourceBoundary>
 
       {dialog === 'email' && (
-        <ComposeEmailDialog
-          customerId={customerId}
-          customerName={customerName}
+        <ShareDialog
+          context={{
+            title: `Message ${customerName}`,
+            customer: { id: customerId, name: customerName },
+          }}
           onClose={() => setDialog(null)}
           onDone={done}
         />

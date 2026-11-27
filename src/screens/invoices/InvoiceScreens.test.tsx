@@ -5,6 +5,8 @@ import App from '@/App'
 import { renderAt, signedInAs } from '@/auth/authTestUtils'
 import * as invoiceService from '@/services/invoices'
 import * as messageService from '@/services/messages'
+import * as shareService from '@/services/share'
+import { shareReady } from '@/test/share'
 import * as orderService from '@/services/orders'
 import * as propertyService from '@/services/properties'
 import * as activityService from '@/services/salesActivities'
@@ -19,6 +21,10 @@ vi.mock('@/services/properties')
 vi.mock('@/services/salesActivities')
 vi.mock('@/services/maintenance')
 vi.mock('@/services/messages')
+vi.mock('@/services/share', async (real) => ({
+  ...(await real<typeof import('@/services/share')>()),
+  ...(await import('@/test/share')).shareMocks(),
+}))
 const download = vi.hoisted(() => vi.fn())
 const build = vi.hoisted(() => vi.fn())
 vi.mock('@/utils/invoicePdf', () => ({ downloadInvoicePdf: download, buildInvoicePdf: build }))
@@ -378,25 +384,28 @@ describe('invoice details', () => {
     m.uploadEmailAttachment.mockResolvedValue(
       ok({ path: 'b1/k/INV-2026-00007.pdf', name: 'INV-2026-00007.pdf' }),
     )
-    m.queueEmail.mockResolvedValue(ok({ id: 'msg1' }))
-    m.sendNow.mockResolvedValue({ state: 'sent' })
+    vi.mocked(shareService).listTeamRecipients.mockResolvedValue(ok([]))
+    shareReady(vi.mocked(shareService))
     build.mockResolvedValue(new Uint8Array([37, 80, 68, 70]))
     open('/invoices/inv1')
-    await userEvent.click(await screen.findByRole('button', { name: /Email Invoice/ }))
+    await userEvent.click(await screen.findByRole('button', { name: /Share Invoice/ }))
     const dialog = screen.getByRole('dialog')
-    expect(await within(dialog).findByLabelText('Subject')).toHaveValue(
+    expect(await within(dialog).findByLabelText('Email subject')).toHaveValue(
       'Invoice INV-2026-00007 from Umbane',
     )
     expect(within(dialog).getByLabelText(/Attach the invoice PDF/)).toBeChecked()
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Send Email' }))
-    expect(await screen.findByText('Email sent to client1@umbane.test.')).toBeInTheDocument()
-    expect(m.queueEmail.mock.calls[0][0]).toMatchObject({
-      customerId: 'c1',
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Send' }))
+    expect(await within(dialog).findByText('Sent.')).toBeInTheDocument()
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Done' }))
+    expect(await screen.findByText('Sent to Email.')).toBeInTheDocument()
+    expect(vi.mocked(shareService).queueMessage.mock.calls[0][0]).toMatchObject({
+      channel: 'email',
+      recipient: { kind: 'customer', id: 'c1' },
       invoiceId: 'inv1',
       templateKey: 'invoice_issued',
       attachment: { path: 'b1/k/INV-2026-00007.pdf', name: 'INV-2026-00007.pdf' },
     })
-    expect(m.sendNow).toHaveBeenCalledWith('msg1')
+    expect(vi.mocked(shareService).sendMessages).toHaveBeenCalledWith(['msg1'])
   })
 })
 

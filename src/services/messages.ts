@@ -48,6 +48,13 @@ const fromListRow = (r: Row): MessageListItem => ({
   nextAttemptAt: str(r.next_attempt_at),
   willRetry: Boolean(r.will_retry),
   error: str(r.error),
+  messageType: str(r.message_type) ?? undefined,
+  provider: str(r.provider),
+  sender: str(r.sender),
+  recipientName: str(r.recipient_name),
+  leadId: str(r.lead_id),
+  leadName: str(r.lead_name),
+  externalUrl: str(r.external_url),
 })
 
 export interface MessageFilters {
@@ -307,7 +314,7 @@ export const getCustomerPreferences = (customerId: string, client?: DbClient) =>
     const { data, error } = await c
       .from('customers')
       .select(
-        'email, email_opt_out, marketing_consent, consent_updated_at, email_suppressed_at, email_suppressed_reason',
+        'email, email_opt_out, marketing_consent, consent_updated_at, email_suppressed_at, email_suppressed_reason, sms_opt_out, whatsapp_opt_in',
       )
       .eq('id', customerId)
       .maybeSingle()
@@ -320,12 +327,19 @@ export const getCustomerPreferences = (customerId: string, client?: DbClient) =>
       consentUpdatedAt: str(r.consent_updated_at),
       suppressedAt: str(r.email_suppressed_at),
       suppressedReason: str(r.email_suppressed_reason) as CustomerPreferences['suppressedReason'],
+      smsOptOut: Boolean(r.sms_opt_out),
+      whatsappOptIn: Boolean(r.whatsapp_opt_in),
     })
   })
 
 export const setCustomerPreferences = (
   customerId: string,
-  prefs: { emailOptOut: boolean; marketingConsent: boolean },
+  prefs: {
+    emailOptOut: boolean
+    marketingConsent: boolean
+    smsOptOut?: boolean
+    whatsappOptIn?: boolean
+  },
   client?: DbClient,
 ) =>
   guarded<null>(
@@ -334,7 +348,12 @@ export const setCustomerPreferences = (
     async (c) => {
       const { data, error } = await c
         .from('customers')
-        .update({ email_opt_out: prefs.emailOptOut, marketing_consent: prefs.marketingConsent })
+        .update({
+          email_opt_out: prefs.emailOptOut,
+          marketing_consent: prefs.marketingConsent,
+          ...(prefs.smsOptOut === undefined ? {} : { sms_opt_out: prefs.smsOptOut }),
+          ...(prefs.whatsappOptIn === undefined ? {} : { whatsapp_opt_in: prefs.whatsappOptIn }),
+        })
         .eq('id', customerId)
         .select('id')
       if (error) return err(mapWriteError(error, 'preferences'))

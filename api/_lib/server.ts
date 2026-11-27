@@ -1,6 +1,9 @@
 import { timingSafeEqual } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { AdminClient, DeliveryConfig } from './deliver.js'
+import { encryptionKey } from './integrations/crypto.js'
+import type { Db } from './integrations/store.js'
+import type { AdapterContext, OAuthApp, OAuthApps } from './integrations/types.js'
 import { sendViaResend } from './resend.js'
 
 /**
@@ -17,9 +20,19 @@ export interface ServerEnv {
   cronSecret: string | null
   /** The app's address, for links in emails (APP_URL, or the Vercel production domain). */
   appUrl: string | null
+  /** Encrypts provider credentials (Settings → Integrations): 32 random bytes, base64. */
+  integrationsKey: string | null
+  /** Umbane's own app id and secret with each OAuth provider. */
+  oauth: OAuthApps
 }
 
 const value = (v: string | undefined) => (v && v.trim() ? v.trim() : null)
+
+const app = (id: string | undefined, secret: string | undefined): OAuthApp | undefined => {
+  const clientId = value(id)
+  const clientSecret = value(secret)
+  return clientId && clientSecret ? { clientId, clientSecret } : undefined
+}
 
 export const readEnv = (env: Record<string, string | undefined> = process.env): ServerEnv => ({
   supabaseUrl: value(env.SUPABASE_URL) ?? value(env.VITE_SUPABASE_URL),
@@ -34,6 +47,13 @@ export const readEnv = (env: Record<string, string | undefined> = process.env): 
     (value(env.VERCEL_PROJECT_PRODUCTION_URL)
       ? `https://${value(env.VERCEL_PROJECT_PRODUCTION_URL)}`
       : null),
+  integrationsKey: value(env.INTEGRATIONS_KEY),
+  oauth: {
+    google: app(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET),
+    microsoft: app(env.MICROSOFT_CLIENT_ID, env.MICROSOFT_CLIENT_SECRET),
+    meta: app(env.META_APP_ID, env.META_APP_SECRET),
+    linkedin: app(env.LINKEDIN_CLIENT_ID, env.LINKEDIN_CLIENT_SECRET),
+  },
 })
 
 /** What is missing before email can be sent, by setting name. Empty when ready. */
@@ -56,10 +76,32 @@ export function adminClient(e: ServerEnv): SupabaseClient {
   })
 }
 
-export const deliveryConfig = (e: ServerEnv): DeliveryConfig => ({
-  from: e.emailFrom ?? '',
+/** Whether anything can be sent: the database settings, and the built-in email or connections. */
+export const canSend = (e: ServerEnv) =>
+  Boolean(
+    e.supabaseUrl &&
+    e.serviceKey &&
+    ((e.resendKey && e.emailFrom) || encryptionKey(e.integrationsKey)),
+  )
+
+export const adapterContext = (e: ServerEnv): AdapterContext => ({
+  fetch: (input, init) => fetch(input, init),
+  appUrl: e.appUrl,
+  oauth: e.oauth,
+  now: () => Date.now(),
+})
+
+/**
+ * How messages go out: the built-in email sender (when its settings are there) and, given the
+ * service-role client, each business's connections from Settings → Integrations.
+ */
+export const deliveryConfig = (e: ServerEnv, admin?: unknown): DeliveryConfig => ({
+  from: e.resendKey && e.emailFrom ? e.emailFrom : '',
   replyTo: e.replyTo ?? undefined,
   send: (email) => sendViaResend(email, e.resendKey ?? ''),
+  integrations: admin
+    ? { db: admin as Db, key: encryptionKey(e.integrationsKey), ctx: adapterContext(e) }
+    : null,
 })
 
 /** A constant-time check of "Authorization: Bearer <CRON_SECRET>". No secret set: always false. */
@@ -80,6 +122,7 @@ export const json = (body: unknown, status = 200) =>
 export interface StaffCaller {
   id: string
   businessId: string
+  role?: string
 }
 
 /** How often each endpoint may be called, per key, per minute. */
@@ -88,6 +131,9 @@ export const RATE_LIMITS = {
   flush: 10,
   status: 30,
   webhook: 600,
+  integrations: 30,
+  invitations: 20,
+  documents: 60,
 } as const
 
 /**
@@ -172,7 +218,16 @@ export async function staffCaller(
     is_active: boolean
   } | null
   if (profile.error || !p || !p.is_active || p.role === 'client') return null
-  return { id: p.id, businessId: p.business_id }
+  return { id: p.id, businessId: p.business_id, role: p.role }
+}
+
+/** The signed-in person behind a request, if they are an active administrator. */
+export async function adminCaller(
+  admin: Pick<SupabaseClient, 'auth' | 'from'>,
+  request: Request,
+): Promise<StaffCaller | null> {
+  const caller = await staffCaller(admin, request)
+  return caller && caller.role === 'administrator' ? caller : null
 }
 
 export type { AdminClient }

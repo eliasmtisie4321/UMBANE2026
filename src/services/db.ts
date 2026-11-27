@@ -295,8 +295,40 @@ const RULES: Record<string, { field?: string; message: string }> = {
     message:
       'Email to this customer is stopped because an earlier email bounced or was marked as spam.',
   },
-  message_opted_out: { message: 'This customer has asked not to receive email.' },
-  message_no_consent: { message: 'Marketing email needs the customer’s recorded consent.' },
+  message_opted_out: { message: 'This person has asked not to receive messages this way.' },
+  message_no_consent: { message: 'Marketing needs the customer’s recorded consent.' },
+  // Integrations and sharing (Settings → Integrations, Share)
+  integration_not_connected: {
+    message:
+      'That platform is not connected. An administrator can connect it in Settings → Integrations.',
+  },
+  integration_cannot_message: { message: 'That connection cannot send direct messages.' },
+  integration_cannot_publish: { message: 'That connection cannot publish posts.' },
+  message_channel_unknown: { message: 'Choose where to send it.' },
+  message_no_phone: {
+    message: 'There is no mobile number on file. Add one to their profile first.',
+  },
+  message_no_whatsapp_consent: {
+    message:
+      'This customer has not agreed to WhatsApp messages. Record their consent on their profile first.',
+  },
+  message_one_recipient: { message: 'Each message goes to one recipient.' },
+  message_address_manager: { message: 'Only managers can send to an address that is not on file.' },
+  message_address_invalid: {
+    field: 'address',
+    message: 'Enter a valid email address or mobile number.',
+  },
+  message_social_manager: { message: 'Only managers can publish public posts.' },
+  message_social_private: {
+    message: 'A public post cannot include customer records or private documents.',
+  },
+  message_image_required: { field: 'imageUrl', message: 'Instagram posts need an image address.' },
+  message_image_social_only: { message: 'Images are only for social posts.' },
+  message_too_long: { field: 'body', message: 'The message is too long for this platform.' },
+  message_body_required: { field: 'body', message: 'Write a message.' },
+  message_subject_required: { field: 'subject', message: 'An email needs a subject.' },
+  message_lead_not_found: { message: 'That lead no longer exists.' },
+  message_recipient_not_found: { message: 'That team member is no longer active.' },
   message_customer_not_found: { message: 'This customer could not be found.' },
   message_link_mismatch: { message: 'The invoice or ticket belongs to a different customer.' },
   message_not_retryable: { message: 'Only a failed email can be tried again. Refresh the page.' },

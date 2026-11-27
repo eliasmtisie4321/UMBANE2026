@@ -174,3 +174,18 @@ of a **development** Supabase project after applying migrations.
 - "Request access" from the sign-up page: 30 an hour per business, counted in the database.
 - The counters (`api_rate_limits`) are closed to every signed-in role; only the server's
   `rate_limit_hit` function touches them.
+
+## Integrations and sharing
+
+- **Settings → Integrations:** administrators only, through the server. Nobody can mark a provider
+  connected or add capabilities directly: the server does it after the provider verifies the
+  connection. Credentials (`integration_secrets`), sign-in states and document links are closed to
+  every signed-in role, administrators included.
+- **Seeing what is connected:** every staff member (to choose where to share). Clients see nothing.
+- **Sending (Share, Send Message):** staff, to the customer, lead or team member on file. Managers may
+  also send service messages to a typed address. Consent is checked per channel (docs/INTEGRATIONS.md).
+- **Public posts (Marketing):** managers and administrators. A post can never carry a customer
+  record or a private document.
+- **Invitations:** administrators send, resend, copy links and cancel (server checks the role).
+- **Webhooks and document links:** no sign-in; each request is checked with the connection's own
+  secret, or a 48-character random token that expires.

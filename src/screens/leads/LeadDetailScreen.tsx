@@ -1,4 +1,5 @@
-import { Ban, Pencil, RotateCcw, ShoppingCart, UserCheck } from 'lucide-react'
+import { Ban, MessageSquareShare, Pencil, RotateCcw, ShoppingCart, UserCheck } from 'lucide-react'
+import { ShareDialog } from '@/components/share/ShareDialog'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Panel, ResourceBoundary } from '@/components/dashboard/Panel'
@@ -33,7 +34,7 @@ function LeadBody({
   version: number
   onChanged: (notice: string) => void
 }) {
-  const [dialog, setDialog] = useState<'lose' | 'convert' | null>(null)
+  const [dialog, setDialog] = useState<'lose' | 'convert' | 'message' | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const approved = APPROVED_STAGES.includes(lead.status)
@@ -74,6 +75,9 @@ function LeadBody({
                 <RotateCcw size={16} aria-hidden="true" /> Reopen
               </Button>
             )}
+            <Button variant="secondary" onClick={() => setDialog('message')}>
+              <MessageSquareShare size={16} aria-hidden="true" /> Send Message
+            </Button>
             <Link to={`/leads/${lead.id}/edit`} className={secondaryLink}>
               <Pencil size={16} aria-hidden="true" /> Edit
             </Link>
@@ -190,6 +194,20 @@ function LeadBody({
           onDone={() => {
             setDialog(null)
             onChanged('Lead marked as lost.')
+          }}
+        />
+      )}
+      {dialog === 'message' && (
+        <ShareDialog
+          context={{
+            title: `Message ${lead.name}`,
+            lead: { id: lead.id, name: lead.name },
+            values: { customer_name: lead.name },
+          }}
+          onClose={() => setDialog(null)}
+          onDone={(notice) => {
+            setDialog(null)
+            onChanged(notice)
           }}
         />
       )}

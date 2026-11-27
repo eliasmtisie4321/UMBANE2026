@@ -9,7 +9,15 @@ import { secondaryLink } from '@/components/data/linkStyles'
 import { PageHeader } from '@/components/data/PageHeader'
 import { Button, Input, Select } from '@/components/ui'
 import { useResource } from '@/hooks/useResource'
-import { getTeamMember, inviteStaff, listTeam, updateEmployee } from '@/services/team'
+import {
+  getTeamMember,
+  invitationAction,
+  inviteStaff,
+  listTeam,
+  updateEmployee,
+  type InvitationOutcome,
+} from '@/services/team'
+import { copyText } from '@/utils/browser'
 import {
   DEPARTMENTS,
   EMPLOYMENT_STATUSES,
@@ -196,6 +204,27 @@ export function NewEmployeeScreen() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<EmployeeFormErrors>({})
   const [invited, setInvited] = useState<EmployeeFormValues | null>(null)
+  const [invitationId, setInvitationId] = useState<string | null>(null)
+  const [delivery, setDelivery] = useState<
+    InvitationOutcome | { state: 'error'; error: string } | null
+  >(null)
+  const [sending, setSending] = useState(false)
+  const [copied, setCopied] = useState<string | null>(null)
+
+  /** Sends the invitation through the business's email (Settings → Integrations). */
+  async function deliver(id: string, action: 'send' | 'resend' | 'link') {
+    setSending(true)
+    const r = await invitationAction(action, id)
+    setSending(false)
+    if (!r.ok) return setDelivery({ state: 'error', error: r.error.message })
+    if (r.data.state === 'link') {
+      if (await copyText(r.data.link))
+        setCopied('The invitation link is copied. Share it only with them.')
+      else setCopied(r.data.link)
+      return
+    }
+    setDelivery(r.data)
+  }
 
   async function save(values: EmployeeFormValues) {
     setSubmitting(true)
@@ -213,37 +242,62 @@ export function NewEmployeeScreen() {
       })
     }
     setInvited(values)
+    setInvitationId(result.data.invitationId)
+    setDelivery(null)
+    setCopied(null)
+    await deliver(result.data.invitationId, 'send')
   }
 
   if (invited) {
     const email = invited.email.trim().toLowerCase()
     return (
       <>
-        <PageHeader title="One More Step" back={{ to: '/team', label: 'Team' }} />
+        <PageHeader title="Invitation" back={{ to: '/team', label: 'Team' }} />
         <section
           aria-label="Next step"
           className="max-w-2xl rounded-lg border border-outline-variant bg-surface p-6 shadow-card"
         >
           <p className="text-body-md text-on-surface">
-            <strong>{invited.fullName.trim()}</strong> is saved and waiting to join. They do not
-            have an Umbane account yet, so send them an invitation from Supabase:
+            <strong>{invited.fullName.trim()}</strong> is saved and waiting to join.
           </p>
-          <ol className="mt-3 list-decimal space-y-1 pl-5 text-body-md text-on-surface">
-            <li>Open your Supabase project, then Authentication → Users.</li>
-            <li>
-              Choose <strong>Add user → Send invitation</strong> and enter{' '}
-              <span className="font-mono">{email}</span>.
-            </li>
-            <li>
-              When they accept the email and set a password, their profile is created with the
-              details you entered.
-            </li>
-          </ol>
+          <div role="status" className="mt-3 text-body-md text-on-surface">
+            {sending && !delivery && <p>Sending the invitation to {email}…</p>}
+            {delivery?.state === 'sent' && (
+              <p>
+                The invitation was emailed to <span className="font-mono">{email}</span>
+                {delivery.via ? ` through ${delivery.via}` : ''}. When they open the link and set a
+                password, they join with the details you entered.
+              </p>
+            )}
+            {(delivery?.state === 'failed' || delivery?.state === 'error') && (
+              <p className="text-error">
+                The invitation could not be emailed: {delivery.error} You can try again, or copy the
+                link and share it with them another way.
+              </p>
+            )}
+          </div>
+          {copied && (
+            <p className="mt-2 break-all text-label-md text-on-surface-variant">{copied}</p>
+          )}
           <p className="mt-3 text-body-md text-on-surface-variant">
-            Until then they appear under “Waiting to join” on the Team page, where you can cancel
-            the invitation.
+            Until they accept, they appear under “Waiting to join” on the Team page, where you can
+            resend, copy the link or cancel the invitation. It stays open for 7 days.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
+            {invitationId && delivery && delivery.state !== 'sent' && (
+              <Button loading={sending} onClick={() => void deliver(invitationId, 'resend')}>
+                Try Again
+              </Button>
+            )}
+            {invitationId && (
+              <Button
+                variant="secondary"
+                disabled={sending}
+                onClick={() => void deliver(invitationId, 'link')}
+              >
+                Copy Invitation Link
+              </Button>
+            )}
             <Link to="/team" className={secondaryLink}>
               Back to Team
             </Link>
