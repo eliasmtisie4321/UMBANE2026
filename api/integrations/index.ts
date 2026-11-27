@@ -227,7 +227,10 @@ export function createIntegrationsHandler(deps: Deps) {
             ...(p.connect === 'oauth' && !deps.env.appUrl ? ['APP_URL'] : []),
           ],
         })),
-        connections: ((data ?? []) as IntegrationRow[]).map((r) => present(r, deps.env, isAdmin)),
+        // The business's connections, and the caller's own personal ones (never colleagues').
+        connections: ((data ?? []) as IntegrationRow[])
+          .filter((r) => !r.profile_id || r.profile_id === caller.id)
+          .map((r) => present(r, deps.env, isAdmin)),
         builtInEmail: {
           ready: Boolean(deps.env.resendKey && deps.env.emailFrom),
           from: deps.env.emailFrom,
@@ -236,7 +239,6 @@ export function createIntegrationsHandler(deps: Deps) {
       })
     }
     if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
-    if (!isAdmin) return json({ error: 'forbidden' }, 403)
     if (!key) return json({ error: 'not_configured', missing: ['INTEGRATIONS_KEY'] }, 503)
 
     let body: Record<string, unknown>
@@ -252,6 +254,10 @@ export function createIntegrationsHandler(deps: Deps) {
       const info = providerInfo(String(body.provider ?? ''))
       const adapter = info ? adapterFor(info.key) : null
       if (!info || !adapter) return json({ error: 'unknown_provider' }, 400)
+      // Business connections are for administrators; a personal one (a calendar) for anyone on the team.
+      if (!isAdmin && !(action === 'oauth_start' && info.personal)) {
+        return json({ error: 'forbidden' }, 403)
+      }
 
       if (action === 'oauth_start') {
         if (info.connect !== 'oauth' || !adapter.oauth) return json({ error: 'not_oauth' }, 400)
@@ -328,6 +334,12 @@ export function createIntegrationsHandler(deps: Deps) {
     const info = providerInfo(row.provider)
     const adapter = adapterFor(row.provider)
     if (!info || !adapter) return json({ error: 'unknown_provider' }, 400)
+    // A personal connection is its owner's to test or disconnect (or an administrator's, to help).
+    const allowed = row.profile_id ? row.profile_id === caller.id || isAdmin : isAdmin
+    if (!allowed) return json({ error: 'forbidden' }, 403)
+    if (row.profile_id && (action === 'set_default' || action === 'settings')) {
+      return json({ error: 'bad_request' }, 400)
+    }
 
     if (action === 'set_default') {
       if (row.status !== 'connected') return json({ error: 'not_connected' }, 409)

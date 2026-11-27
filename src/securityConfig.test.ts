@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import html from '../index.html?raw'
+import verifyScript from '../scripts/verify-production.mjs?raw'
 import vercelJson from '../vercel.json?raw'
 
 /**
  * Guards the security settings in vercel.json and index.html (docs/QA.md, "Security review"), so
- * a later change cannot quietly drop a header or add an inline script the policy would block.
+ * a later change cannot quietly drop a header or add an inline script the policy would block; and
+ * the live check (npm run verify:prod), so a new migration cannot be left out of it.
  */
 const vercel = JSON.parse(vercelJson) as {
   headers: Array<{ source: string; headers: Array<{ key: string; value: string }> }>
@@ -47,5 +49,20 @@ describe('security headers', () => {
       expect(attrs).toMatch(/\bsrc=/)
       expect(body.trim()).toBe('')
     }
+  })
+})
+
+describe('the live check', () => {
+  it('looks for every migration in the live database', () => {
+    const migrations = Object.keys(import.meta.glob('../supabase/migrations/*.sql')).map((path) =>
+      path.slice(path.lastIndexOf('/') + 1, path.lastIndexOf('/') + 15),
+    )
+    expect(migrations).toContain('20261125000001')
+    // 20261125000002 only adds row security to the tables of 0001, so there is nothing new to look
+    // for; the anonymous-access checks cover it.
+    const unlisted = migrations.filter(
+      (stamp) => stamp !== '20261125000002' && !verifyScript.includes(`['${stamp} `),
+    )
+    expect(unlisted).toEqual([])
   })
 })

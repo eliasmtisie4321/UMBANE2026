@@ -19,7 +19,8 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
   useEffect(() => {
     if (!open) return
     const previous = document.activeElement as HTMLElement | null
-    panelRef.current?.focus()
+    // Into the dialog, unless a field in it has already taken focus (autoFocus).
+    if (!panelRef.current?.contains(document.activeElement)) panelRef.current?.focus()
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
     document.addEventListener('keydown', onKey)
     return () => {

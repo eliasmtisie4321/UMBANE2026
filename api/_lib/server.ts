@@ -134,6 +134,7 @@ export const RATE_LIMITS = {
   integrations: 30,
   invitations: 20,
   documents: 60,
+  calendar: 60,
 } as const
 
 /**

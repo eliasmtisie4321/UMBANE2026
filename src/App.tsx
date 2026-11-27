@@ -62,6 +62,7 @@ const RolesScreen = lazyScreen(() => import('@/screens/settings/RolesScreen'))
 const SettingsScreen = lazyScreen(() => import('@/screens/settings/SettingsScreen'))
 const IntegrationsScreen = lazyScreen(() => import('@/screens/settings/IntegrationsScreen'))
 const MarketingScreen = lazyScreen(() => import('@/screens/marketing/MarketingScreen'))
+const CalendarScreen = lazyScreen(() => import('@/screens/calendar/CalendarScreen'))
 const InventoryHistoryScreen = lazyScreen(
   () => import('@/screens/inventory/InventoryHistoryScreen'),
 )
@@ -152,6 +153,7 @@ const BUILT = [
   '/automations',
   '/settings',
   '/marketing',
+  '/calendar',
 ]
 
 export default function App() {
@@ -233,6 +235,7 @@ export default function App() {
         <Route path="/settings/privacy" element={<PrivacyScreen />} />
         <Route path="/settings/integrations" element={<IntegrationsScreen />} />
         <Route path="/marketing" element={<MarketingScreen />} />
+        <Route path="/calendar" element={<CalendarScreen />} />
         <Route path="/account/security" element={<AccountSecurityScreen />} />
         {NAV_ITEMS.filter((i) => i.to !== '/' && !BUILT.includes(i.to)).map((item) => (
           <Route

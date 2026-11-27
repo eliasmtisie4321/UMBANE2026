@@ -22,6 +22,7 @@ team work, communication on every channel, and reports, in one place.
 | Inventory                     | Products, stock movements, low-stock alerts                                                                                                      |
 | Support tickets               | Customer portal, assignment, status history, attachments, internal notes                                                                         |
 | Team and tasks                | Employees and access levels, invitations by email, tasks with proof of work                                                                      |
+| Calendar                      | Appointments, task due dates, maintenance and invoice due dates by month or as an agenda; each person's own Google Calendar                      |
 | Communications                | One history for email, SMS, WhatsApp and social posts, templates, delivery reports, retries                                                      |
 | Integrations                  | Settings → Integrations: Resend, Gmail / Google Workspace, Outlook / Microsoft 365, Twilio SMS, WhatsApp Business, Facebook, Instagram, LinkedIn |
 | Sharing                       | One Share dialog everywhere: several platforms at once, preview, delivery status                                                                 |
@@ -29,6 +30,7 @@ team work, communication on every channel, and reports, in one place.
 | Reports                       | Overview, customers, properties, electricity, sales, revenue, inventory, support, team; CSV and PDF                                              |
 | Notifications and automations | In-app and email notifications; overdue-invoice, task and maintenance reminders                                                                  |
 | Settings and audit            | Business profile, invoice and tax settings, categories, roles, audit log, data retention                                                         |
+| Search and Quick Add          | Search every record the person may see from the top bar; Quick Add opens the create pages their role allows                                      |
 
 Four roles: administrator, manager, staff and client, each limited by the database itself
 (`docs/PERMISSIONS.md`).
@@ -103,8 +105,9 @@ and [`docs/LAUNCH.md`](docs/LAUNCH.md). Never commit secrets or Supabase service
 
 ## Known issues and limitations
 
-- **Providers need their own approval** before they can be connected: Google (Gmail send scope),
-  Microsoft, Meta (App Review, WhatsApp business verification and templates), LinkedIn, Twilio.
+- **Providers need their own approval** before they can be connected: Google (Gmail send and
+  Calendar events scopes), Microsoft, Meta (App Review, WhatsApp business verification and
+  templates), LinkedIn, Twilio.
   Until then each shows as not connected. Email works through the built-in Resend sender.
 - **WhatsApp** free text and documents only go within 24 hours of the customer's last message;
   otherwise an approved template is needed.

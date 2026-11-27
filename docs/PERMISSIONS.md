@@ -189,3 +189,14 @@ of a **development** Supabase project after applying migrations.
 - **Invitations:** administrators send, resend, copy links and cancel (server checks the role).
 - **Webhooks and document links:** no sign-in; each request is checked with the connection's own
   secret, or a 48-character random token that expires.
+
+## Search and calendar
+
+- **Search:** everyone signed in, finding only what row security already lets them see; results for
+  pages their role cannot open are not shown.
+- **Calendar:** everyone except clients sees the business's appointments, plus the tasks,
+  maintenance and invoice due dates they may see. An appointment can be changed or deleted by its
+  organiser, the person it is for, or a manager. Only the server records an appointment's copy in
+  Google Calendar.
+- **Google Calendar connections** are personal: each person connects and disconnects their own;
+  colleagues never see it; administrators can, to help.

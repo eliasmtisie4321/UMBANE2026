@@ -29,18 +29,20 @@ flowchart LR
     EMAIL["Email<br/>Resend · Gmail · Microsoft 365"]
     MSG["SMS · WhatsApp<br/>Twilio · Meta Cloud API"]
     SOC["Social<br/>Facebook · Instagram · LinkedIn"]
+    CAL["Calendar<br/>each person's Google Calendar"]
   end
 
   SPA -- "pages, assets" --> STATIC
   SPA -- "sign in, session" --> AUTH
   SPA -- "queries and RPC as the signed-in person (RLS)" --> DB
   SPA -- "uploads, signed downloads" --> ST
-  SPA -- "send now, integrations, invitations (Bearer token)" --> FN
+  SPA -- "send now, integrations, invitations, calendar (Bearer token)" --> FN
   CRON -- "CRON_SECRET" --> FN
   FN -- "service role: claim, record, automations" --> DB
   FN -- "invitation links" --> AUTH
   FN -- "attachments" --> ST
   FN -- "send / publish (encrypted credentials)" --> EMAIL & MSG & SOC
+  FN -- "read events, add copies of appointments" --> CAL
   EMAIL & MSG -- "signed webhooks: delivered, bounced, replies" --> FN
 ```
 
@@ -48,8 +50,9 @@ flowchart LR
   goes through row security as the signed-in person.
 - **Vercel functions** (`api/`) hold the service-role key and every provider secret. They do what the
   browser must not: claim and send queued messages, record delivery reports, run automations, connect
-  integrations, make invitation links. Each checks who is calling (a signed-in staff member, an
-  administrator, the cron secret, or a provider signature) before doing anything.
+  integrations, make invitation links, read and write each person's Google Calendar. Each checks
+  who is calling (a signed-in staff member, an administrator, the cron secret, or a provider
+  signature) before doing anything.
 - **Supabase** is the system of record and the identity system. Migrations in
   `supabase/migrations/` are applied in filename order; `scripts/db-test.mjs` runs them all on an
   in-memory Postgres in CI with the row-security tests.

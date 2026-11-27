@@ -1,5 +1,10 @@
-import { Bell, LogOut, Menu, Plus, Search, User, KeyRound } from 'lucide-react'
-import { Button, Dropdown } from '@/components/ui'
+import { Bell, KeyRound, LogOut, Menu, Search, User } from 'lucide-react'
+import { useState } from 'react'
+import { Clock } from '@/components/topbar/Clock'
+import { GlobalSearch } from '@/components/topbar/GlobalSearch'
+import { QuickAdd } from '@/components/topbar/QuickAdd'
+import { Dropdown, Modal } from '@/components/ui'
+import type { UserRole } from '@/types/auth'
 
 interface TopBarProps {
   onOpenMenu: () => void
@@ -8,6 +13,10 @@ interface TopBarProps {
   onSignOut?: () => void
   /** Opens the person's own password and sign-in page. */
   onOpenSecurity?: () => void
+  /** Opens a page (search results, Quick Add). */
+  onNavigate?: (to: string) => void
+  /** Decides what search may show and what Quick Add offers. */
+  role?: UserRole
   userName?: string
   roleLabel?: string
 }
@@ -18,9 +27,13 @@ export function TopBar({
   unread = 0,
   onSignOut,
   onOpenSecurity,
+  onNavigate,
+  role,
   userName,
   roleLabel,
 }: TopBarProps) {
+  const [searching, setSearching] = useState(false)
+  const go = (to: string) => onNavigate?.(to)
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-outline-variant bg-surface px-4 lg:px-8">
       <button
@@ -31,23 +44,24 @@ export function TopBar({
       >
         <Menu size={20} aria-hidden="true" />
       </button>
-      <div role="search" className="relative hidden max-w-md flex-1 sm:block">
-        <Search
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-          aria-hidden="true"
-        />
-        <input
-          type="search"
-          aria-label="Search"
-          placeholder="Search customers, meters, invoices"
-          className="w-full rounded-md border border-outline-variant bg-surface-container-low py-2 pl-9 pr-3 text-body-md placeholder:text-outline"
-        />
-      </div>
+      {role && (
+        <div role="search" className="hidden max-w-md flex-1 sm:block">
+          <GlobalSearch role={role} onNavigate={go} shortcut />
+        </div>
+      )}
       <div className="ml-auto flex items-center gap-2">
-        <Button className="hidden sm:inline-flex">
-          <Plus size={16} aria-hidden="true" /> Quick Add
-        </Button>
+        {role && (
+          <button
+            type="button"
+            onClick={() => setSearching(true)}
+            aria-label="Search"
+            className="rounded-md p-2 text-on-surface-variant hover:bg-surface-container sm:hidden"
+          >
+            <Search size={20} aria-hidden="true" />
+          </button>
+        )}
+        <Clock />
+        {role && <QuickAdd role={role} onNavigate={go} />}
         <button
           type="button"
           onClick={onOpenNotifications}
@@ -89,6 +103,18 @@ export function TopBar({
           </button>
         </Dropdown>
       </div>
+      {searching && role && (
+        <Modal open title="Search" onClose={() => setSearching(false)}>
+          <div role="search" className="min-h-64">
+            <GlobalSearch
+              role={role}
+              onNavigate={go}
+              autoFocus
+              onDone={() => setSearching(false)}
+            />
+          </div>
+        </Modal>
+      )}
     </header>
   )
 }
